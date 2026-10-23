@@ -10,6 +10,7 @@ on:
       # The client contract fixtures are checked against live responses by the backend tests.
       - packages/taketuk_api/test/fixtures/**
       - .nvmrc
+      - render.yaml
       - .github/workflows/backend.yml
   pull_request:
     paths:
@@ -19,6 +20,7 @@ on:
       # The client contract fixtures are checked against live responses by the backend tests.
       - packages/taketuk_api/test/fixtures/**
       - .nvmrc
+      - render.yaml
       - .github/workflows/backend.yml
   workflow_dispatch:
 
@@ -61,5 +63,8 @@ jobs:
       - name: Tests (unit, architecture, OpenAPI drift, integration against PostGIS)
         run: npm test
       - run: npm run build
+      - name: Container image (deployed to staging by render.yaml)
+        working-directory: .
+        run: docker build -f backend/Dockerfile -t taketuk-api:ci .
       - name: Dependency audit (production dependencies)
         run: npm audit --omit=dev --audit-level=high

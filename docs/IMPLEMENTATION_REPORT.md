@@ -130,7 +130,7 @@ node dist/src/main.js                                        # smoke test (§2)
 | Google Routes API | Adapter matches the documented format. **Not verified live.** No key. | Server key restricted to Routes API; compare distances for Wad Madani routes (MAP-1); terms review (MAP-2) |
 | FCM / APNs | HTTP v1 adapter. **Not verified live.** No Firebase project. | Firebase project, service account, APNs key; device test |
 | SMS OTP delivery to Sudan | Not evaluated | Choose provider; test (IDN-1) |
-| Container image | Dockerfile written. **Not built** (no registry access here). | Build in CI or locally |
+| Container image | Built by the backend CI workflow (§12). Staging Blueprint `render.yaml` validated against Render's schema. **Not deployed** | Deploy staging (OPERATIONS §7a) |
 | OSRM routing (§9) | Adapter verified against a real `osrm-routed` v26.4.0 on a synthetic network. **Not run on real Wad Madani data**; the Docker dataset path has not been run | Build a dataset from a Sudan/Wad Madani extract (`infra/osrm`); compare quotes for known trips (MAP-1) |
 | Flutter apps (§9) | Analysed and tested with fakes. Debug APKs of both apps **build in CI**. **Not run on a device**, **not signed in against Supabase** | Device test against staging |
 
@@ -379,3 +379,14 @@ Not verified yet: the API connecting to the project's database through the sessi
   - each printed code signed in through the same request the apps make (HTTP 200);
   - it refused another domain and production.
 - **Tests:** 4 backend unit tests (backend `npm test`: 204) and 1 widget test (`taketuk_auth`: 20).
+
+## 12. Staging on Render
+
+- **`render.yaml`:** a Render Blueprint for one free web service built from `backend/Dockerfile`. It runs `NODE_ENV=development` with the routing and push stand-ins.
+  - Its health check is `/health/ready`, so a wrong database URL fails the deploy instead of going live.
+  - It deploys only after GitHub checks pass (`autoDeployTrigger: checksPass`).
+  - Secrets are entered in Render, never committed.
+  - The file is validated against Render's published JSON schema, and a deliberately broken copy was rejected.
+- **CI builds the container image** (backend workflow). It had never been built before.
+- **OPERATIONS §7a** covers the steps: region, secrets, the database certificate as a secret file, keeping a free instance awake, and app configuration.
+- **Not verified:** a deploy to Render. Also unverified: that the image's non-root user can read Render's mounted secret file, and the API's connection to the project database (§11.7).

@@ -1,0 +1,51 @@
+# TAKE-TUK staging API on Render (docs/operations/OPERATIONS.md §7a). Not production: it runs the
+# development stand-ins for routing and push (NODE_ENV=development) until OSRM and FCM exist.
+# Secrets are entered in the Render dashboard (sync: false) and never committed.
+services:
+  - type: web
+    name: taketuk-api-staging
+    runtime: docker
+    # The image is built from the repository root: it bundles supabase/migrations.
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
+    # Free instances sleep after 15 minutes without requests, which pauses dispatch (OPERATIONS §7a).
+    plan: free
+    # Match the Supabase project's region: every request makes several database round trips.
+    region: frankfurt
+    branch: main
+    # Deploy a push to main only after its GitHub checks pass.
+    autoDeployTrigger: checksPass
+    buildFilter:
+      paths:
+        - backend/**
+        - supabase/migrations/**
+        - render.yaml
+    # Ready means the database answers, so a wrong DATABASE_URL fails the deploy instead of going live.
+    healthCheckPath: /health/ready
+    envVars:
+      - key: NODE_ENV
+        value: development
+      # Behind Render's proxy: client addresses come from X-Forwarded-For.
+      - key: TRUST_PROXY
+        value: "true"
+      - key: LOG_FORMAT
+        value: json
+      # Swagger UI at /docs, used to approve drivers until the admin dashboard exists.
+      - key: API_DOCS_ENABLED
+        value: "true"
+      - key: AUTH_JWT_MODE
+        value: jwks
+      - key: STORAGE_PROVIDER
+        value: supabase
+      - key: ROUTING_PROVIDER
+        value: dev_fake
+      - key: NOTIFICATION_PROVIDER
+        value: log
+      # Session pooler URL for the taketuk_api_login role, with
+      # sslmode=verify-full&sslrootcert=/etc/secrets/supabase-ca.crt (OPERATIONS §7a).
+      - key: DATABASE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SECRET_KEY
+        sync: false
