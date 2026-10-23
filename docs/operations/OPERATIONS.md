@@ -141,6 +141,8 @@ Integration tests need `TEST_DATABASE_ADMIN_URL` (default `postgres://postgres:p
 
 CI: `.github/workflows/backend.yml` runs the same checks against a `postgis/postgis:16-3.4` service container. **It has not run yet**, because the branch could not be pushed (see the implementation report).
 
+On demand, `OSRM_LIVE_URL=… npm run test:live` runs the OSRM adapter against a real `osrm-routed` serving the synthetic network (`infra/osrm/README.md`). The Flutter apps and packages have their own checks: see [apps/README.md](../../apps/README.md).
+
 ## 7. Deployment (planned; not performed)
 
 - Build: `docker build -f backend/Dockerfile -t taketuk-api .` (from the repository root). Not yet built.

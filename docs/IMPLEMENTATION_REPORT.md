@@ -1,10 +1,10 @@
-# TAKE-TUK — Implementation report (first increment)
+# TAKE-TUK — Implementation report
 
 | | |
 |---|---|
 | Date | 2026-10-23 |
 | Branch | `claude/take-tuk-architecture-zdr973` |
-| Scope | Phases 1–7 of the project directive: documentation foundation, backend foundation, identity, ride-booking vertical slice, verification, handoff |
+| Scope | **First increment** (§1–§8): phases 1–7 of the project directive: documentation foundation, backend foundation, identity, ride-booking vertical slice, verification, handoff. **Second increment** (§9): self-hosted OSRM routing, API contract fixes, Flutter foundation (phase 9) |
 
 This report distinguishes **implemented and tested**, **implemented but not verified against a live service**, and **planned**. Every test result quoted below was actually run in this environment.
 
@@ -131,6 +131,8 @@ node dist/src/main.js                                        # smoke test (§2)
 | FCM / APNs | HTTP v1 adapter. **Not verified live.** No Firebase project. | Firebase project, service account, APNs key; device test |
 | SMS OTP delivery to Sudan | Not evaluated | Choose provider; test (IDN-1) |
 | Container image | Dockerfile written. **Not built** (no registry access here). | Build in CI or locally |
+| OSRM routing (§9) | Adapter verified against a real `osrm-routed` v26.4.0 on a synthetic network. **Not run on real Wad Madani data**; the Docker dataset path has not been run | Build a dataset from a Sudan/Wad Madani extract (`infra/osrm`); compare quotes for known trips (MAP-1) |
+| Flutter apps (§9) | Analysed and tested with fakes. **No Android build here** (no Android SDK), **not run on a device**, **not signed in against Supabase** | Run the mobile CI workflow (debug APKs); device test against staging |
 
 ## 5. Assumptions made
 
@@ -150,7 +152,7 @@ All fare and commission numbers are development values.
 
 ## 6. Known limitations
 
-- No mobile or web clients. Real-time is by polling plus push. There is no live tracking or location history.
+- The mobile apps have sign-in, registration and session only; there are no ride screens and no web clients. Real-time is by polling plus push. There is no live tracking or location history.
 - Dispatch thresholds are development defaults. Ranking is by straight-line distance, not ETA.
 - Reference data (service areas, vehicle and service types, compatibility) is managed by migrations and operator SQL; there are no admin endpoints for it yet.
 - No dispute workflow, cancellation fees, commission settlement, refunds or reversals. The ledger is designed for them.
@@ -174,14 +176,66 @@ All fare and commission numbers are development values.
 
 ## 8. Recommended next phase
 
-**Phase 8: live integration verification (staging)** comes before any client work, because every client depends on it. Create a staging Supabase project and verify:
-- `supabase db push`,
-- the login role,
-- JWKS verification with real phone-OTP tokens,
-- Storage signed URLs,
-- the Google Routes distances on real Wad Madani routes,
-- FCM delivery.
+Superseded by §9.4.
 
-Then build the container image. Feed findings back into ADR-0004/0008/0015.
+## 9. Second increment
 
-After that: **Phase 9–10 (Flutter foundation and ride UX)**, starting with the shared `taketuk_api` package generated from `docs/api/openapi.json`, and **Phase 11 (admin web)** for verification and policy management. The roadmap has the full sequence.
+### 9.1 What was implemented
+
+- **Self-hosted OSRM routing provider** (ADR-0017), because Google Maps Platform billing needs a payment card the team cannot use for now. Configured with `ROUTING_PROVIDER=osrm`, `OSRM_BASE_URL`, `OSRM_SNAP_RADIUS_METERS` and `OSRM_ALLOW_HTTP`.
+  - **Bounded snapping.** Against a real server, a pin 3.3 km from any road was otherwise moved onto the road network and priced as a 545 m trip.
+  - **Error mapping.** `NoRoute`/`NoSegment` map to `NO_ROUTE_FOUND`; every other failure maps to `ROUTING_UNAVAILABLE`, with no fallback distance.
+  - **Fail closed.** Two-wheeler requests are refused because the instance serves the car dataset only.
+  - **Transport.** Production requires https unless an encrypted private network is declared.
+  - **Tooling.** `infra/osrm` holds the dataset preparation script and the synthetic network.
+- **API contract fixes**, found while generating the client:
+  - The OpenAPI document declared **no path or query parameters**. `ZodParams`/`ZodQuery` now validate and document them from one schema; an architecture rule forbids the old pipes, and a test checks every path variable.
+  - The 204 response of `notifications.removeDevice` was undocumented. A test now requires a success response on every operation.
+  - The document root now lists every problem code with its status (`x-taketuk-problem-codes`).
+  - **Contract fixtures:** a backend integration test records real responses and fails on shape drift, and the Dart tests decode the same files.
+- **Flutter foundation (phase 9, ADR-0018):**
+  - A pub workspace with three packages:
+    - `taketuk_api`, generated: 98 types, 10 API areas, admin operations excluded;
+    - `taketuk_auth`: Supabase phone OTP, `SessionController`, sign-in screens, Sudanese number normalisation, configuration checks that refuse secret or `service_role` keys;
+    - `taketuk_ui`: theme, Arabic-first locale resolution, localized error messages, money formatting, `BusyButton`.
+  - Passenger and driver apps, Arabic and English:
+    - passenger: phone sign-in, registration, home placeholder;
+    - driver: phone sign-in, applicant registration, review status with the reviewer's note.
+  - Android release manifests require https and debug manifests allow local HTTP. Application ids are `app.taketuk.passenger` and `app.taketuk.driver` (APP-1).
+  - CI: a `mobile` workflow (format, generated-code freshness, analysis, tests, debug APK builds) and path filters on both workflows.
+
+### 9.2 What was tested (all ran and passed here)
+
+| Suite | Tests | Covers |
+|---|---:|---|
+| Backend `npm test` | 193 (20 suites) | the 170 of §2, plus: OSRM adapter against recorded `osrm-routed` responses (15); OSRM configuration (2); path parameters, success responses and the problem-code registry in the contract (4); architecture rule for parameter validation (1); client contract fixtures against live responses (1) |
+| Backend `npm run test:live` (on demand) | 5 | the adapter against a **real** `osrm-routed` v26.4.0 serving the synthetic grid: routed trip ≈ Manhattan distance, same point, beyond snap radius, disconnected roads, unreachable server |
+| `packages/taketuk_api` | 20 | requests (token, body, idempotency key, path encoding, query, base path, `oneOf`), every recorded fixture decoded and round-tripped, unknown fields and enum values, problems, Retry-After, network/timeout/5xx, contract violations, generated code up to date, generator rejects unsupported schemas |
+| `packages/taketuk_ui` | 4 | Arabic default and RTL, error-to-message mapping (Arabic and English; server text never shown), money formatting, no double submit |
+| `packages/taketuk_auth` | 13 | phone normalisation (incl. Arabic-Indic digits), Supabase error mapping, session (sign-in, restore, revoked token, account error), sign-in screens, configuration checks (http only in debug, refuses secret keys) |
+| `apps/passenger_app` | 6 | redirect rules; sign-in → registration → home → sign-out in Arabic; registration error message |
+| `apps/driver_app` | 4 | redirect rules; applicant registration with the configured service area; review outcome with note; already-registered conflict |
+
+Also clean: backend format, lint, typecheck and build; `npm audit --omit=dev` with 0 vulnerabilities; `dart format`; `dart analyze`/`flutter analyze --fatal-infos` on every package and app; and generated code (client and localizations) matching its sources.
+
+Mutation checks were run by hand and reverted:
+- a `validQuery(` call outside shared fails the architecture rule;
+- a renamed key in a fixture fails the contract test.
+
+### 9.3 Not verified
+
+- **OSRM:** real Wad Madani OpenStreetMap data, since no extract could be downloaded here (Geofabrik and other OSM mirrors were blocked), and the Docker dataset path.
+- **Android builds:** the Android SDK host was blocked here. The mobile CI workflow builds debug APKs but has not run yet.
+- **Devices and Supabase:** the apps have not run on a device, signed in against a Supabase project, or sent an SMS to a Sudanese number (IDN-1). iOS is not built (APP-2).
+- **Arabic copy:** needs review by a native speaker (APP-3).
+
+### 9.4 Recommended next phase
+
+1. **Run the mobile CI workflow** by opening a pull request, so the debug APKs are built once.
+2. **Phase 8 (staging):**
+   - a Supabase project: `db push`, the login role, JWKS with real OTP tokens, Storage, test SMS numbers, then real SMS to Sudan;
+   - an OSRM dataset from a real extract, with quotes compared to known trips;
+   - an FCM project.
+3. **Phase 10, passenger ride flow:** quote → proposed fare → searching → counteroffer → trip. This needs the map-display decision (MAP-6).
+4. **Phase 10, driver onboarding:** vehicle, documents through signed upload URLs, submission, availability and offers.
+

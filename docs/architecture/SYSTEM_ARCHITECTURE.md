@@ -2,15 +2,15 @@
 
 | | |
 |---|---|
-| Status | Reflects the implemented backend foundation (first ride-booking slice). Planned parts are marked **[P]**. |
+| Status | Reflects the implemented backend (ride-booking slice, OSRM routing) and the Flutter app foundation. Planned parts are marked **[P]**. |
 | Related | [ADRs](decisions/README.md), [Database design](DATABASE_DESIGN.md), [Domain model](../domain/DOMAIN_MODEL.md), [Security](../security/SECURITY.md), [Operations](../operations/OPERATIONS.md) |
 
 ## 1. System context
 
 ```mermaid
 flowchart TB
-  passenger["Passenger app (Flutter) [P]"]
-  driver["Driver app (Flutter) [P]"]
+  passenger["Passenger app (Flutter): foundation"]
+  driver["Driver app (Flutter): foundation"]
   merchant["Merchant dashboard (React) [P]"]
   admin["Admin dashboard (React) [P]"]
   api["TAKE-TUK API (NestJS modular monolith)"]
@@ -61,8 +61,10 @@ Clients talk to Supabase directly only for **authentication** and for **uploads 
 │  │  └─ cli/                   operator CLI (migrate, seed-dev, grant-role)
 │  ├─ test/                     unit, architecture, integration, concurrency, security, failure tests
 │  └─ Dockerfile                API image (build context: repository root)
-├─ apps/                        [P] passenger_app, driver_app (Flutter); merchant_web, admin_web (React)
-└─ packages/                    [P] shared Dart packages and TypeScript API contracts
+├─ pubspec.yaml                 Dart pub workspace (apps and packages; ADR-0018)
+├─ apps/                        passenger_app, driver_app (Flutter); [P] merchant_web, admin_web (React)
+├─ packages/                    taketuk_api (generated client), taketuk_auth, taketuk_ui
+└─ infra/osrm/                  routing dataset preparation (ADR-0017)
 ```
 
 There is no root JavaScript workspace yet, because only one JavaScript project exists. When the React apps arrive, a workspace is introduced for shared TypeScript contracts generated from `openapi.json`. The web apps must not import backend source.

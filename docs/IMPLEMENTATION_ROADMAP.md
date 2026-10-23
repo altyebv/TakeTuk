@@ -38,14 +38,39 @@ The full slice was implemented as specified: quote → negotiated ride → dispa
 
 Documentation reconciled with the implementation, and the implementation report written.
 
+## Second increment
+
+### Self-hosted routing (OSRM) ✅ adapter · 🟡 real data
+
+`ROUTING_PROVIDER=osrm` (ADR-0017), because Google Maps Platform billing needs a payment card the team cannot use for now. The adapter was verified against a real `osrm-routed` on a synthetic street grid. It has **not** yet run on real Wad Madani OpenStreetMap data, because no extract could be downloaded in the build environment (MAP-1).
+
+### API contract fixes ✅
+
+Found while generating the Dart client:
+- the OpenAPI document declared no path or query parameters;
+- the 204 response of `DELETE /v1/me/devices/{id}` was undocumented;
+- general problem codes were not published.
+
+All three are fixed and tested. Contract fixtures are recorded from the backend and checked on both sides.
+
+### Phase 9: Flutter foundation 🟡
+
+Implemented and tested (47 Dart tests):
+- a pub workspace;
+- `taketuk_api`, generated from the OpenAPI document;
+- `taketuk_auth`: Supabase phone OTP, session and sign-in screens;
+- `taketuk_ui`: theme, Arabic/RTL and error messages;
+- passenger and driver app shells with sign-in and registration.
+
+**Pending:** completion criteria "apps build in CI" (the mobile workflow builds debug APKs and has not run yet) and "sign-in against staging" (needs a Supabase project).
+
 ---
 
 ## Next phases (planned)
 
 | Phase | Scope | Depends on | Completion criteria |
 |---|---|---|---|
-| 8. Live integration verification | Supabase project (Auth JWKS, Storage bucket, role creation, `supabase db push`), Google Routes key, FCM project. Run the existing adapters against them | Accounts and credentials | Each adapter exercised in staging; findings fed back into ADRs |
-| 9. Flutter foundation | Monorepo packages (`taketuk_api`, `taketuk_auth`, `taketuk_ui`), passenger and driver app shells, sign-in, registration | Phase 8 (Auth) | Apps build in CI; sign-in against staging |
+| 8. Live integration verification | Supabase project (Auth JWKS, Storage bucket, role creation, `supabase db push`), FCM project, an OSRM dataset built from a real extract (Google Routes once billing is possible). Run the existing adapters against them | Accounts and credentials | Each adapter exercised in staging; findings fed back into ADRs |
 | 10. Passenger and driver ride UX | Quote → request → negotiation → trip screens; driver onboarding, availability, offers | Phase 9 | Pilot-ready ride flow on devices |
 | 11. Admin web (React) | Driver verification queue, document viewer, policy management, ride lookup, audit | Phase 8 | Operators can approve drivers and configure policies without SQL |
 | 12. Operations hardening | Global rate limiting, alerting on failed outbox and dispatch, account deletion, document retention, restore drill, admin MFA (`aal2`) | — | Runbooks exercised |
@@ -56,6 +81,6 @@ Documentation reconciled with the implementation, and the implementation report 
 ## Known gaps and risks
 
 Kept current in [IMPLEMENTATION_REPORT.md](IMPLEMENTATION_REPORT.md) §4, §6 and §7. The largest outstanding risks:
-- live integrations are unverified (Supabase, Google Routes, FCM),
+- live integrations are unverified (Supabase, FCM, OSRM on real data; Google Routes has no key),
 - pricing, commission and dispatch values are placeholders awaiting product decisions,
-- there is no client application yet.
+- the apps have sign-in and registration only; ride screens are next (phase 10).

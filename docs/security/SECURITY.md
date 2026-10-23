@@ -61,7 +61,9 @@
 | FCM service-account JSON | API runtime | Restrict to the `firebase.messaging` scope |
 
 - No secret is committed. `backend/.env.example` contains placeholders only, and `.env*` files are git-ignored except the example.
-- Flutter and web clients receive only the Supabase project URL and the **publishable (anon) key**, which is designed to be public and has no access to `taketuk`. They also receive client-restricted Maps SDK keys [P].
+- Flutter and web clients receive only the Supabase project URL and the **publishable (anon) key**, which is designed to be public and has no access to `taketuk`. The Flutter apps refuse to start if the configured key is a secret (`sb_secret_…`) or `service_role` key (`ClientConfig`, ADR-0018). Client-restricted map keys are [P] (MAP-6).
+- The apps call the API over https in release builds. Plain HTTP is allowed only in debug builds, for a local stack: the debug Android manifest permits cleartext and the release manifest does not.
+- Sessions are stored by `supabase_flutter` in app-private storage, not an encrypted keystore [Gap] (IDN-5). Signing out removes them.
 - Secrets are injected as environment variables by the hosting platform. Rotation: every secret above can be rotated without a code change.
 
 ## 5. Privileged database access

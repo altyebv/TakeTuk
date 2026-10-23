@@ -57,6 +57,7 @@ Status values: `open` (provisional behaviour implemented), `needs-input` (blocke
 | IDN-2 | Phone numbers exposed between passenger and driver | The assigned counterpart's phone is revealed only while the assignment is active, and only to the two parties. Masked calling is planned. | open |
 | IDN-3 | Can one person be both passenger and driver? | Yes (separate roles). A driver can never receive their own ride request. | open |
 | IDN-4 | Admin roles granularity | A single `admin` role mapped to fine-grained permissions in code, so it can be split later (support, finance, verification). | open |
+| IDN-5 | Where the apps keep the session | `supabase_flutter` persists the session (including the refresh token) in the app's private storage, which is not an encrypted keystore. A secure-storage adapter can replace it. | open |
 
 ## Maps and data
 
@@ -67,6 +68,16 @@ Status values: `open` (provisional behaviour implemented), `needs-input` (blocke
 | MAP-3 | Travel mode for raksha | Car routing is used as an approximation (Google `DRIVE`, OSRM car profile). Tuk-tuks may use roads that cars do not. With OSRM a custom raksha profile is possible. | open |
 | MAP-4 | Official Wad Madani service-area boundary | Only an approximate development bounding box in `seed.sql`. | needs-input |
 | MAP-5 | Production routing provider | Self-hosted OSRM (ADR-0017), because Google billing needs a payment card the team cannot use for now. Google stays configurable. Switching is a configuration change; quotes record which provider priced them. | open |
+| MAP-6 | Map display and place search in the apps | Not built yet. Google Maps SDK keys need the same billing account as the Routes API (ADR-0008 amendment). Candidates: `flutter_map` with an OpenStreetMap-based map provider (attribution required), or Google once billing is possible. | needs-input |
+
+## Apps
+
+| ID | Decision | Current provisional behaviour | Status |
+|---|---|---|---|
+| APP-1 | Store identity and release signing | Android application ids `app.taketuk.passenger` and `app.taketuk.driver`; they cannot change after the first Play Store upload. Release signing is not configured: release builds use the debug key and must not be published. | needs-input |
+| APP-2 | iOS at the pilot | Android first. iOS projects exist but are not built or tested (no macOS runner; push also needs an Apple Developer account). | needs-input |
+| APP-3 | Arabic copy | Arabic strings were written during development and need review by a native speaker familiar with Sudanese usage (for example "مشوار" for a ride). | needs-input |
+| APP-4 | Service area chosen by drivers at registration | Build configuration (`SERVICE_AREA_CODE`, default `wad_madani`), since there is one city. A service-area list endpoint is added when there is a second city. | open |
 
 ## API
 
