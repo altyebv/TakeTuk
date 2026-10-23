@@ -77,6 +77,8 @@ All of the following ran and passed in this environment (PostgreSQL 16.15 with P
 
 The integration project (84 tests) was run 3 additional consecutive times with no failures, to check the concurrency tests for flakiness.
 
+**CI.** The GitHub Actions workflow (`.github/workflows/backend.yml`) ran on [altyebv/TakeTuk#1](https://github.com/altyebv/TakeTuk/pull/1) and passed: format check, lint, type check, all 170 tests against a `postgis/postgis:16-3.4` service container, build, and `npm audit --omit=dev` with 0 vulnerabilities.
+
 **Compiled-server smoke test** (manual, scripted): built the server, migrated and seeded a fresh database with the CLI, created a least-privilege login role, and started `node dist/src/main.js` with workers enabled and HS256 auth. The following completed with the expected status codes:
 - passenger and driver registration,
 - vehicle registration,
@@ -129,7 +131,6 @@ node dist/src/main.js                                        # smoke test (§2)
 | FCM / APNs | HTTP v1 adapter. **Not verified live.** No Firebase project. | Firebase project, service account, APNs key; device test |
 | SMS OTP delivery to Sudan | Not evaluated | Choose provider; test (IDN-1) |
 | Container image | Dockerfile written. **Not built** (no registry access here). | Build in CI or locally |
-| CI workflow | Written. **Never run**, because the branch could not be pushed (GitHub returned 403 to this session). | Restore GitHub access (connect the Claude GitHub App to the repository) and push |
 
 ## 5. Assumptions made
 
@@ -181,6 +182,6 @@ All fare and commission numbers are development values.
 - the Google Routes distances on real Wad Madani routes,
 - FCM delivery.
 
-Then run the CI workflow on GitHub and build the image. Feed findings back into ADR-0004/0008/0015.
+Then build the container image. Feed findings back into ADR-0004/0008/0015.
 
 After that: **Phase 9–10 (Flutter foundation and ride UX)**, starting with the shared `taketuk_api` package generated from `docs/api/openapi.json`, and **Phase 11 (admin web)** for verification and policy management. The roadmap has the full sequence.
