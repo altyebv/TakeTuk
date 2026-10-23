@@ -39,7 +39,7 @@ function parseInt8(value: string): number {
  * bigint columns are parsed as numbers and rejected if they exceed Number.MAX_SAFE_INTEGER.
  * Scoped to this pool (no global pg type mutation).
  */
-function createTypeOverrides(): TypeOverrides {
+export function createTypeOverrides(): TypeOverrides {
   const overrides = new TypeOverrides();
   overrides.setTypeParser(INT8_OID, 'text', parseInt8);
   return overrides;

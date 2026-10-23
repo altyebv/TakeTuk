@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { Client, Pool } from 'pg';
+import { createTypeOverrides } from '../../src/infrastructure/database/database';
 
 /**
  * Integration tests run against a real PostgreSQL + PostGIS server (ADR-0003). A template
@@ -57,7 +58,12 @@ export async function createTestDatabase(): Promise<TestDatabase> {
   await withAdminClient('postgres', (client) =>
     client.query(`create database ${name} template ${TEMPLATE_DATABASE}`),
   );
-  const admin = new Pool({ connectionString: adminUrl(name), max: 5 });
+  // Same bigint parsing as the application, so assertions compare numbers.
+  const admin = new Pool({
+    connectionString: adminUrl(name),
+    max: 5,
+    types: createTypeOverrides(),
+  });
   return {
     name,
     apiUrl: apiUrl(name),

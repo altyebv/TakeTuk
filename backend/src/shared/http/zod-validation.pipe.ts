@@ -13,7 +13,9 @@ export class ZodValidationPipe<S extends z.ZodType> implements PipeTransform<unk
   ) {}
 
   transform(value: unknown): z.output<S> {
-    const result = this.schema.safeParse(value);
+    // Express leaves req.body undefined when a request has no body; treat it as an empty object.
+    const input = this.location === 'body' && value === undefined ? {} : value;
+    const result = this.schema.safeParse(input);
     if (result.success) {
       return result.data;
     }

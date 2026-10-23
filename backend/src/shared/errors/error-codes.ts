@@ -79,6 +79,7 @@ export const ERROR_CODES = define({
   OFFER_EXPIRED: { kind: 'conflict', title: 'The offer has expired' },
   DRIVER_BUSY: { kind: 'conflict', title: 'The driver already has an active job' },
   DRIVER_NOT_AVAILABLE: { kind: 'conflict', title: 'The driver is no longer available' },
+  VEHICLE_ALREADY_REGISTERED: { kind: 'conflict', title: 'The vehicle is already registered' },
   PAYMENT_ALREADY_REPORTED: {
     kind: 'conflict',
     title: 'The payment has already been reported differently',
