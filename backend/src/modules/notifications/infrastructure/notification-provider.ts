@@ -39,6 +39,8 @@ export type FetchLike = (input: string, init: RequestInit) => Promise<Response>;
  * project). Implemented against the documented `projects.messages.send` API; NOT yet verified
  * against a live Firebase project.
  */
+const FCM_SCOPES = ['https://www.googleapis.com/auth/firebase.messaging'];
+
 export class FcmNotificationProvider implements NotificationProvider {
   private readonly logger = new Logger(FcmNotificationProvider.name);
 
@@ -50,10 +52,23 @@ export class FcmNotificationProvider implements NotificationProvider {
   ) {}
 
   static fromServiceAccountFile(projectId: string, keyFile: string): FcmNotificationProvider {
-    const auth = new GoogleAuth({
-      keyFile,
-      scopes: ['https://www.googleapis.com/auth/firebase.messaging'],
-    });
+    return FcmNotificationProvider.withAuth(
+      projectId,
+      new GoogleAuth({ keyFile, scopes: FCM_SCOPES }),
+    );
+  }
+
+  static fromServiceAccount(
+    projectId: string,
+    credentials: { readonly client_email: string; readonly private_key: string },
+  ): FcmNotificationProvider {
+    return FcmNotificationProvider.withAuth(
+      projectId,
+      new GoogleAuth({ credentials: { ...credentials }, scopes: FCM_SCOPES }),
+    );
+  }
+
+  private static withAuth(projectId: string, auth: GoogleAuth): FcmNotificationProvider {
     return new FcmNotificationProvider(projectId, async () => {
       const token = await auth.getAccessToken();
       if (!token) throw new TransientPushError('could not obtain an FCM access token');

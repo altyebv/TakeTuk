@@ -18,13 +18,17 @@ import {
     {
       provide: NOTIFICATION_PROVIDER,
       inject: [APP_CONFIG],
-      useFactory: (config: AppConfig): NotificationProvider =>
-        config.notifications.provider === 'fcm'
-          ? FcmNotificationProvider.fromServiceAccountFile(
-              config.notifications.fcmProjectId ?? '',
-              config.notifications.fcmServiceAccountFile ?? '',
-            )
-          : new LogNotificationProvider(),
+      useFactory: ({ notifications }: AppConfig): NotificationProvider => {
+        if (notifications.provider !== 'fcm') return new LogNotificationProvider();
+        // Configuration validation guarantees the project id and exactly one credential source.
+        const projectId = notifications.fcmProjectId ?? '';
+        return notifications.fcmServiceAccount
+          ? FcmNotificationProvider.fromServiceAccount(projectId, notifications.fcmServiceAccount)
+          : FcmNotificationProvider.fromServiceAccountFile(
+              projectId,
+              notifications.fcmServiceAccountFile ?? '',
+            );
+      },
     },
   ],
   exports: [NOTIFICATION_PROVIDER],

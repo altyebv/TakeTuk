@@ -58,7 +58,7 @@
 | `SUPABASE_JWT_SECRET` (legacy only) | API runtime | Prefer asymmetric keys (JWKS), which need no secret |
 | `GOOGLE_MAPS_API_KEY` | API runtime | Restrict to Routes API and server IPs if the host allows it |
 | (none for OSRM) | — | The self-hosted OSRM server needs no key. Keep it off the public internet: it has no authentication of its own |
-| FCM service-account JSON | API runtime | Restrict to the `firebase.messaging` scope |
+| FCM service-account key (`FCM_SERVICE_ACCOUNT_FILE` or `FCM_SERVICE_ACCOUNT_JSON`) | API runtime | A dedicated service account that may only send messages. Never shipped in an app (the apps' `google-services.json` is a different, public file) |
 
 - No secret is committed. `backend/.env.example` contains placeholders only, and `.env*` files are git-ignored except the example.
 - Flutter and web clients receive only the Supabase project URL and the **publishable (anon) key**, which is designed to be public and has no access to `taketuk`. The Flutter apps refuse to start if the configured key is a secret (`sb_secret_…`) or `service_role` key (`ClientConfig`, ADR-0018). Map display uses `flutter_map` with OpenStreetMap-based maps (MAP-6). Any map-provider key must be a client-restricted key [P].

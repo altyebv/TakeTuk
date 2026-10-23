@@ -108,7 +108,56 @@ describe('loadConfig', () => {
     ]);
     expect(issuesOf({ ...base, NOTIFICATION_PROVIDER: 'fcm' })).toEqual([
       expect.stringMatching(/^FCM_PROJECT_ID/),
+      expect.stringMatching(/^FCM_SERVICE_ACCOUNT_JSON: set exactly one/),
     ]);
+  });
+
+  describe('FCM service-account key from the environment', () => {
+    // A structurally valid but fake key: only the shape is checked here.
+    const key = {
+      type: 'service_account',
+      project_id: 'taketuk',
+      client_email: 'push@taketuk.iam.gserviceaccount.com',
+      private_key: '-----BEGIN PRIVATE KEY-----\nFAKEKEY\n-----END PRIVATE KEY-----\n',
+    };
+    const fcm = { ...base, NOTIFICATION_PROVIDER: 'fcm', FCM_PROJECT_ID: 'taketuk' };
+
+    it('accepts the key JSON or its base64 encoding', () => {
+      for (const value of [
+        JSON.stringify(key),
+        Buffer.from(JSON.stringify(key)).toString('base64'),
+      ]) {
+        const config = loadConfig({ ...fcm, FCM_SERVICE_ACCOUNT_JSON: value });
+        expect(config.notifications.fcmServiceAccount).toEqual({
+          client_email: key.client_email,
+          private_key: key.private_key,
+        });
+        expect(config.notifications.fcmServiceAccountFile).toBeUndefined();
+      }
+    });
+
+    it('requires exactly one credential source', () => {
+      expect(
+        issuesOf({
+          ...fcm,
+          FCM_SERVICE_ACCOUNT_JSON: JSON.stringify(key),
+          FCM_SERVICE_ACCOUNT_FILE: '/secrets/fcm.json',
+        }),
+      ).toEqual([expect.stringMatching(/^FCM_SERVICE_ACCOUNT_JSON: set exactly one/)]);
+    });
+
+    it('rejects malformed keys without echoing them', () => {
+      for (const value of [
+        'not-a-key',
+        JSON.stringify({ ...key, type: 'authorized_user' }),
+        JSON.stringify({ ...key, private_key: 'secret-but-wrong' }),
+      ]) {
+        const issues = issuesOf({ ...fcm, FCM_SERVICE_ACCOUNT_JSON: value });
+        expect(issues).toEqual([expect.stringMatching(/^FCM_SERVICE_ACCOUNT_JSON: must be/)]);
+        expect(issues.join(' ')).not.toContain('secret-but-wrong');
+        expect(issues.join(' ')).not.toContain('FAKEKEY');
+      }
+    });
   });
 
   it('configures OSRM routing with a bounded snap radius', () => {
