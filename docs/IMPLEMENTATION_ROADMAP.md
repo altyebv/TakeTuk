@@ -18,7 +18,9 @@ NestJS 12 backend on Node 24 with strict TypeScript, ESLint, Prettier and Jest. 
 
 Completion criteria met: a clean database migrates (tested); lint, type check and tests pass; the compiled service starts against a migrated database (smoke test).
 
-🟡 **Not verified here:** the Docker build, the Supabase CLI stack, and the CI run (see the implementation report §4).
+The CI workflow has run and passed on GitHub Actions.
+
+🟡 **Not verified yet:** the Docker build and the Supabase CLI stack (see the implementation report §4).
 
 ## Phase 4: Identity and authorization ✅
 
@@ -55,6 +57,5 @@ Documentation reconciled with the implementation, and the implementation report 
 
 Kept current in [IMPLEMENTATION_REPORT.md](IMPLEMENTATION_REPORT.md) §4, §6 and §7. The largest outstanding risks:
 - live integrations are unverified (Supabase, Google Routes, FCM),
-- CI has not run,
 - pricing, commission and dispatch values are placeholders awaiting product decisions,
 - there is no client application yet.
