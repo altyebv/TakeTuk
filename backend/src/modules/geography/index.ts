@@ -5,6 +5,7 @@ export {
   ROUTING_PROVIDER,
   type RouteEstimate,
   type RouteRequest,
+  type FetchLike,
   type RoutingProvider,
   type TravelMode,
 } from './routing/routing-provider';
@@ -14,3 +15,4 @@ export {
   buildRequestBody,
   GOOGLE_ROUTES_ENDPOINT,
 } from './routing/google-routes.provider';
+export { OsrmRoutingProvider, buildOsrmRouteUrl } from './routing/osrm-routing.provider';

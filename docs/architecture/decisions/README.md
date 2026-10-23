@@ -27,7 +27,7 @@ No record claims a measurement or benchmark that was not performed.
 | [0003](0003-supabase-postgresql.md) | Supabase PostgreSQL as the primary database | Accepted |
 | [0004](0004-supabase-auth.md) | Supabase Auth for identity | Accepted |
 | [0005](0005-postgis.md) | PostGIS for geographic queries | Accepted |
-| [0006](0006-flutter-mobile.md) | Flutter for passenger and driver apps | Accepted |
+| [0006](0006-flutter-mobile.md) | Flutter for passenger and driver apps | Accepted (foundation implemented) |
 | [0007](0007-backend-controlled-operations.md) | Backend-controlled business operations | Accepted |
 | [0008](0008-google-maps-initial-provider.md) | Google Maps Platform as the initial mapping provider | Accepted (pending terms review) |
 | [0009](0009-routing-provider-abstraction.md) | Narrow provider abstraction for routing and geocoding | Accepted |
@@ -38,3 +38,5 @@ No record claims a measurement or benchmark that was not performed.
 | [0014](0014-validation-zod-openapi.md) | Runtime validation with Zod; OpenAPI from the same schemas | Accepted |
 | [0015](0015-database-security-posture.md) | Private schema, least-privilege backend role, RLS as defence in depth | Accepted |
 | [0016](0016-financial-records-ledger.md) | Cash-first payments and an append-only double-entry ledger | Accepted |
+| [0017](0017-self-hosted-osrm-routing.md) | Self-hosted OSRM as a routing provider | Accepted |
+| [0018](0018-flutter-client-architecture.md) | Flutter client foundation: workspace, generated API client, session and navigation | Accepted |

@@ -1,9 +1,15 @@
-import { Body, Controller, Get, HttpCode, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post } from '@nestjs/common';
 import { z } from 'zod';
 import { CurrentAuth, RequirePermissions } from '../../../shared/auth/access.decorators';
 import type { AuthContext } from '../../../shared/auth/auth-context';
-import { ApiEndpoint, ApiZodBody, ApiZodResponse } from '../../../shared/http/openapi';
-import { validBody, validParam, validQuery } from '../../../shared/http/zod-validation.pipe';
+import {
+  ApiEndpoint,
+  ApiZodBody,
+  ApiZodResponse,
+  ZodParams,
+  ZodQuery,
+} from '../../../shared/http/openapi';
+import { validBody } from '../../../shared/http/zod-validation.pipe';
 import { PageQuerySchema } from '../../../shared/pagination';
 import { POLICY_STATUSES } from '../../../shared/policy-lifecycle';
 import { IdParamSchema, isoDate, MoneyResponseSchema, MoneySchema } from '../../../shared/schemas';
@@ -76,7 +82,7 @@ export class DriverFinanceController {
   @ApiZodResponse(200, RidePaymentSchema, 'Payment record')
   async reportCash(
     @CurrentAuth() auth: AuthContext,
-    @Param(validParam(IdParamSchema)) params: z.infer<typeof IdParamSchema>,
+    @ZodParams(IdParamSchema) params: z.infer<typeof IdParamSchema>,
     @Body(validBody(CashReportSchema)) body: z.infer<typeof CashReportSchema>,
   ): Promise<RidePaymentResponse> {
     const payment = await this.finance.reportCash(
@@ -99,7 +105,7 @@ export class DriverFinanceController {
   @ApiZodResponse(200, EarningsSchema, 'Earnings')
   async earnings(
     @CurrentAuth() auth: AuthContext,
-    @Query(validQuery(PageQuerySchema)) query: z.infer<typeof PageQuerySchema>,
+    @ZodQuery(PageQuerySchema) query: z.infer<typeof PageQuerySchema>,
   ): Promise<z.infer<typeof EarningsSchema>> {
     const { commissionOwed, page } = await this.finance.driverEarnings(auth, query);
     return {
@@ -175,7 +181,7 @@ export class AdminCommissionPoliciesController {
   })
   @ApiZodResponse(200, z.object({ items: z.array(CommissionPolicySchema) }), 'Policies')
   async list(
-    @Query(validQuery(ListPoliciesQuerySchema)) query: z.infer<typeof ListPoliciesQuerySchema>,
+    @ZodQuery(ListPoliciesQuerySchema) query: z.infer<typeof ListPoliciesQuerySchema>,
   ): Promise<{ items: CommissionPolicyResponse[] }> {
     return { items: (await this.policies.list(query)).map(presentCommissionPolicy) };
   }
@@ -210,7 +216,7 @@ export class AdminCommissionPoliciesController {
   @ApiZodResponse(200, CommissionPolicySchema, 'Activated')
   async activate(
     @CurrentAuth() auth: AuthContext,
-    @Param(validParam(IdParamSchema)) params: z.infer<typeof IdParamSchema>,
+    @ZodParams(IdParamSchema) params: z.infer<typeof IdParamSchema>,
   ): Promise<CommissionPolicyResponse> {
     return presentCommissionPolicy(await this.policies.activate(auth, params.id));
   }
@@ -227,7 +233,7 @@ export class AdminCommissionPoliciesController {
   @ApiZodResponse(200, CommissionPolicySchema, 'Retired')
   async retire(
     @CurrentAuth() auth: AuthContext,
-    @Param(validParam(IdParamSchema)) params: z.infer<typeof IdParamSchema>,
+    @ZodParams(IdParamSchema) params: z.infer<typeof IdParamSchema>,
   ): Promise<CommissionPolicyResponse> {
     return presentCommissionPolicy(await this.policies.retire(auth, params.id));
   }

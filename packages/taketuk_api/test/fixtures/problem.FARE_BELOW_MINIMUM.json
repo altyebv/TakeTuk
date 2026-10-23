@@ -1,0 +1,12 @@
+{
+  "minimumFare": {
+    "amountMinor": 22500,
+    "currency": "SDG"
+  },
+  "type": "https://docs.taketuk.app/problems/fare-below-minimum",
+  "title": "The fare is below the minimum fare",
+  "status": 422,
+  "code": "FARE_BELOW_MINIMUM",
+  "detail": "The proposed fare 22000 is below the minimum fare 22500 SDG (minor units).",
+  "requestId": "41fe1f71-ab7d-46fc-8635-11c54ee715b8"
+}

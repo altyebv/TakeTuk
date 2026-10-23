@@ -104,7 +104,7 @@ Anything less is "partially implemented", and is reported as such.
 
 ## 11. Implementation status
 
-As of 2026-10-23 (end of the first increment). Details are in the linked documents.
+As of 2026-10-23 (second increment). Details are in the linked documents.
 
 | Area | Status | Reference |
 |---|---|---|
@@ -114,8 +114,10 @@ As of 2026-10-23 (end of the first increment). Details are in the linked documen
 | Identity and authorization | Implemented and tested with locally signed tokens. **Not verified against a live Supabase project** | `docs/security/SECURITY.md` |
 | Ride-booking vertical slice (negotiation, dispatch, atomic assignment, trip, cash payment, commission ledger) | Implemented and tested end to end against PostgreSQL, including concurrency, idempotency and failure tests | `docs/domain/STATE_MACHINES.md` |
 | External integrations (Google Routes, FCM, Supabase Storage) | Adapters written and unit-tested against documented formats. **Not verified against live services** | `docs/IMPLEMENTATION_REPORT.md` |
+| Self-hosted routing (OSRM) | Implemented. Verified against a real OSRM server on a synthetic network. **Not yet run on Wad Madani map data** | ADR-0017, `infra/osrm/README.md` |
+| Flutter apps (passenger, driver) and shared packages | Foundation implemented and tested: generated API client, sign-in, registration, session, Arabic/RTL. Debug APKs build in CI. **Not yet run on a device or signed in against a live Supabase project** | `apps/README.md`, ADR-0018 |
 | CI workflow | Runs and passes on GitHub Actions (format, lint, type check, tests against PostGIS, build, audit) | `.github/workflows/backend.yml` |
 | Container image | Dockerfile written. **Not yet built** | `backend/Dockerfile` |
-| Mobile apps, web dashboards, marketplace, deliveries, disputes, digital payments | Planned | `docs/IMPLEMENTATION_ROADMAP.md` |
+| Ride screens in the apps, web dashboards, marketplace, deliveries, disputes, digital payments | Planned | `docs/IMPLEMENTATION_ROADMAP.md` |
 
 This table is updated at every milestone. If it disagrees with the implementation report, the report is authoritative and this table is corrected.

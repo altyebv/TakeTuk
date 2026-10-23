@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Param, Patch, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Patch, Post, Res } from '@nestjs/common';
 import type { Response } from 'express';
 import { z } from 'zod';
 import {
@@ -7,8 +7,8 @@ import {
   RequirePermissions,
 } from '../../../shared/auth/access.decorators';
 import type { AuthContext } from '../../../shared/auth/auth-context';
-import { ApiEndpoint, ApiZodBody, ApiZodResponse } from '../../../shared/http/openapi';
-import { validBody, validParam } from '../../../shared/http/zod-validation.pipe';
+import { ApiEndpoint, ApiZodBody, ApiZodResponse, ZodParams } from '../../../shared/http/openapi';
+import { validBody } from '../../../shared/http/zod-validation.pipe';
 import { IdParamSchema } from '../../../shared/schemas';
 import { DisplayNameSchema } from '../../identity';
 import { DriverOnboardingService } from '../application/driver-onboarding.service';
@@ -207,7 +207,7 @@ export class DriverOnboardingController {
   @ApiZodResponse(200, DriverDocumentSchema, 'Document confirmed')
   async confirmUpload(
     @CurrentAuth() auth: AuthContext,
-    @Param(validParam(IdParamSchema)) params: z.infer<typeof IdParamSchema>,
+    @ZodParams(IdParamSchema) params: z.infer<typeof IdParamSchema>,
   ): Promise<DriverDocumentResponse> {
     return presentDocument(await this.onboarding.confirmDocumentUpload(auth, params.id));
   }

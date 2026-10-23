@@ -1,0 +1,17 @@
+# Dart pub workspace for the TAKE-TUK mobile apps and their shared packages (ADR-0006).
+# One resolution and one lockfile for every member: run `flutter pub get` here.
+name: taketuk_workspace
+publish_to: none
+
+environment:
+  sdk: ^3.13.0
+
+workspace:
+  - packages/taketuk_api
+  - packages/taketuk_auth
+  - packages/taketuk_ui
+  - apps/passenger_app
+  - apps/driver_app
+
+dev_dependencies:
+  flutter_lints: ^6.0.0

@@ -1,0 +1,29 @@
+{
+  "id": "22efd9d2-1fa5-4f27-959a-79c3e919d506",
+  "serviceTypeCode": "passenger_transport",
+  "pickup": {
+    "lat": 14.4,
+    "lng": 33.52,
+    "label": "University main gate"
+  },
+  "destination": {
+    "lat": 14.42,
+    "lng": 33.53,
+    "label": "Souq"
+  },
+  "route": {
+    "distanceMeters": 2500,
+    "durationSeconds": 600,
+    "provider": "test_routing",
+    "estimatedAt": "2026-10-23T04:11:14.152Z"
+  },
+  "minimumFare": {
+    "amountMinor": 22500,
+    "currency": "SDG"
+  },
+  "farePolicy": {
+    "id": "e01b8272-58ae-4974-b179-8c0a6078fa77",
+    "version": 1
+  },
+  "expiresAt": "2026-10-23T04:21:14.152Z"
+}

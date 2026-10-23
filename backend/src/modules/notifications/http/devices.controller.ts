@@ -1,11 +1,12 @@
-import { Body, Controller, Delete, HttpCode, Param, Put } from '@nestjs/common';
+import { Body, Controller, Delete, HttpCode, Put } from '@nestjs/common';
+import { ApiResponse } from '@nestjs/swagger';
 import { z } from 'zod';
 import { Database } from '../../../infrastructure/database/database';
 import { CurrentAuth, RequirePermissions } from '../../../shared/auth/access.decorators';
 import type { AuthContext } from '../../../shared/auth/auth-context';
 import { AppError } from '../../../shared/errors/app-error';
-import { ApiEndpoint, ApiZodBody, ApiZodResponse } from '../../../shared/http/openapi';
-import { validBody, validParam } from '../../../shared/http/zod-validation.pipe';
+import { ApiEndpoint, ApiZodBody, ApiZodResponse, ZodParams } from '../../../shared/http/openapi';
+import { validBody } from '../../../shared/http/zod-validation.pipe';
 import { requireRegistered } from '../../identity';
 import { DeviceRegistrationsRepository } from '../infrastructure/device-registrations.repository';
 
@@ -40,7 +41,7 @@ export class DevicesController {
   @ApiZodResponse(200, DeviceSchema, 'Registered')
   async register(
     @CurrentAuth() auth: AuthContext,
-    @Param(validParam(InstallationParamsSchema)) params: z.infer<typeof InstallationParamsSchema>,
+    @ZodParams(InstallationParamsSchema) params: z.infer<typeof InstallationParamsSchema>,
     @Body(validBody(RegisterDeviceSchema)) body: z.infer<typeof RegisterDeviceSchema>,
   ): Promise<z.infer<typeof DeviceSchema>> {
     const user = requireRegistered(auth);
@@ -65,9 +66,10 @@ export class DevicesController {
     summary: 'Remove this installation (e.g. on sign-out)',
     tag: 'identity',
   })
+  @ApiResponse({ status: 204, description: 'Removed (also when it was already absent)' })
   async remove(
     @CurrentAuth() auth: AuthContext,
-    @Param(validParam(InstallationParamsSchema)) params: z.infer<typeof InstallationParamsSchema>,
+    @ZodParams(InstallationParamsSchema) params: z.infer<typeof InstallationParamsSchema>,
   ): Promise<void> {
     await this.devices.remove(this.db, params.installationId, requireRegistered(auth).id);
   }

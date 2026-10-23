@@ -1,0 +1,6 @@
+arb-dir: lib/l10n
+template-arb-file: ui_en.arb
+output-dir: lib/src/l10n
+output-localization-file: taketuk_ui_localizations.dart
+output-class: TaketukUiLocalizations
+nullable-getter: false

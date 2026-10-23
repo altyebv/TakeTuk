@@ -56,6 +56,7 @@ These conventions apply to every HTTP endpoint of the TAKE-TUK backend. The mach
 
 - `Content-Type: application/problem+json`.
 - `code` is the stable, machine-readable identifier that clients switch on. `title` and `detail` are for humans and may change.
+- Every code with its HTTP status is listed in the OpenAPI document under the root extension `x-taketuk-problem-codes`. Each operation lists its specific codes in `x-taketuk-problem-codes` too. The Dart client generates `ProblemCodes` from the registry.
 - `errors` appears only for validation problems.
 - `type` is a stable URI that identifies the problem type. It is not guaranteed to be resolvable yet.
 - `500` responses never include stack traces or internal messages.

@@ -57,10 +57,13 @@
 | `SUPABASE_SECRET_KEY` (service role) | API runtime | Used only for Storage signed URLs |
 | `SUPABASE_JWT_SECRET` (legacy only) | API runtime | Prefer asymmetric keys (JWKS), which need no secret |
 | `GOOGLE_MAPS_API_KEY` | API runtime | Restrict to Routes API and server IPs if the host allows it |
+| (none for OSRM) | — | The self-hosted OSRM server needs no key. Keep it off the public internet: it has no authentication of its own |
 | FCM service-account JSON | API runtime | Restrict to the `firebase.messaging` scope |
 
 - No secret is committed. `backend/.env.example` contains placeholders only, and `.env*` files are git-ignored except the example.
-- Flutter and web clients receive only the Supabase project URL and the **publishable (anon) key**, which is designed to be public and has no access to `taketuk`. They also receive client-restricted Maps SDK keys [P].
+- Flutter and web clients receive only the Supabase project URL and the **publishable (anon) key**, which is designed to be public and has no access to `taketuk`. The Flutter apps refuse to start if the configured key is a secret (`sb_secret_…`) or `service_role` key (`ClientConfig`, ADR-0018). Map display uses `flutter_map` with OpenStreetMap-based maps (MAP-6). Any map-provider key must be a client-restricted key [P].
+- The apps call the API over https in release builds. Plain HTTP is allowed only in debug builds, for a local stack: the debug Android manifest permits cleartext and the release manifest does not.
+- Sessions are stored by `supabase_flutter` in app-private storage, not an encrypted keystore [Gap] (IDN-5). Signing out removes them.
 - Secrets are injected as environment variables by the hosting platform. Rotation: every secret above can be rotated without a code change.
 
 ## 5. Privileged database access
@@ -87,6 +90,7 @@
 - Phone numbers: stored only from the verified token. They are revealed to the counterpart only during an active assignment (IDN-2).
 - Location: only the latest driver position is stored. Passenger locations exist only as pickup and destination on quotes and rides.
 - National ID numbers are not stored as data fields (DRV-2).
+- Pickup and destination coordinates leave the system once per quote, to the routing provider. With OSRM that is our own server. With Google, the request is covered by Google's terms (MAP-2).
 - Logs exclude request bodies, tokens, phone numbers and coordinates.
 
 ## 8. Audit trail
@@ -103,6 +107,7 @@
 - Parameterised SQL everywhere (`pg` placeholders). No string-built SQL from user input.
 - Security headers: `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, `X-Frame-Options: DENY`. HSTS is expected to be set by the TLS terminator.
 - CORS is disabled by default. Web origins are added explicitly when the web apps exist.
+- Outbound calls to providers use TLS. The one exception is a self-hosted OSRM on a private network that is itself encrypted, which must be declared with `OSRM_ALLOW_HTTP=true`; otherwise production refuses a plain-HTTP `OSRM_BASE_URL`.
 
 ## 10. Operational risks and gaps
 

@@ -2,15 +2,15 @@
 
 | | |
 |---|---|
-| Status | Reflects the implemented backend foundation (first ride-booking slice). Planned parts are marked **[P]**. |
+| Status | Reflects the implemented backend (ride-booking slice, OSRM routing) and the Flutter app foundation. Planned parts are marked **[P]**. |
 | Related | [ADRs](decisions/README.md), [Database design](DATABASE_DESIGN.md), [Domain model](../domain/DOMAIN_MODEL.md), [Security](../security/SECURITY.md), [Operations](../operations/OPERATIONS.md) |
 
 ## 1. System context
 
 ```mermaid
 flowchart TB
-  passenger["Passenger app (Flutter) [P]"]
-  driver["Driver app (Flutter) [P]"]
+  passenger["Passenger app (Flutter): foundation"]
+  driver["Driver app (Flutter): foundation"]
   merchant["Merchant dashboard (React) [P]"]
   admin["Admin dashboard (React) [P]"]
   api["TAKE-TUK API (NestJS modular monolith)"]
@@ -19,7 +19,7 @@ flowchart TB
     db[("PostgreSQL + PostGIS<br/>schema: taketuk")]
     storage["Supabase Storage<br/>(private bucket driver-documents)"]
   end
-  google["Google Routes API"]
+  routing["Routing: self-hosted OSRM<br/>or Google Routes API"]
   fcm["Firebase Cloud Messaging<br/>(+ APNs for iOS)"]
 
   passenger -- "sign-in (OTP)" --> auth
@@ -32,7 +32,7 @@ flowchart TB
   api -- "verify JWT (JWKS)" --> auth
   api -- "SQL as taketuk_api member" --> db
   api -- "signed URLs (secret key)" --> storage
-  api -- "computeRoutes (server key)" --> google
+  api -- "one route per quote" --> routing
   api -- "HTTP v1 send" --> fcm
   fcm -. push .-> passenger
   fcm -. push .-> driver
@@ -61,8 +61,10 @@ Clients talk to Supabase directly only for **authentication** and for **uploads 
 │  │  └─ cli/                   operator CLI (migrate, seed-dev, grant-role)
 │  ├─ test/                     unit, architecture, integration, concurrency, security, failure tests
 │  └─ Dockerfile                API image (build context: repository root)
-├─ apps/                        [P] passenger_app, driver_app (Flutter); merchant_web, admin_web (React)
-└─ packages/                    [P] shared Dart packages and TypeScript API contracts
+├─ pubspec.yaml                 Dart pub workspace (apps and packages; ADR-0018)
+├─ apps/                        passenger_app, driver_app (Flutter); [P] merchant_web, admin_web (React)
+├─ packages/                    taketuk_api (generated client), taketuk_auth, taketuk_ui
+└─ infra/osrm/                  routing dataset preparation (ADR-0017)
 ```
 
 There is no root JavaScript workspace yet, because only one JavaScript project exists. When the React apps arrive, a workspace is introduced for shared TypeScript contracts generated from `openapi.json`. The web apps must not import backend source.
@@ -123,7 +125,7 @@ flowchart LR
 | Integration | Port | Adapters | Status |
 |---|---|---|---|
 | Supabase Auth | `TokenVerifier` | JWKS (ES256/RS256), legacy HS256 secret | Implemented. Tested with locally generated ES256 keys (unit and HTTP tests) and HS256 (compiled-server smoke test). **Not verified against a live Supabase project.** |
-| Routing | `RoutingProvider` | `GoogleRoutesProvider`, `DevFakeRoutingProvider` | Google adapter unit-tested against documented formats, **not verified live**. The fake is used in development and tests. |
+| Routing | `RoutingProvider` | `OsrmRoutingProvider` (self-hosted, ADR-0017), `GoogleRoutesProvider`, `DevFakeRoutingProvider` | OSRM adapter verified against a real `osrm-routed` on a synthetic network, **not yet on real Wad Madani data**. Google adapter unit-tested against documented formats, **not verified live**. The fake is used in development and tests. |
 | File storage | `DocumentStorage` | `SupabaseDocumentStorage` (storage-js), `InMemoryDocumentStorage` (dev/test) | Supabase adapter **not verified live**. |
 | Push | `NotificationProvider` | `FcmNotificationProvider` (HTTP v1 + service account), `LogNotificationProvider` | FCM adapter unit-tested with a mocked transport, **not verified live**. |
 | Payments | — | — | [P]. Cash only. |
@@ -178,7 +180,7 @@ Scale in this order, as evidence demands:
 2. More API instances (stateless) and a dedicated worker instance.
 3. A read replica for admin and reporting queries.
 4. Location updates moved to a lighter path (batched writes, or a separate table partitioned by time if history is ever needed).
-5. A self-hosted routing engine to cut routing cost (ADR-0008/0009).
+5. Scaling the self-hosted routing engine (ADR-0017): more `osrm-routed` replicas behind the API, or an engine that suits a larger region.
 6. Extraction of a module into a service only when its scaling or ownership needs clearly diverge (ADR-0001).
 
 Kubernetes, microservices and message brokers are not introduced without a demonstrated requirement.

@@ -1,0 +1,35 @@
+{
+  "@@locale": "en",
+  "appName": "TAKE-TUK Driver",
+  "registerTitle": "Drive with TAKE-TUK",
+  "registerIntro": "Tell us about yourself. Your details are reviewed before you can take rides.",
+  "displayNameLabel": "Name shown to passengers",
+  "legalNameLabel": "Full legal name",
+  "licenseLabel": "Driving licence number",
+  "errorRequired": "This field is required.",
+  "errorAlreadyRegistered": "You are already registered with different details. Please contact support.",
+  "continueButton": "Continue",
+  "homeGreeting": "Hello, {name}",
+  "@homeGreeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "statusApplicant": "Next: add your vehicle and documents. This arrives in the next version of the app.",
+  "statusPendingReview": "Your application is being reviewed.",
+  "statusApproved": "You are approved. Going online arrives in the next version of the app.",
+  "statusRejected": "Your application was not approved.",
+  "reviewNote": "Reviewer's note: {note}",
+  "@reviewNote": {
+    "placeholders": {
+      "note": {
+        "type": "String"
+      }
+    }
+  },
+  "statusSuspended": "Your account is suspended. Please contact support.",
+  "statusUnknown": "Your account status cannot be shown in this version. Please update the app.",
+  "signOut": "Sign out"
+}

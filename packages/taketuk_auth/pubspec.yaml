@@ -1,0 +1,27 @@
+name: taketuk_auth
+description: TAKE-TUK sign-in (Supabase Auth phone OTP), session state and the shared sign-in screens.
+publish_to: none
+version: 0.1.0
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+  flutter: ">=3.47.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: any
+  supabase_flutter: ^2.18.3
+  taketuk_api: any
+  taketuk_ui: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  http: ^1.6.0
+
+flutter:
+  generate: true

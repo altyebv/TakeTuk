@@ -1,0 +1,19 @@
+{
+  "@@locale": "en",
+  "retry": "Try again",
+  "errorNetwork": "No connection. Check your internet and try again.",
+  "errorServiceUnavailable": "The service is temporarily unavailable. Please try again shortly.",
+  "errorSignedOut": "Your session has ended. Please sign in again.",
+  "errorAccountDisabled": "This account is disabled. Please contact support.",
+  "errorRateLimited": "Too many attempts. Wait a moment and try again.",
+  "errorValidation": "Some details are not valid. Check them and try again.",
+  "errorUpdateRequired": "This version of the app is out of date. Please update it.",
+  "errorGeneric": "Something went wrong. Please try again.",
+  "supportReference": "Reference: {requestId}",
+  "@supportReference": {
+    "description": "Shown under an error so the user can quote it to support.",
+    "placeholders": { "requestId": { "type": "String" } }
+  },
+  "currencySdg": "SDG",
+  "@currencySdg": { "description": "Sudanese pound, shown after amounts." }
+}

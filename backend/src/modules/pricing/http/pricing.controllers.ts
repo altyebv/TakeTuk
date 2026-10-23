@@ -1,9 +1,15 @@
-import { Body, Controller, Get, HttpCode, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post } from '@nestjs/common';
 import { z } from 'zod';
 import { CurrentAuth, RequirePermissions } from '../../../shared/auth/access.decorators';
 import type { AuthContext } from '../../../shared/auth/auth-context';
-import { ApiEndpoint, ApiZodBody, ApiZodResponse } from '../../../shared/http/openapi';
-import { validBody, validParam, validQuery } from '../../../shared/http/zod-validation.pipe';
+import {
+  ApiEndpoint,
+  ApiZodBody,
+  ApiZodResponse,
+  ZodParams,
+  ZodQuery,
+} from '../../../shared/http/openapi';
+import { validBody } from '../../../shared/http/zod-validation.pipe';
 import { POLICY_STATUSES } from '../../../shared/policy-lifecycle';
 import {
   CoordinatesSchema,
@@ -164,7 +170,7 @@ export class AdminFarePoliciesController {
   })
   @ApiZodResponse(200, z.object({ items: z.array(FarePolicySchema) }), 'Policies')
   async list(
-    @Query(validQuery(ListPoliciesQuerySchema)) query: z.infer<typeof ListPoliciesQuerySchema>,
+    @ZodQuery(ListPoliciesQuerySchema) query: z.infer<typeof ListPoliciesQuerySchema>,
   ): Promise<{ items: FarePolicyResponse[] }> {
     return { items: (await this.policies.list(query)).map(presentPolicy) };
   }
@@ -198,7 +204,7 @@ export class AdminFarePoliciesController {
   @ApiZodResponse(200, FarePolicySchema, 'Activated')
   async activate(
     @CurrentAuth() auth: AuthContext,
-    @Param(validParam(IdParamSchema)) params: z.infer<typeof IdParamSchema>,
+    @ZodParams(IdParamSchema) params: z.infer<typeof IdParamSchema>,
   ): Promise<FarePolicyResponse> {
     return presentPolicy(await this.policies.activate(auth, params.id));
   }
@@ -215,7 +221,7 @@ export class AdminFarePoliciesController {
   @ApiZodResponse(200, FarePolicySchema, 'Retired')
   async retire(
     @CurrentAuth() auth: AuthContext,
-    @Param(validParam(IdParamSchema)) params: z.infer<typeof IdParamSchema>,
+    @ZodParams(IdParamSchema) params: z.infer<typeof IdParamSchema>,
   ): Promise<FarePolicyResponse> {
     return presentPolicy(await this.policies.retire(auth, params.id));
   }

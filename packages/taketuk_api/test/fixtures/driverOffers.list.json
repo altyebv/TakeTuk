@@ -1,0 +1,39 @@
+{
+  "items": [
+    {
+      "offerId": "43b867a4-1c22-4bda-904a-e4b867398347",
+      "rideId": "1b2cbcb7-900d-4ea7-abbe-e225f8cbc3e7",
+      "status": "pending",
+      "expiresAt": "2026-10-23T04:11:59.359Z",
+      "dispatchRound": 1,
+      "distanceToPickupMeters": 246,
+      "offeredFare": {
+        "amountMinor": 25000,
+        "currency": "SDG"
+      },
+      "minimumFare": {
+        "amountMinor": 22500,
+        "currency": "SDG"
+      },
+      "counterFare": null,
+      "pickup": {
+        "lat": 14.4,
+        "lng": 33.52,
+        "label": "University main gate"
+      },
+      "destination": {
+        "lat": 14.42,
+        "lng": 33.53,
+        "label": "Souq"
+      },
+      "route": {
+        "distanceMeters": 2500,
+        "durationSeconds": 600,
+        "provider": "test_routing"
+      },
+      "passenger": {
+        "displayName": "Hiba"
+      }
+    }
+  ]
+}

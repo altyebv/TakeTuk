@@ -111,6 +111,37 @@ describe('loadConfig', () => {
     ]);
   });
 
+  it('configures OSRM routing with a bounded snap radius', () => {
+    expect(issuesOf({ ...base, ROUTING_PROVIDER: 'osrm' })).toEqual([
+      expect.stringMatching(/^OSRM_BASE_URL/),
+    ]);
+    const config = loadConfig({
+      ...base,
+      ROUTING_PROVIDER: 'osrm',
+      OSRM_BASE_URL: 'http://127.0.0.1:5000',
+    });
+    expect(config.routing).toMatchObject({
+      provider: 'osrm',
+      osrmBaseUrl: 'http://127.0.0.1:5000',
+      osrmSnapRadiusMeters: 500,
+    });
+    expect(issuesOf({ ...base, OSRM_SNAP_RADIUS_METERS: '0' })).toEqual([
+      expect.stringMatching(/^OSRM_SNAP_RADIUS_METERS/),
+    ]);
+  });
+
+  it('requires https for OSRM in production unless a private network is declared', () => {
+    const osrm = {
+      ...production,
+      ROUTING_PROVIDER: 'osrm',
+      GOOGLE_MAPS_API_KEY: '',
+      OSRM_BASE_URL: 'http://osrm.internal:5000',
+    };
+    expect(issuesOf(osrm)).toEqual([expect.stringMatching(/^OSRM_BASE_URL: must use https/)]);
+    expect(issuesOf({ ...osrm, OSRM_ALLOW_HTTP: 'true' })).toEqual([]);
+    expect(issuesOf({ ...osrm, OSRM_BASE_URL: 'https://osrm.example' })).toEqual([]);
+  });
+
   it('rejects out-of-range thresholds', () => {
     expect(issuesOf({ ...base, DISPATCH_BATCH_SIZE: '0' })).toEqual([
       expect.stringMatching(/^DISPATCH_BATCH_SIZE/),

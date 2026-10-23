@@ -1,12 +1,18 @@
-import { Body, Controller, Get, Headers, HttpCode, Param, Post, Query, Res } from '@nestjs/common';
+import { Body, Controller, Get, Headers, HttpCode, Post, Res } from '@nestjs/common';
 import { ApiHeader } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { z } from 'zod';
 import { requireIdempotencyKey } from '../../../platform/idempotency';
 import { CurrentAuth, RequirePermissions } from '../../../shared/auth/access.decorators';
 import type { AuthContext } from '../../../shared/auth/auth-context';
-import { ApiEndpoint, ApiZodBody, ApiZodResponse } from '../../../shared/http/openapi';
-import { validBody, validParam, validQuery } from '../../../shared/http/zod-validation.pipe';
+import {
+  ApiEndpoint,
+  ApiZodBody,
+  ApiZodResponse,
+  ZodParams,
+  ZodQuery,
+} from '../../../shared/http/openapi';
+import { validBody } from '../../../shared/http/zod-validation.pipe';
 import { PageQuerySchema, pageResponseSchema, type Page } from '../../../shared/pagination';
 import { IdParamSchema, MoneySchema, ReasonSchema } from '../../../shared/schemas';
 import { DriverOffersService } from '../application/driver-offers.service';
@@ -87,7 +93,7 @@ export class PassengerRidesController {
   @ApiZodResponse(200, pageResponseSchema(PassengerRideSchema), 'Rides')
   list(
     @CurrentAuth() auth: AuthContext,
-    @Query(validQuery(PageQuerySchema)) query: z.infer<typeof PageQuerySchema>,
+    @ZodQuery(PageQuerySchema) query: z.infer<typeof PageQuerySchema>,
   ): Promise<Page<PassengerRideView>> {
     return this.rides.listRides(auth, query);
   }
@@ -103,7 +109,7 @@ export class PassengerRidesController {
   @ApiZodResponse(200, PassengerRideSchema, 'Ride')
   get(
     @CurrentAuth() auth: AuthContext,
-    @Param(validParam(IdParamSchema)) params: IdParams,
+    @ZodParams(IdParamSchema) params: IdParams,
   ): Promise<PassengerRideView> {
     return this.rides.getRide(auth, params.id);
   }
@@ -121,7 +127,7 @@ export class PassengerRidesController {
   @ApiZodResponse(200, PassengerRideSchema, 'Cancelled')
   cancel(
     @CurrentAuth() auth: AuthContext,
-    @Param(validParam(IdParamSchema)) params: IdParams,
+    @ZodParams(IdParamSchema) params: IdParams,
     @Body(validBody(PassengerCancelSchema)) body: z.infer<typeof PassengerCancelSchema>,
   ): Promise<PassengerRideView> {
     return this.rides.cancel(auth, params.id, body.reason ?? null);
@@ -147,7 +153,7 @@ export class PassengerRidesController {
   @ApiZodResponse(200, PassengerRideSchema, 'Ride assigned')
   acceptCounteroffer(
     @CurrentAuth() auth: AuthContext,
-    @Param(validParam(RideOfferParamsSchema)) params: z.infer<typeof RideOfferParamsSchema>,
+    @ZodParams(RideOfferParamsSchema) params: z.infer<typeof RideOfferParamsSchema>,
   ): Promise<PassengerRideView> {
     return this.rides.acceptCounteroffer(auth, params.id, params.offerId);
   }
@@ -164,7 +170,7 @@ export class PassengerRidesController {
   @ApiZodResponse(200, PassengerRideSchema, 'Counteroffer rejected')
   rejectCounteroffer(
     @CurrentAuth() auth: AuthContext,
-    @Param(validParam(RideOfferParamsSchema)) params: z.infer<typeof RideOfferParamsSchema>,
+    @ZodParams(RideOfferParamsSchema) params: z.infer<typeof RideOfferParamsSchema>,
   ): Promise<PassengerRideView> {
     return this.rides.rejectCounteroffer(auth, params.id, params.offerId);
   }
@@ -207,7 +213,7 @@ export class DriverOffersController {
   @ApiZodResponse(200, DriverRideSchema, 'Assigned ride')
   accept(
     @CurrentAuth() auth: AuthContext,
-    @Param(validParam(IdParamSchema)) params: IdParams,
+    @ZodParams(IdParamSchema) params: IdParams,
   ): Promise<DriverRideView> {
     return this.offers.accept(auth, params.id);
   }
@@ -224,7 +230,7 @@ export class DriverOffersController {
   @ApiZodResponse(200, DriverOfferSchema, 'Declined')
   decline(
     @CurrentAuth() auth: AuthContext,
-    @Param(validParam(IdParamSchema)) params: IdParams,
+    @ZodParams(IdParamSchema) params: IdParams,
   ): Promise<DriverOfferView> {
     return this.offers.decline(auth, params.id);
   }
@@ -250,7 +256,7 @@ export class DriverOffersController {
   @ApiZodResponse(200, DriverOfferSchema, 'Counteroffer submitted')
   counteroffer(
     @CurrentAuth() auth: AuthContext,
-    @Param(validParam(IdParamSchema)) params: IdParams,
+    @ZodParams(IdParamSchema) params: IdParams,
     @Body(validBody(CounterofferSchema)) body: z.infer<typeof CounterofferSchema>,
   ): Promise<DriverOfferView> {
     return this.offers.counteroffer(auth, params.id, body.amount);
@@ -271,7 +277,7 @@ export class DriverRidesController {
   @ApiZodResponse(200, pageResponseSchema(DriverRideSchema), 'Rides')
   list(
     @CurrentAuth() auth: AuthContext,
-    @Query(validQuery(PageQuerySchema)) query: z.infer<typeof PageQuerySchema>,
+    @ZodQuery(PageQuerySchema) query: z.infer<typeof PageQuerySchema>,
   ): Promise<Page<DriverRideView>> {
     return this.trips.listForDriver(auth, query);
   }
@@ -299,7 +305,7 @@ export class DriverRidesController {
   @ApiZodResponse(200, DriverRideSchema, 'Ride')
   get(
     @CurrentAuth() auth: AuthContext,
-    @Param(validParam(IdParamSchema)) params: IdParams,
+    @ZodParams(IdParamSchema) params: IdParams,
   ): Promise<DriverRideView> {
     return this.trips.getForDriver(auth, params.id);
   }
@@ -316,7 +322,7 @@ export class DriverRidesController {
   @ApiZodResponse(200, DriverRideSchema, 'Driver arrived')
   arrive(
     @CurrentAuth() auth: AuthContext,
-    @Param(validParam(IdParamSchema)) params: IdParams,
+    @ZodParams(IdParamSchema) params: IdParams,
   ): Promise<DriverRideView> {
     return this.trips.driverTransition(auth, params.id, 'arrive');
   }
@@ -333,7 +339,7 @@ export class DriverRidesController {
   @ApiZodResponse(200, DriverRideSchema, 'Trip in progress')
   start(
     @CurrentAuth() auth: AuthContext,
-    @Param(validParam(IdParamSchema)) params: IdParams,
+    @ZodParams(IdParamSchema) params: IdParams,
   ): Promise<DriverRideView> {
     return this.trips.driverTransition(auth, params.id, 'start');
   }
@@ -350,7 +356,7 @@ export class DriverRidesController {
   @ApiZodResponse(200, DriverRideSchema, 'Trip completed')
   complete(
     @CurrentAuth() auth: AuthContext,
-    @Param(validParam(IdParamSchema)) params: IdParams,
+    @ZodParams(IdParamSchema) params: IdParams,
   ): Promise<DriverRideView> {
     return this.trips.driverTransition(auth, params.id, 'complete');
   }
@@ -368,7 +374,7 @@ export class DriverRidesController {
   @ApiZodResponse(200, DriverRideSchema, 'Cancelled')
   cancel(
     @CurrentAuth() auth: AuthContext,
-    @Param(validParam(IdParamSchema)) params: IdParams,
+    @ZodParams(IdParamSchema) params: IdParams,
     @Body(validBody(RequiredReasonSchema)) body: z.infer<typeof RequiredReasonSchema>,
   ): Promise<DriverRideView> {
     return this.trips.cancelByDriver(auth, params.id, body.reason);
@@ -388,7 +394,7 @@ export class AdminRidesController {
     problems: ['RIDE_NOT_FOUND'],
   })
   @ApiZodResponse(200, AdminRideSchema, 'Ride')
-  get(@Param(validParam(IdParamSchema)) params: IdParams): Promise<AdminRideView> {
+  get(@ZodParams(IdParamSchema) params: IdParams): Promise<AdminRideView> {
     return this.trips.getForAdmin(params.id);
   }
 
@@ -405,7 +411,7 @@ export class AdminRidesController {
   @ApiZodResponse(200, AdminRideSchema, 'Cancelled')
   cancel(
     @CurrentAuth() auth: AuthContext,
-    @Param(validParam(IdParamSchema)) params: IdParams,
+    @ZodParams(IdParamSchema) params: IdParams,
     @Body(validBody(RequiredReasonSchema)) body: z.infer<typeof RequiredReasonSchema>,
   ): Promise<AdminRideView> {
     return this.trips.cancelByAdmin(auth, params.id, body.reason);

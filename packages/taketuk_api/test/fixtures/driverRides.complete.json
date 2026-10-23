@@ -1,0 +1,52 @@
+{
+  "id": "1b2cbcb7-900d-4ea7-abbe-e225f8cbc3e7",
+  "status": "completed",
+  "serviceTypeCode": "passenger_transport",
+  "pickup": {
+    "lat": 14.4,
+    "lng": 33.52,
+    "label": "University main gate"
+  },
+  "destination": {
+    "lat": 14.42,
+    "lng": 33.53,
+    "label": "Souq"
+  },
+  "route": {
+    "distanceMeters": 2500,
+    "durationSeconds": 600,
+    "provider": "test_routing"
+  },
+  "minimumFare": {
+    "amountMinor": 22500,
+    "currency": "SDG"
+  },
+  "agreedFare": {
+    "amountMinor": 25000,
+    "currency": "SDG"
+  },
+  "createdAt": "2026-10-23T04:11:14.343Z",
+  "searchExpiresAt": "2026-10-23T04:16:14.343Z",
+  "assignedAt": "2026-10-23T04:11:14.423Z",
+  "driverArrivedAt": "2026-10-23T04:11:14.476Z",
+  "startedAt": "2026-10-23T04:11:14.501Z",
+  "completedAt": "2026-10-23T04:11:14.511Z",
+  "cancelledAt": null,
+  "expiredAt": null,
+  "cancellation": null,
+  "passenger": {
+    "displayName": "Hiba",
+    "phoneE164": null
+  },
+  "payment": {
+    "rideId": "1b2cbcb7-900d-4ea7-abbe-e225f8cbc3e7",
+    "method": "cash",
+    "status": "awaiting_collection",
+    "amountDue": {
+      "amountMinor": 25000,
+      "currency": "SDG"
+    },
+    "amountCollected": null,
+    "reportedAt": null
+  }
+}

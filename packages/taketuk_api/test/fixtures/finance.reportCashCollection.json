@@ -1,0 +1,14 @@
+{
+  "rideId": "1b2cbcb7-900d-4ea7-abbe-e225f8cbc3e7",
+  "method": "cash",
+  "status": "collected",
+  "amountDue": {
+    "amountMinor": 25000,
+    "currency": "SDG"
+  },
+  "amountCollected": {
+    "amountMinor": 25000,
+    "currency": "SDG"
+  },
+  "reportedAt": "2026-10-23T04:11:14.534Z"
+}

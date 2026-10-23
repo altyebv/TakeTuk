@@ -1,0 +1,20 @@
+{
+  "@@locale": "ar",
+  "signInTitle": "تسجيل الدخول",
+  "phoneLabel": "رقم الهاتف",
+  "phoneHint": "0912345678",
+  "phoneHelp": "سنرسل إليك رمزًا برسالة نصية.",
+  "sendCode": "إرسال الرمز",
+  "codeTitle": "أدخل الرمز",
+  "codeSentTo": "أدخل الرمز الذي أرسلناه إلى {phone}.",
+  "codeLabel": "رمز التحقق",
+  "verify": "تأكيد",
+  "resendCode": "إرسال رمز جديد",
+  "codeResent": "تم إرسال رمز جديد.",
+  "changeNumber": "تغيير الرقم",
+  "signOut": "تسجيل الخروج",
+  "errorInvalidPhone": "أدخل رقم هاتف سوداني، مثل 0912345678.",
+  "errorInvalidCode": "الرمز غير صحيح أو انتهت صلاحيته.",
+  "loading": "جارٍ التحميل…",
+  "accountErrorTitle": "تعذّر تحميل حسابك"
+}

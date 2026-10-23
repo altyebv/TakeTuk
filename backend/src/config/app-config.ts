@@ -39,8 +39,11 @@ const environmentSchema = z
     STORAGE_DRIVER_DOCUMENTS_BUCKET: z.string().min(1).default('driver-documents'),
     STORAGE_VIEW_URL_TTL_SECONDS: integer(300, 30, 3600),
 
-    ROUTING_PROVIDER: z.enum(['google', 'dev_fake']).default('dev_fake'),
+    ROUTING_PROVIDER: z.enum(['google', 'osrm', 'dev_fake']).default('dev_fake'),
     GOOGLE_MAPS_API_KEY: z.string().min(10).optional(),
+    OSRM_BASE_URL: z.url().optional(),
+    OSRM_SNAP_RADIUS_METERS: integer(500, 10, 5000),
+    OSRM_ALLOW_HTTP: booleanString.default(false),
     ROUTING_TIMEOUT_MS: integer(5000, 500, 30_000),
 
     NOTIFICATION_PROVIDER: z.enum(['fcm', 'log']).default('log'),
@@ -85,6 +88,9 @@ const environmentSchema = z
     if (env.ROUTING_PROVIDER === 'google' && !env.GOOGLE_MAPS_API_KEY) {
       issue('GOOGLE_MAPS_API_KEY', 'required when ROUTING_PROVIDER=google');
     }
+    if (env.ROUTING_PROVIDER === 'osrm' && !env.OSRM_BASE_URL) {
+      issue('OSRM_BASE_URL', 'required when ROUTING_PROVIDER=osrm');
+    }
     if (
       env.NOTIFICATION_PROVIDER === 'fcm' &&
       (!env.FCM_PROJECT_ID || !env.FCM_SERVICE_ACCOUNT_FILE)
@@ -110,6 +116,15 @@ const environmentSchema = z
       }
       if (!env.SUPABASE_URL.startsWith('https://')) {
         issue('SUPABASE_URL', 'must use https in production');
+      }
+      // Route requests carry trip coordinates (personal data). Plain HTTP only over a private
+      // network that is itself encrypted, declared explicitly (docs/security/SECURITY.md).
+      if (
+        env.ROUTING_PROVIDER === 'osrm' &&
+        env.OSRM_BASE_URL?.startsWith('http://') &&
+        !env.OSRM_ALLOW_HTTP
+      ) {
+        issue('OSRM_BASE_URL', 'must use https in production unless OSRM_ALLOW_HTTP=true');
       }
       if (env.API_DOCS_ENABLED) {
         issue('API_DOCS_ENABLED', 'interactive API docs are disabled in production');
@@ -147,8 +162,10 @@ export interface AppConfig {
     readonly viewUrlTtlSeconds: number;
   };
   readonly routing: {
-    readonly provider: 'google' | 'dev_fake';
+    readonly provider: 'google' | 'osrm' | 'dev_fake';
     readonly googleApiKey: string | undefined;
+    readonly osrmBaseUrl: string | undefined;
+    readonly osrmSnapRadiusMeters: number;
     readonly timeoutMs: number;
   };
   readonly notifications: {
@@ -230,6 +247,8 @@ export function loadConfig(source: Record<string, string | undefined>): AppConfi
     routing: {
       provider: env.ROUTING_PROVIDER,
       googleApiKey: env.GOOGLE_MAPS_API_KEY,
+      osrmBaseUrl: env.OSRM_BASE_URL,
+      osrmSnapRadiusMeters: env.OSRM_SNAP_RADIUS_METERS,
       timeoutMs: env.ROUTING_TIMEOUT_MS,
     },
     notifications: {

@@ -9,6 +9,8 @@ import ts from 'typescript';
  *  3. domain/ code imports no framework, driver or infrastructure code.
  *  4. SQL writes (INSERT/UPDATE/DELETE) touch only tables owned by the module containing them.
  *  5. Platform and shared code never depend on business modules.
+ *  6. Route parameters and queries are validated through ZodParams/ZodQuery, which also put
+ *     them in the OpenAPI contract (ADR-0014).
  */
 
 const SRC = resolve(__dirname, '../../src');
@@ -214,6 +216,13 @@ describe('architecture', () => {
           violations.push(`${relative(SRC, file)} writes ${table} (owner: ${owner ?? 'unknown'})`);
       }
     }
+    expect(violations).toEqual([]);
+  });
+
+  it('validates route parameters and queries only through the documenting decorators', () => {
+    const violations = FILES.filter((file) => unitOf(file) !== 'shared')
+      .filter((file) => /\bvalid(?:Param|Query)\(/.test(readFileSync(file, 'utf8')))
+      .map((file) => relative(SRC, file));
     expect(violations).toEqual([]);
   });
 });

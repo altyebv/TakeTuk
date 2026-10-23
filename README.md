@@ -2,7 +2,7 @@
 
 Transportation, food-marketplace and logistics platform, launching in Wad Madani, Sudan.
 
-**Status:** first increment. The backend foundation and the ride-booking vertical slice are implemented and tested. Client apps are planned. See [`docs/IMPLEMENTATION_REPORT.md`](docs/IMPLEMENTATION_REPORT.md).
+**Status:** the backend foundation and the ride-booking vertical slice are implemented and tested. The Flutter apps have their foundation: sign-in, registration and session. See [`docs/IMPLEMENTATION_REPORT.md`](docs/IMPLEMENTATION_REPORT.md).
 
 | Start here | |
 |---|---|
@@ -18,10 +18,12 @@ Transportation, food-marketplace and logistics platform, launching in Wad Madani
 ## Repository
 
 ```
-backend/     NestJS API (modular monolith): the only component implemented so far
+backend/     NestJS API (modular monolith)
 supabase/    migrations (authoritative schema), CLI config, development seed
+apps/        Flutter passenger and driver apps (foundation); React clients planned
+packages/    shared Dart packages: generated API client, auth and session, UI
+infra/osrm/  self-hosted routing dataset tooling
 docs/        product, architecture, domain, API, security, operations
-apps/        planned Flutter (passenger, driver) and React (merchant, admin) clients
 ```
 
 ## Quick start (backend)
@@ -35,3 +37,7 @@ npm run check    # format, lint, typecheck, and all tests (TEST_DATABASE_ADMIN_U
 ```
 
 The full local setup is in [OPERATIONS §2](docs/operations/OPERATIONS.md).
+
+## Quick start (apps)
+
+Requires Flutter 3.47: `flutter pub get` at the repository root, then follow [apps/README.md](apps/README.md).

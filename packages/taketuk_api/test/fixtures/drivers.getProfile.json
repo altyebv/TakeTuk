@@ -1,0 +1,13 @@
+{
+  "userId": "12825985-7fb8-4059-b495-8c2c268c6623",
+  "serviceAreaCode": "test_city",
+  "status": "approved",
+  "fullLegalName": "Musa Full Name",
+  "drivingLicenseNumber": "DL-12825985",
+  "submittedAt": "2026-10-23T04:11:14.294Z",
+  "reviewedAt": "2026-10-23T04:11:14.304Z",
+  "reviewNote": null,
+  "availability": "online",
+  "activeVehicleId": "d8cf6ba0-c62a-446c-97ed-eb7bd45a1bc7",
+  "createdAt": "2026-10-23T04:11:14.184Z"
+}
