@@ -53,6 +53,39 @@ describe('openapi document', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
+  it('declares every path template variable as a required path parameter', () => {
+    for (const [path, item] of Object.entries(doc.paths)) {
+      const variables = [...path.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort();
+      for (const [method, op] of Object.entries(
+        item as Record<
+          string,
+          { parameters?: Array<{ in: string; name: string; required?: boolean }> }
+        >,
+      )) {
+        const declared = (op.parameters ?? [])
+          .filter((p) => p.in === 'path' && p.required === true)
+          .map((p) => p.name)
+          .sort();
+        expect({ op: `${method} ${path}`, declared }).toEqual({
+          op: `${method} ${path}`,
+          declared: variables,
+        });
+      }
+    }
+  });
+
+  it('documents query parameters of paginated lists', () => {
+    const rides = doc.paths['/v1/rides'] as {
+      get: { parameters: Array<{ name: string; in: string }> };
+    };
+    expect(
+      rides.get.parameters
+        .filter((p) => p.in === 'query')
+        .map((p) => p.name)
+        .sort(),
+    ).toEqual(['cursor', 'limit']);
+  });
+
   it('matches the committed docs/api/openapi.json', () => {
     if (process.env.UPDATE_OPENAPI === '1') {
       writeFileSync(TARGET, json);

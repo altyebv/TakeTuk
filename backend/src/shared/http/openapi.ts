@@ -1,8 +1,17 @@
-import { applyDecorators } from '@nestjs/common';
-import { ApiBody, ApiExtension, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { applyDecorators, Param, Query } from '@nestjs/common';
+import {
+  ApiBody,
+  ApiExtension,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import type { SchemaObject } from '@nestjs/swagger';
 import { z } from 'zod';
 import type { ErrorCode } from '../errors/error-codes';
+import { validParam, validQuery } from './zod-validation.pipe';
 
 /**
  * Named schemas (Zod `.meta({ id })`) are hoisted into OpenAPI `components/schemas` instead of
@@ -58,6 +67,43 @@ export const ApiZodBody = (schema: z.ZodType, description?: string) =>
 
 export const ApiZodResponse = (status: number, schema: z.ZodType, description: string) =>
   ApiResponse({ status, description, schema: toOpenApiSchema(schema, 'output') });
+
+/**
+ * Validated path parameters, documented from the same Zod object schema. The Swagger explorer
+ * only sees named `@Param('x')` parameters, so a whole-object `@Param(pipe)` would leave them
+ * out of the contract.
+ */
+export const ZodParams = (schema: z.ZodObject): ParameterDecorator =>
+  documentedParameters(schema, 'path', Param(validParam(schema)));
+
+/** Validated query parameters, documented from the same Zod object schema. */
+export const ZodQuery = (schema: z.ZodObject): ParameterDecorator =>
+  documentedParameters(schema, 'query', Query(validQuery(schema)));
+
+function documentedParameters(
+  schema: z.ZodObject,
+  location: 'path' | 'query',
+  bind: ParameterDecorator,
+): ParameterDecorator {
+  const json = toOpenApiSchema(schema, 'input');
+  const required = new Set(json.required ?? []);
+  const properties = Object.entries(json.properties ?? {}) as Array<[string, SchemaObject]>;
+  return (target, key, index) => {
+    bind(target, key, index);
+    const descriptor = key === undefined ? undefined : Object.getOwnPropertyDescriptor(target, key);
+    if (key === undefined || !descriptor) {
+      throw new Error('ZodParams and ZodQuery decorate route handler parameters only');
+    }
+    for (const [name, property] of properties) {
+      const options = {
+        name,
+        required: location === 'path' || required.has(name),
+        schema: property,
+      };
+      (location === 'path' ? ApiParam(options) : ApiQuery(options))(target, key, descriptor);
+    }
+  };
+}
 
 const problemSchema: SchemaObject = {
   type: 'object',
