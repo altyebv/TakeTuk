@@ -5,6 +5,7 @@ import { parseArgs } from 'node:util';
 import { Client } from 'pg';
 import { findMigrationsDirectory, migrate } from '../infrastructure/database/migrator';
 import { isRole } from '../shared/auth/roles-and-permissions';
+import { issueSignInCode } from './sign-in-code';
 
 /**
  * Operator CLI (docs/operations/OPERATIONS.md §5).
@@ -13,14 +14,18 @@ import { isRole } from '../shared/auth/roles-and-permissions';
  *                Refuses Supabase-managed databases: use the Supabase CLI there (ADR-0003).
  *   seed-dev     Apply supabase/seed.sql (development data). Refuses NODE_ENV=production.
  *   grant-role   Grant a role (e.g. admin) to an existing user, with an audit event.
+ *   sign-in-code DEVELOPMENT ONLY: a sign-in code for an @example.com test account, without
+ *                sending an email (./sign-in-code.ts). Refuses NODE_ENV=production.
  *
- * Connection: DATABASE_ADMIN_URL (migrate, seed-dev) or DATABASE_URL (grant-role).
+ * Connection: DATABASE_ADMIN_URL (migrate, seed-dev), DATABASE_URL (grant-role), or
+ * SUPABASE_URL and SUPABASE_SECRET_KEY (sign-in-code).
  */
 
 const USAGE = `usage:
   cli migrate
   cli seed-dev
-  cli grant-role --user <uuid> --role <passenger|driver|admin> --operator <name> --reason <text>`;
+  cli grant-role --user <uuid> --role <passenger|driver|admin> --operator <name> --reason <text>
+  cli sign-in-code --email <name@example.com>`;
 
 function env(name: string): string {
   const value = process.env[name];
@@ -121,6 +126,22 @@ async function runGrantRole(args: string[]): Promise<void> {
   });
 }
 
+async function runSignInCode(args: string[]): Promise<void> {
+  const { values } = parseArgs({ args, options: { email: { type: 'string' } }, strict: true });
+  if (!values.email) throw new Error(USAGE);
+  const result = await issueSignInCode({
+    supabaseUrl: env('SUPABASE_URL'),
+    secretKey: env('SUPABASE_SECRET_KEY'),
+    email: values.email,
+    nodeEnv: process.env.NODE_ENV,
+  });
+  console.log(
+    `${result.created ? 'created test account ' : ''}${result.email}\n` +
+      `sign-in code: ${result.code}\n` +
+      'Enter it in the app (on the sign-in screen: "I already have a code"). No email was sent.',
+  );
+}
+
 async function main(): Promise<void> {
   const [command, ...rest] = process.argv.slice(2);
   switch (command) {
@@ -130,6 +151,8 @@ async function main(): Promise<void> {
       return runSeedDev();
     case 'grant-role':
       return runGrantRole(rest);
+    case 'sign-in-code':
+      return runSignInCode(rest);
     default:
       throw new Error(USAGE);
   }

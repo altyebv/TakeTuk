@@ -30,19 +30,19 @@ const SUPABASE_SIGNED_UPLOAD_TTL_SECONDS = 2 * 60 * 60;
 
 /**
  * Supabase Storage adapter using the official storage-js client with the server-side secret key.
- * Written against the documented storage-js API; NOT yet verified against a live project.
+ * Verified against the live project by `npm run test:live -- supabase-storage`.
  */
 export class SupabaseDocumentStorage implements DocumentStorage {
   private readonly logger = new Logger(SupabaseDocumentStorage.name);
   private readonly client: StorageClient;
 
-  constructor(supabaseUrl: string, secretKey: string) {
+  constructor(supabaseUrl: string, secretKey: string, fetchImpl?: typeof fetch) {
     // New-style secret keys (sb_secret_...) are not JWTs and go only in the apikey header;
     // legacy service_role keys are JWTs and are also sent as a bearer token.
     const headers: Record<string, string> = secretKey.startsWith('sb_secret_')
       ? { apikey: secretKey }
       : { apikey: secretKey, Authorization: `Bearer ${secretKey}` };
-    this.client = new StorageClient(`${supabaseUrl}/storage/v1`, headers);
+    this.client = new StorageClient(`${supabaseUrl}/storage/v1`, headers, fetchImpl);
   }
 
   async createSignedUploadUrl(bucket: string, path: string): Promise<SignedUpload> {
@@ -59,14 +59,15 @@ export class SupabaseDocumentStorage implements DocumentStorage {
   }
 
   async objectExists(bucket: string, path: string): Promise<boolean> {
-    const { data, error } = await this.client.from(bucket).exists(path);
-    if (error) {
-      // storage-js reports a missing object as an error with data=false.
-      if (!data && /not.?found|404/i.test(`${error.name} ${error.message}`)) return false;
-      this.logger.warn(`exists failed: ${error.message}`);
+    try {
+      // storage-js answers a missing object (Storage replies 400 or 404 to the HEAD request) with
+      // data=false, and throws for every other failure.
+      const { data } = await this.client.from(bucket).exists(path);
+      return data;
+    } catch (error) {
+      this.logger.warn(`exists failed: ${error instanceof Error ? error.message : 'unknown'}`);
       throw new AppError('STORAGE_UNAVAILABLE', undefined, { cause: error });
     }
-    return data;
   }
 
   async createSignedViewUrl(

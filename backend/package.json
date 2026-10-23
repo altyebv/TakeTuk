@@ -9,8 +9,8 @@
   },
   "scripts": {
     "build": "rm -rf dist && tsc -p tsconfig.build.json",
-    "start": "node --enable-source-maps dist/src/main.js",
-    "start:dev": "npm run build && node --enable-source-maps dist/src/main.js",
+    "start": "node --enable-source-maps --env-file-if-exists=.env dist/src/main.js",
+    "start:dev": "npm run build && node --enable-source-maps --env-file-if-exists=.env dist/src/main.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint .",
     "format": "prettier --write .",
@@ -19,11 +19,11 @@
     "test:unit": "node --experimental-vm-modules node_modules/jest/bin/jest.js --selectProjects unit",
     "test:integration": "node --experimental-vm-modules node_modules/jest/bin/jest.js --selectProjects integration",
     "test:live": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.live.config.js",
-    "db:migrate": "npm run build && node dist/src/cli/main.js migrate",
+    "db:migrate": "npm run build && node --env-file-if-exists=.env dist/src/cli/main.js migrate",
     "openapi": "UPDATE_OPENAPI=1 node --experimental-vm-modules node_modules/jest/bin/jest.js --selectProjects unit test/unit/openapi.spec.ts",
-    "cli": "node dist/src/cli/main.js",
+    "cli": "node --env-file-if-exists=.env dist/src/cli/main.js",
     "check": "npm run format:check && npm run lint && npm run typecheck && npm test",
-    "db:seed:dev": "npm run build && node dist/src/cli/main.js seed-dev"
+    "db:seed:dev": "npm run build && node --env-file-if-exists=.env dist/src/cli/main.js seed-dev"
   },
   "dependencies": {
     "@nestjs/common": "^12.2.0",

@@ -155,7 +155,7 @@ void main() {
     await tester.enterText(find.byKey(const Key('phone')), '0912345678');
     await tester.tap(find.text('إرسال الرمز'));
     await tester.pumpAndSettle();
-    expect(auth.codesRequested, ['+249912345678']);
+    expect(auth.codesRequested, [const PhoneAddress('+249912345678')]);
 
     await tester.enterText(find.byKey(const Key('code')), '123456');
     await tester.tap(find.text('تأكيد'));
@@ -182,6 +182,61 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('تسجيل الدخول'), findsOneWidget);
     session.dispose();
+  });
+
+  testWidgets('signs in by email when the build uses email codes', (
+    tester,
+  ) async {
+    final auth = FakeAuthGateway();
+    final api = TaketukApi(
+      ApiTransport(
+        baseUrl: Uri.parse('https://api.example'),
+        accessToken: auth.accessToken,
+        httpClient: MockClient(
+          (_) async => _json(200, {
+            ..._me(registered: false).toJson(),
+            'phoneE164': null,
+          }),
+        ),
+      ),
+    );
+    tester.platformDispatcher.localesTestValue = const [Locale('en')];
+    addTearDown(tester.platformDispatcher.clearLocalesTestValue);
+    final session = SessionController(auth: auth, api: api);
+    addTearDown(session.dispose);
+    await session.start();
+    await tester.pumpWidget(
+      PassengerApp(
+        auth: auth,
+        api: api,
+        session: session,
+        signInMethod: SignInMethod.email,
+        mapSettings: const MapSettings.withoutTiles(),
+        location: FakeDeviceLocation(null),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('phone')), findsNothing);
+    await tester.enterText(find.byKey(const Key('email')), 'Hiba@Example.com');
+    await tester.tap(find.text('Send code'));
+    await tester.pumpAndSettle();
+    expect(auth.codesRequested, [const EmailAddress('hiba@example.com')]);
+    expect(find.textContaining('hiba@example.com'), findsOneWidget);
+
+    // Changing the address returns to the email form.
+    await tester.tap(find.text('Change email'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('email')), findsOneWidget);
+    await tester.enterText(find.byKey(const Key('email')), 'hiba@example.com');
+    await tester.tap(find.text('Send code'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byKey(const Key('code')), '123456');
+    await tester.tap(find.text('Confirm'));
+    await tester.pumpAndSettle();
+    expect(auth.currentUser?.email, 'hiba@example.com');
+    expect(find.byKey(const Key('name')), findsOneWidget);
   });
 
   testWidgets('shows a localized error when registration fails', (

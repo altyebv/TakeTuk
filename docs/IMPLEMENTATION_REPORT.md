@@ -124,9 +124,9 @@ node dist/src/main.js                                        # smoke test (§2)
 
 | Integration | State | To complete |
 |---|---|---|
-| Supabase project (Auth JWKS, Storage, roles) | Code paths implemented. **Not verified live.** | Create staging project; enable asymmetric signing keys; `supabase db push`; create the API login role (OPERATIONS §4); run the smoke test with real tokens |
+| Supabase project (Auth JWKS, Storage, roles) | **Verified live** (§11): token verification (email sign-in, ES256 through the project JWKS); the schema applied with `supabase db push`, the private bucket and the Data API exposure. The API login role was created, but **the API has not yet connected to the database** | Run the API against the project (OPERATIONS §2c) |
 | Supabase CLI local stack | Config and migrations ready. **`supabase start` not run** (Docker image pulls were rate-limited or blocked in this environment) | Run `supabase start && supabase db reset` |
-| Supabase Storage adapter | storage-js based. **Not verified live.** | Exercise upload URL, existence check and view URL against staging |
+| Supabase Storage adapter | **Verified live** (§11.7): signed upload as the driver app sends it, existence check, signed view URL. The live run found a bug in the existence check, now fixed | — |
 | Google Routes API | Adapter matches the documented format. **Not verified live.** No key. | Server key restricted to Routes API; compare distances for Wad Madani routes (MAP-1); terms review (MAP-2) |
 | FCM / APNs | HTTP v1 adapter. **Not verified live.** No Firebase project. | Firebase project, service account, APNs key; device test |
 | SMS OTP delivery to Sudan | Not evaluated | Choose provider; test (IDN-1) |
@@ -291,3 +291,91 @@ Analysis with `--fatal-infos`, formatting and generated-code freshness are clean
 2. **A device run** of both apps against a staging backend: the phase 10 completion criterion.
 3. **Phase 11:** an admin dashboard for driver approval, so the end-to-end flow needs no SQL.
 
+## 11. Email sign-in and the first live Supabase check
+
+### 11.1 What was implemented
+
+- **Email sign-in for development builds** (`SIGN_IN_METHOD=email`), because SMS delivery (Twilio) is not available yet (OPEN_DECISIONS IDN-6). Release builds refuse it: email accounts have no verified phone number, so drivers and passengers cannot call each other.
+- **`taketuk_auth`:**
+  - `SignInAddress` (a phone number or an email address) across the gateway, the screens and navigation;
+  - `SignInScreen` replaces `PhoneEntryScreen`;
+  - email normalisation;
+  - mapping of Supabase's email errors (rate limit, invalid address, address not allowed by the built-in email service);
+  - Arabic and English strings.
+- **Supabase:** the email template `supabase/templates/sign_in_code.html` (the code only, no link), used by the local stack's config.
+- **Backend:** no change was needed, because the phone claim was already optional. Added the live check `test/live/supabase-auth.live-spec.ts`.
+
+### 11.2 Verified against the live Supabase project
+
+These ran from this environment against the project in `SUPABASE_URL`:
+
+- **Auth settings** (public endpoint): email provider on, phone provider off, sign-ups open, email confirmation required.
+- **Sign-in by email code:**
+  - a throwaway user was created through the admin API, which issues the code without sending an email;
+  - the code was exchanged with the publishable key only, exactly as the apps do;
+  - the project issued an ES256 token with a `kid`, the expected issuer and audience, role `authenticated`, an empty phone claim and a 1-hour lifetime;
+  - this project's email codes are **8 digits**; the code field accepts up to 10.
+- **A wrong code** gets `403 otp_expired`, which the apps show as "wrong or expired".
+- **The backend**, running here against a local database through the least-privilege role and verifying with the live JWKS:
+  - `GET /v1/me` answered 200, unregistered;
+  - passenger registration answered 201, and the account then had the passenger role and no phone number;
+  - a copy of the token with a tampered signature got `401 INVALID_TOKEN`.
+- **Cleanup:** the user was deleted, and no test users remain in the project.
+- **Repeatable:** `npm run test:live -- supabase` (2 tests) ran and passed against the project.
+
+### 11.3 Not possible from this environment
+
+- **The database.** Only HTTPS leaves this environment, so a PostgreSQL URL cannot be used here. The schema must be applied from a machine that can reach the database (`supabase link`, then `supabase db push`).
+- **Storage uploads.** The private `driver-documents` bucket is created by the migrations, which are not applied yet. The project already has a **public** bucket, `TakeTukDocs`, which TAKE-TUK does not use. Driver documents must never be stored in a public bucket.
+
+### 11.4 Incident: database password partly exposed
+
+While checking the format of `SUPABASE_DB_URL` without printing it, two fragments of the database password were printed into the session output. The password contains `@` and `?` without URL escaping, so the URL parser split the password at those characters. The password should be reset, and the variable removed from the environment, since this environment cannot use it. An unescaped password would also have broken the backend's connection string.
+
+### 11.5 What was tested (all ran and passed here)
+
+| Suite | Tests |
+|---|---:|
+| `packages/taketuk_auth` | 19. New: email normalisation, address round-trip, email entry, email code, the `SIGN_IN_METHOD` setting |
+| `apps/passenger_app` | 15. New: email sign-in through to registration |
+| `apps/driver_app` | 12. New: email sign-in through to the applicant form |
+| Backend live `supabase` | 2, against the live project |
+
+The other suites are unchanged: backend `npm test` 196, `taketuk_api` 20, `taketuk_ui` 6. Analysis with `--fatal-infos` and formatting are clean.
+
+### 11.6 Recommended next phase
+
+1. **Reset the database password.** Then apply the schema from your machine and create the API login role (OPERATIONS §4).
+2. **Email templates** with `{{ .Token }}` (OPERATIONS §4). Then a device run with `SIGN_IN_METHOD=email` against a backend the phone can reach.
+3. **Phase 11:** the admin dashboard, so drivers can be approved without SQL.
+
+### 11.7 After the schema was applied
+
+`supabase db push` and the API login role were run by the project owner. `npm run test:live -- supabase-storage` then ran here and passed (5 tests):
+- `driver-documents` is private, limited to 10 MB and to JPEG, PNG and PDF;
+- the `taketuk` schema is not reachable through the Data API with the publishable key (`PGRST106`);
+- a document uploaded through a signed URL, exactly as the driver app sends it, is reported as present and is readable through a signed view URL;
+- neither the public path nor the publishable key can read the document;
+- a text file is refused;
+- a signed upload URL cannot be used twice.
+
+The test objects were removed, and the bucket is empty.
+
+**Bug found and fixed.** For a missing object, Storage answers the existence check (a `HEAD` request) with a bare 400. storage-js reports that as `data: false`, but `SupabaseDocumentStorage.objectExists` only recognized a "not found" message. So confirming a document that was never uploaded would have answered 503 `STORAGE_UNAVAILABLE` instead of saying the upload is missing. The adapter now relies on storage-js's own not-found result, and it also turns errors storage-js throws (network failures, 5xx) into `STORAGE_UNAVAILABLE`. Before, those escaped as raw errors. New unit tests cover all of these cases (backend `npm test`: 200).
+
+**Also fixed:** the npm scripts never read `backend/.env`, although OPERATIONS §2a told developers to create one. So `npm run start:dev` would have failed with `DATABASE_URL` missing. `start`, `start:dev`, `cli`, `db:migrate` and `db:seed:dev` now load it with `node --env-file-if-exists`. A check here showed that the file is read, and that a variable set in the environment takes precedence over it. The container image is unchanged.
+
+Not verified yet: the API connecting to the project's database through the session pooler with `sslmode=verify-full` (OPERATIONS §2c).
+
+### 11.8 Test accounts
+
+- **`npm run cli -- sign-in-code --email <name>@example.com`** prints a sign-in code for a test account and creates the account on first use. The code comes from the Auth admin API, so no email or SMS is needed.
+  - It accepts only `@example.com` addresses, so it can never sign in as a real person.
+  - It refuses `NODE_ENV=production`.
+  - It never echoes Supabase's responses.
+- **"I already have a code"** on the sign-in screen goes straight to code entry. It appears in development builds only.
+- **Verified against the live project:**
+  - the command created `passenger@example.com` and `driver@example.com`, and reused an account on a second run;
+  - each printed code signed in through the same request the apps make (HTTP 200);
+  - it refused another domain and production.
+- **Tests:** 4 backend unit tests (backend `npm test`: 204) and 1 widget test (`taketuk_auth`: 20).

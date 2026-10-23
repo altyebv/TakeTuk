@@ -4,12 +4,16 @@
   "phoneLabel": "Mobile number",
   "phoneHint": "0912345678",
   "phoneHelp": "We will send you a code by SMS.",
+  "emailLabel": "Email",
+  "emailHint": "name@example.com",
+  "emailHelp": "We will send you a code by email.",
   "sendCode": "Send code",
+  "haveCode": "I already have a code",
   "codeTitle": "Enter the code",
-  "codeSentTo": "Enter the code we sent to {phone}.",
+  "codeSentTo": "Enter the code we sent to {address}.",
   "@codeSentTo": {
     "placeholders": {
-      "phone": {
+      "address": {
         "type": "String"
       }
     }
@@ -19,8 +23,11 @@
   "resendCode": "Send a new code",
   "codeResent": "A new code is on its way.",
   "changeNumber": "Change number",
+  "changeEmail": "Change email",
   "signOut": "Sign out",
   "errorInvalidPhone": "Enter a Sudanese mobile number, for example 0912345678.",
+  "errorInvalidEmail": "Enter a valid email address, for example name@example.com.",
+  "errorAddressNotAllowed": "Sign-in codes cannot be sent to this address yet.",
   "errorInvalidCode": "The code is wrong or has expired.",
   "loading": "Loading…",
   "accountErrorTitle": "We could not load your account"

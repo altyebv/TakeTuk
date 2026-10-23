@@ -30,6 +30,6 @@ String? normalizeSudanMobile(String input) {
   return match == null ? null : '+249${match[1]}';
 }
 
-/// Wraps a phone number in Unicode directional isolates so it reads left to right inside
-/// Arabic text.
+/// Wraps a phone number or email address in Unicode directional isolates so it reads left to
+/// right inside Arabic text.
 String isolateLtr(String text) => '\u2066$text\u2069';

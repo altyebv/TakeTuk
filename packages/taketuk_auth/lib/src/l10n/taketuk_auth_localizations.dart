@@ -125,11 +125,35 @@ abstract class TaketukAuthLocalizations {
   /// **'We will send you a code by SMS.'**
   String get phoneHelp;
 
+  /// No description provided for @emailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get emailLabel;
+
+  /// No description provided for @emailHint.
+  ///
+  /// In en, this message translates to:
+  /// **'name@example.com'**
+  String get emailHint;
+
+  /// No description provided for @emailHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'We will send you a code by email.'**
+  String get emailHelp;
+
   /// No description provided for @sendCode.
   ///
   /// In en, this message translates to:
   /// **'Send code'**
   String get sendCode;
+
+  /// No description provided for @haveCode.
+  ///
+  /// In en, this message translates to:
+  /// **'I already have a code'**
+  String get haveCode;
 
   /// No description provided for @codeTitle.
   ///
@@ -140,8 +164,8 @@ abstract class TaketukAuthLocalizations {
   /// No description provided for @codeSentTo.
   ///
   /// In en, this message translates to:
-  /// **'Enter the code we sent to {phone}.'**
-  String codeSentTo(String phone);
+  /// **'Enter the code we sent to {address}.'**
+  String codeSentTo(String address);
 
   /// No description provided for @codeLabel.
   ///
@@ -173,6 +197,12 @@ abstract class TaketukAuthLocalizations {
   /// **'Change number'**
   String get changeNumber;
 
+  /// No description provided for @changeEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Change email'**
+  String get changeEmail;
+
   /// No description provided for @signOut.
   ///
   /// In en, this message translates to:
@@ -184,6 +214,18 @@ abstract class TaketukAuthLocalizations {
   /// In en, this message translates to:
   /// **'Enter a Sudanese mobile number, for example 0912345678.'**
   String get errorInvalidPhone;
+
+  /// No description provided for @errorInvalidEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email address, for example name@example.com.'**
+  String get errorInvalidEmail;
+
+  /// No description provided for @errorAddressNotAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in codes cannot be sent to this address yet.'**
+  String get errorAddressNotAllowed;
 
   /// No description provided for @errorInvalidCode.
   ///

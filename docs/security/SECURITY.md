@@ -22,6 +22,7 @@
   - `exp` (and `nbf` if present) with a 60 s clock tolerance,
   - `sub` must be a UUID, `role` must be `authenticated`, and anonymous users (`is_anonymous = true`) are rejected.
 - Failures return `401 INVALID_TOKEN` without revealing which check failed. The reason is neither returned nor logged, because token contents must not reach logs. When the JWKS endpoint itself cannot be reached, the API answers `503 AUTHENTICATION_UNAVAILABLE` instead of 401, so an auth-provider outage does not sign users out.
+- Users sign in with a one-time code sent by SMS. Development builds can use a code sent by email instead (IDN-6); release builds refuse it. The token and its checks are the same either way, and email accounts simply have no phone number.
 - After token verification, the backend loads `users` and `user_roles`. Users with `status = disabled` receive `403 ACCOUNT_DISABLED`. This is how a user is blocked immediately, without waiting for token expiry.
 
 ## 3. Authorization

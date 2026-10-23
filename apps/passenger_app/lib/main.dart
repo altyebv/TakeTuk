@@ -28,6 +28,7 @@ Future<void> main() async {
       auth: auth,
       api: api,
       session: session,
+      signInMethod: config.signInMethod,
       mapSettings: MapSettings(
         tileUrlTemplate: config.mapTileUrlTemplate,
         attribution: config.mapAttribution,

@@ -15,7 +15,7 @@ final class FakeAuthGateway implements AuthGateway {
 
   final String validCode;
   final String userId;
-  final List<String> codesRequested = [];
+  final List<SignInAddress> codesRequested = [];
   AuthFailure? nextFailure;
   AuthUser? _user;
   final StreamController<AuthUser?> _changes = StreamController.broadcast();
@@ -27,19 +27,25 @@ final class FakeAuthGateway implements AuthGateway {
   Stream<AuthUser?> get userChanges => _changes.stream;
 
   @override
-  Future<void> requestCode(String phoneE164) async {
+  Future<void> requestCode(SignInAddress address) async {
     _throwIfFailing();
-    codesRequested.add(phoneE164);
+    codesRequested.add(address);
   }
 
   @override
   Future<void> verifyCode({
-    required String phoneE164,
+    required SignInAddress address,
     required String code,
   }) async {
     _throwIfFailing();
     if (code != validCode) throw const AuthFailure(AuthFailureKind.invalidCode);
-    _user = AuthUser(id: userId, phoneE164: phoneE164);
+    _user = switch (address) {
+      PhoneAddress(:final phoneE164) => AuthUser(
+        id: userId,
+        phoneE164: phoneE164,
+      ),
+      EmailAddress(:final email) => AuthUser(id: userId, email: email),
+    };
     _changes.add(_user);
   }
 
