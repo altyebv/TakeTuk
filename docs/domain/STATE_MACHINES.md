@@ -73,7 +73,7 @@ Open states: `pending`, `countered`. Every other state is terminal.
 
 **Expiry is enforced at decision time.** Every use case compares `expires_at` with the database clock (`now()`), so an offer past its window can never be accepted, even before the sweeper has marked it `expired`.
 
-**Retry behaviour.** Accepting an offer that the same driver already accepted, or accepting a counteroffer the same passenger already accepted, returns the existing assignment (`200`) and creates nothing new. Decline and reject return `409 OFFER_NOT_OPEN` if the offer is already terminal.
+**Retry behaviour.** Accepting an offer that the same driver already accepted, or accepting a counteroffer the same passenger already accepted, returns the existing assignment (`200`) and creates nothing new. Repeating a decline, a counteroffer of the same amount, or a counteroffer rejection returns `200` with the current state. Any other response to an already-terminal offer returns `409 OFFER_NOT_OPEN`. A driver who loses an acceptance race receives `409 RIDE_NO_LONGER_AVAILABLE`, because the ride status is checked before the offer status.
 
 ---
 
@@ -85,7 +85,7 @@ Statuses: `active` → (`completed` | `cancelled`).
 
 1. `SELECT … FROM rides WHERE id = $1 FOR UPDATE`. Competing acceptances for the same ride now run one at a time.
 2. Lock the offer row (`FOR UPDATE`) and check it is open, unexpired and in the expected state.
-3. Check that the ride is `searching`. If it is already assigned to this driver through this offer, return the existing assignment (idempotent retry). Otherwise return `409 RIDE_NO_LONGER_AVAILABLE`.
+3. If the ride is already assigned through this same offer, return it (idempotent retry). Otherwise check that the ride is `searching` and its search window is open (`409 RIDE_NO_LONGER_AVAILABLE`), then that the offer is in the expected open state (`409 OFFER_NOT_OPEN`) and unexpired (`409 OFFER_EXPIRED`).
 4. Lock the driver row (`FOR UPDATE`) and re-check eligibility (approved, online, same active vehicle, vehicle approved and compatible).
 5. Load the active commission policy for the ride's scope (`PRICING_NOT_CONFIGURED` if none).
 6. Insert the `fare_agreement` (unique per ride and per offer).

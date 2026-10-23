@@ -104,13 +104,17 @@ Anything less is "partially implemented", and is reported as such.
 
 ## 11. Implementation status
 
-As of 2026-10-23. Details are in the linked documents.
+As of 2026-10-23 (end of the first increment). Details are in the linked documents.
 
 | Area | Status | Reference |
 |---|---|---|
-| Documentation foundation, ADRs | Written | `docs/` |
-| Backend scaffold, schema, identity, ride-booking slice | In progress (first increment) | `docs/IMPLEMENTATION_ROADMAP.md` |
-| External integrations (Google Routes, FCM, Supabase Storage) | Not started | `docs/IMPLEMENTATION_ROADMAP.md` |
-| Mobile apps, web dashboards, marketplace, deliveries | Planned | `docs/IMPLEMENTATION_ROADMAP.md` |
+| Documentation foundation, ADRs 0001–0016 | Written and reconciled with the implementation | `docs/` |
+| Backend scaffold, configuration, health, logging, CLI | Implemented and tested | `docs/operations/OPERATIONS.md` |
+| Database schema and migrations | Implemented. Tested from a clean database on PostgreSQL 16 + PostGIS 3.4. **Not yet applied through the Supabase CLI** | `docs/architecture/DATABASE_DESIGN.md` |
+| Identity and authorization | Implemented and tested with locally signed tokens. **Not verified against a live Supabase project** | `docs/security/SECURITY.md` |
+| Ride-booking vertical slice (negotiation, dispatch, atomic assignment, trip, cash payment, commission ledger) | Implemented and tested end to end against PostgreSQL, including concurrency, idempotency and failure tests | `docs/domain/STATE_MACHINES.md` |
+| External integrations (Google Routes, FCM, Supabase Storage) | Adapters written and unit-tested against documented formats. **Not verified against live services** | `docs/IMPLEMENTATION_REPORT.md` |
+| CI workflow, container image | Written. **Not yet run or built** | `.github/workflows/backend.yml`, `backend/Dockerfile` |
+| Mobile apps, web dashboards, marketplace, deliveries, disputes, digital payments | Planned | `docs/IMPLEMENTATION_ROADMAP.md` |
 
 This table is updated at every milestone. If it disagrees with the implementation report, the report is authoritative and this table is corrected.

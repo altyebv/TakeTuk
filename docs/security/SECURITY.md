@@ -21,7 +21,7 @@
   - `iss = <SUPABASE_URL>/auth/v1` and `aud = authenticated`,
   - `exp` (and `nbf` if present) with a 60 s clock tolerance,
   - `sub` must be a UUID, `role` must be `authenticated`, and anonymous users (`is_anonymous = true`) are rejected.
-- Failures return `401 INVALID_TOKEN` without revealing which check failed. The reason is logged at debug level.
+- Failures return `401 INVALID_TOKEN` without revealing which check failed. The reason is neither returned nor logged, because token contents must not reach logs. When the JWKS endpoint itself cannot be reached, the API answers `503 AUTHENTICATION_UNAVAILABLE` instead of 401, so an auth-provider outage does not sign users out.
 - After token verification, the backend loads `users` and `user_roles`. Users with `status = disabled` receive `403 ACCOUNT_DISABLED`. This is how a user is blocked immediately, without waiting for token expiry.
 
 ## 3. Authorization
@@ -45,6 +45,7 @@
   - **vehicle eligibility**: an approved, owned, compatible active vehicle;
   - **state**: STATE_MACHINES transitions;
   - **separation of duties**: an admin cannot review their own driver profile or vehicles.
+- Push device registration is limited to the app matching a held role, so a passenger account cannot receive driver offers.
 - Admin role grants happen only through the operator CLI (`npm run cli -- grant-role`), using operator database credentials. Each grant is audited with actor `system` and operator metadata. There is no HTTP endpoint that grants `admin`.
 
 ## 4. Secret management

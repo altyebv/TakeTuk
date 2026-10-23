@@ -43,6 +43,13 @@ describe('problem details mapping', () => {
     );
   });
 
+  it('maps persistent serialization failures and deadlocks to a retryable 409', () => {
+    for (const code of ['40001', '40P01']) {
+      const { problem } = toProblem(Object.assign(new Error('x'), { code }), logger);
+      expect(problem).toMatchObject({ status: 409, code: 'CONCURRENT_UPDATE' });
+    }
+  });
+
   it('passes Retry-After for rate limits', () => {
     expect(
       toProblem(new AppError('RATE_LIMITED', undefined, { retryAfterSeconds: 60 }), logger)

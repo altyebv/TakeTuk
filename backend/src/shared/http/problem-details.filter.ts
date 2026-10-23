@@ -11,6 +11,7 @@ import { ERROR_CODES, HTTP_STATUS_BY_KIND, type ErrorCode } from '../errors/erro
 import {
   isConnectionError,
   isIllegalTransitionError,
+  isRetryableTransactionError,
   isStatementTimeout,
 } from '../../infrastructure/database/pg-errors';
 import { currentRequestId } from './request-context';
@@ -95,6 +96,19 @@ export function toProblem(
         'DATABASE_UNAVAILABLE',
         503,
         ERROR_CODES.DATABASE_UNAVAILABLE.title,
+        requestId,
+      ),
+    };
+  }
+
+  if (isRetryableTransactionError(exception)) {
+    // Serialization failure or deadlock that persisted through the transaction helper's retries.
+    logger.warn(`Transaction conflict persisted after retries: ${(exception as Error).message}`);
+    return {
+      problem: simpleProblem(
+        'CONCURRENT_UPDATE',
+        409,
+        ERROR_CODES.CONCURRENT_UPDATE.title,
         requestId,
       ),
     };

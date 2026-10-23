@@ -22,18 +22,20 @@ flowchart LR
   Notifications
   Drivers --> Fleet
   Drivers --> Identity
+  Drivers --> Geography
   Pricing --> Geography
-  Pricing --> Fleet
+  Pricing --> Finance
+  Finance --> Geography
   Mobility --> Pricing
   Mobility --> Drivers
   Mobility --> Fleet
   Mobility --> Finance
   Mobility --> Geography
-  Notifications --> Outbox
+  Mobility --> Identity
   Notifications --> Identity
 ```
 
-Every module may also use `Identity` (authentication context), `Audit` and `Outbox`. These dependency rules are enforced by an automated architecture test (`backend/test/architecture/architecture.spec.ts`).
+Every module may also use the platform modules `Audit`, `Outbox` and `Idempotency`, and the shared authorization vocabulary. These dependency rules are enforced by an automated architecture test (`backend/test/architecture/architecture.spec.ts`).
 
 ## 2. Identity
 

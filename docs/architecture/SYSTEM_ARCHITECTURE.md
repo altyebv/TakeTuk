@@ -54,11 +54,13 @@ Clients talk to Supabase directly only for **authentication** and for **uploads 
 │  ├─ src/
 │  │  ├─ main.ts, app.module.ts
 │  │  ├─ config/                validated environment configuration
-│  │  ├─ shared/                errors, HTTP plumbing, money, geo, pagination, state-machine helper
-│  │  ├─ infrastructure/        database pool and transactions
-│  │  └─ modules/<module>/      domain/ application/ infrastructure/ http/ index.ts
-│  ├─ scripts/                  migration runner (plain PostgreSQL), OpenAPI export, operator CLI
-│  └─ test/                     integration, concurrency, security and architecture tests
+│  │  ├─ shared/                errors, HTTP plumbing, auth vocabulary, money, pagination, state-machine helper
+│  │  ├─ infrastructure/        database pool, transactions, plain-PostgreSQL migration runner
+│  │  ├─ platform/              cross-cutting modules: audit, outbox, idempotency, worker base class
+│  │  ├─ modules/<module>/      domain/ application/ infrastructure/ http/ index.ts
+│  │  └─ cli/                   operator CLI (migrate, seed-dev, grant-role)
+│  ├─ test/                     unit, architecture, integration, concurrency, security, failure tests
+│  └─ Dockerfile                API image (build context: repository root)
 ├─ apps/                        [P] passenger_app, driver_app (Flutter); merchant_web, admin_web (React)
 └─ packages/                    [P] shared Dart packages and TypeScript API contracts
 ```
@@ -67,21 +69,20 @@ There is no root JavaScript workspace yet, because only one JavaScript project e
 
 ## 3. Backend modules
 
-| Module | Owns (tables) | Responsibilities | Depends on |
+| Module | Owns (tables) | Responsibilities | Depends on (business modules) |
 |---|---|---|---|
-| `identity` | `users`, `user_roles` | Token verification, current-user resolution, registration, roles → permissions, global guards | — |
-| `audit` (platform) | `audit_events` | Append audit events inside transactions; admin audit queries | identity |
-| `outbox` (platform) | `outbox_events` | Enqueue events transactionally; worker delivers to registered handlers | — |
+| `identity` | `users`, `user_roles` | Token verification, current-user resolution, registration, global access guard | — |
 | `geography` | `service_areas`, `service_area_services` | Service-area lookup; `RoutingProvider` port and adapters | — |
 | `fleet` | `vehicle_types`, `service_types`, `service_vehicle_compatibility`, `vehicles` | Vehicle catalogue, compatibility rules, vehicle records and their state machine | — |
-| `drivers` | `drivers`, `driver_locations`, `driver_documents` | Driver registration, verification and review (including vehicle review orchestration), availability, location, documents | identity, fleet, geography, audit, storage port |
-| `pricing` | `fare_policies`, `fare_quotes` | Fare-policy versions, minimum-fare calculation, quotes | geography, fleet, finance (commission-configured check), audit |
-| `finance` | `commission_policies`, `ride_payments`, `ledger_transactions`, `ledger_entries` | Commission policies, payment records, ledger postings, earnings | audit |
-| `mobility` | `rides`, `ride_offers`, `fare_agreements`, `ride_assignments`, `idempotency_keys`* | Ride creation, dispatch and matching, negotiation, atomic assignment, trip lifecycle, cancellation; dispatch worker | identity, pricing, drivers, fleet, finance, geography, audit, outbox |
-| `notifications` | `device_registrations` | Device tokens; outbox handlers that turn domain events into pushes; `NotificationProvider` port (FCM, log) | identity, outbox |
+| `drivers` | `drivers`, `driver_locations`, `driver_documents` | Driver registration, documents (storage port), verification and vehicle review orchestration, availability, location, operational eligibility view | identity, fleet, geography |
+| `finance` | `commission_policies`, `ride_payments`, `ledger_transactions`, `ledger_entries` | Commission policies, payment records, ledger postings, earnings | geography |
+| `pricing` | `fare_policies`, `fare_quotes` | Fare-policy versions, minimum-fare calculation, negotiation rules, quotes | geography, finance |
+| `mobility` | `rides`, `ride_offers`, `fare_agreements`, `ride_assignments` | Ride creation, dispatch and matching, negotiation, atomic assignment, trip lifecycle, cancellation and expiry; dispatch worker | identity, pricing, drivers, fleet, finance, geography |
+| `notifications` | `device_registrations` | Device tokens; outbox handlers that turn domain events into pushes; `NotificationProvider` port (FCM, log) | identity |
 | `health` | — | Liveness and readiness | — |
-
-\* `idempotency_keys` is owned by the shared idempotency service in `shared/idempotency`, which is used by mobility.
+| `platform/audit` | `audit_events` | Append audit events inside transactions; admin audit queries | (shared only) |
+| `platform/outbox` | `outbox_events` | Enqueue events transactionally; delivery worker; retention worker | (shared only) |
+| `platform/idempotency` | `idempotency_keys` | Idempotency-key execution inside the effect's transaction; cleanup worker | (shared only) |
 
 The rules, enforced by `backend/test/architecture/architecture.spec.ts`:
 
@@ -89,38 +90,39 @@ The rules, enforced by `backend/test/architecture/architecture.spec.ts`:
 2. The module dependency graph is acyclic and matches the table above.
 3. `domain/` folders import nothing from NestJS, `pg`, or infrastructure.
 4. SQL `INSERT`, `UPDATE` and `DELETE` statements touch only tables owned by the module containing them.
-5. Every HTTP route declares an access rule.
+5. Platform, shared, infrastructure and config code never import business modules.
+6. Every HTTP route declares an access rule (checked on the generated OpenAPI document by `test/unit/openapi.spec.ts`, and at runtime by the deny-by-default guard).
 
-Cross-module atomic operations pass a transaction handle to the owning module's public service. For example, `mobility` calls `finance.recordRideCompletion(tx, …)`. Domain events that tolerate eventual consistency (notifications) go through the outbox.
+Cross-module atomic operations pass a transaction handle to the owning module's public service. For example, `mobility` calls `finance.recordRideCompletion(tx, …)` and `drivers.lockOperationalDriver(tx, …)`. The one documented read-only exception is mobility's dispatch candidate query, which joins driver, fleet and location tables in a single SQL statement (`dispatch-candidates.query.ts`). Domain events that tolerate eventual consistency (notifications) go through the outbox.
 
 ```mermaid
 flowchart LR
-  mobility --> pricing & drivers & fleet & finance & geography
-  pricing --> geography & fleet & finance
+  mobility --> pricing & drivers & fleet & finance & geography & identity
+  pricing --> geography & finance
+  finance --> geography
   drivers --> fleet & geography & identity
-  notifications --> outbox & identity
-  mobility --> outbox
-  subgraph platform["used by all"]
-    identity
+  notifications --> identity
+  subgraph platform["platform (usable by every module; depends on no module)"]
     audit
+    outbox
+    idempotency
   end
 ```
 
 ## 4. Request lifecycle
 
 1. The `RequestContext` middleware assigns or validates `X-Request-Id` and starts timing.
-2. `AuthGuard` (global) verifies the bearer JWT, loads the user and roles from the database, and rejects disabled users.
-3. `AccessGuard` (global) enforces the route's declared access rule (public, authenticated, or permissions).
-4. `ZodValidationPipe` validates the body, params and query.
-5. The controller calls one application use case, which opens a transaction (`Database.transaction`), locks rows, checks preconditions, writes state, audit and outbox, and commits.
-6. Post-commit best-effort work runs, such as the first dispatch round after ride creation.
-7. `ProblemDetailsFilter` converts errors to RFC 9457 responses. The request log line records method, route, status, duration, request id and user id. It never records bodies or tokens.
+2. `AccessGuard` (global) reads the route's declared access rule (public, authenticated, or registered with permissions). For non-public routes it verifies the bearer JWT, loads the user and roles from the database, rejects disabled users, then enforces the rule. A route with no declared rule fails closed.
+3. `ZodValidationPipe` validates the body, params and query.
+4. The controller calls one application use case, which opens a transaction (`Database.transaction`), locks rows, checks preconditions, writes state, audit and outbox, and commits.
+5. Post-commit best-effort work runs, such as the first dispatch round after ride creation.
+6. `ProblemDetailsFilter` converts errors to RFC 9457 responses. The request log line records method, route, status, duration, request id and user id. It never records bodies or tokens.
 
 ## 5. External integrations
 
 | Integration | Port | Adapters | Status |
 |---|---|---|---|
-| Supabase Auth | `TokenVerifier` | JWKS (ES256/RS256), legacy HS256 secret | Implemented and unit-tested with locally generated keys. **Not verified against a live project.** |
+| Supabase Auth | `TokenVerifier` | JWKS (ES256/RS256), legacy HS256 secret | Implemented. Tested with locally generated ES256 keys (unit and HTTP tests) and HS256 (compiled-server smoke test). **Not verified against a live Supabase project.** |
 | Routing | `RoutingProvider` | `GoogleRoutesProvider`, `DevFakeRoutingProvider` | Google adapter unit-tested against documented formats, **not verified live**. The fake is used in development and tests. |
 | File storage | `DocumentStorage` | `SupabaseDocumentStorage` (storage-js), `InMemoryDocumentStorage` (dev/test) | Supabase adapter **not verified live**. |
 | Push | `NotificationProvider` | `FcmNotificationProvider` (HTTP v1 + service account), `LogNotificationProvider` | FCM adapter unit-tested with a mocked transport, **not verified live**. |
@@ -164,7 +166,7 @@ Details: [SECURITY.md](../security/SECURITY.md).
 | Push provider failure | Retries with exponential backoff, then `failed` after N attempts. Business state is unaffected, and clients see state by polling. |
 | Two drivers accept simultaneously | Exactly one wins. The other gets `409 RIDE_NO_LONGER_AVAILABLE` (concurrency tests). |
 | Worker instance dies mid-dispatch | Its transaction rolls back. `SKIP LOCKED` lets other instances continue. The next tick redoes the work. |
-| Deadlock or serialization failure | Transaction retried up to 3 times, then `503`. |
+| Deadlock or serialization failure | Transaction retried up to 3 times, then `409 CONCURRENT_UPDATE` (safe for the client to retry). |
 | Clock skew on devices | Ignored. Expiry decisions use the database clock, and location freshness uses server receive time. |
 | Misconfiguration | The process refuses to start (configuration validation). `dev_fake` providers are refused in production. |
 

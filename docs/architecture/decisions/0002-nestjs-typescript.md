@@ -15,7 +15,7 @@ The directive mandates NestJS with strict TypeScript for the backend. Concrete v
 
 - **Runtime:** Node.js 24 LTS (`>=24.9`), pinned by `.nvmrc` and `engines`.
 - **Framework:** NestJS 12, Express adapter.
-- **Language:** TypeScript 6.0 with `strict: true` and additional strictness (`noUncheckedIndexedAccess`, `noImplicitOverride`, `noFallthroughCasesInSwitch`, `exactOptionalPropertyTypes` was considered; see Consequences). The application compiles to CommonJS and loads the ESM-only NestJS packages through Node's stable `require(esm)`, following the official NestJS 12 application template.
+- **Language:** TypeScript 6.0 with `strict: true` plus `noUncheckedIndexedAccess`, `noImplicitOverride`, `noImplicitReturns`, `noFallthroughCasesInSwitch`, `noUnusedLocals` and `noUnusedParameters`. `exactOptionalPropertyTypes` was considered and not enabled (see Consequences). The application compiles to CommonJS and loads the ESM-only NestJS packages through Node's stable `require(esm)`, following the official NestJS 12 application template.
 - **Tests:** Jest 30 with `ts-jest`, run with `--experimental-vm-modules` (as in the official template). Supertest for HTTP-level tests.
 - **Lint and format:** ESLint 10 with `typescript-eslint` (type-aware rules, including `no-explicit-any`, `no-floating-promises` and `no-unsafe-*`), and Prettier.
 

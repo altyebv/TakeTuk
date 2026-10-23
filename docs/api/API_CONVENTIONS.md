@@ -92,7 +92,7 @@ Two mechanisms:
    - Concurrent requests with the same key wait for the first one to finish, then replay it.
    - Failed requests (4xx and 5xx) are not stored, so the client may retry them with the same key.
    - Retention is 24 hours. After that the key may be reused.
-2. **Natural idempotency of state transitions.** Repeating a transition that has already happened, by the same actor and with the same parameters, returns `200` with the current representation and has no further effect. This applies to accepting an offer or counteroffer, arriving, starting, completing, reporting a cash collection, and cancelling. A conflicting repeat (for example, a different collected amount) → `409`.
+2. **Natural idempotency of state transitions.** Repeating a transition that has already happened, by the same actor and with the same parameters, returns `200` with the current representation and has no further effect. This applies to registration, accepting an offer or counteroffer, declining, counteroffering the same amount, rejecting a counteroffer, arriving, starting, completing, reporting a cash collection, cancelling, document confirmation, verification submission, admin review decisions and policy activation. A conflicting repeat (for example, a different collected amount) → `409`.
 
 Clients should generate one idempotency key per user intent (for example, per tap on "Request ride") and reuse it on every retry of that intent.
 
@@ -122,7 +122,8 @@ Clients should generate one idempotency key per user intent (for example, per ta
 
 | Area | Endpoints |
 |---|---|
-| Identity | `GET /v1/me`, `POST /v1/passenger/registration`, `PATCH /v1/me/profile`, `PUT /v1/me/devices/{installationId}` |
+| Identity | `GET /v1/me`, `POST /v1/passenger/registration`, `PATCH /v1/me/profile`, `PUT`/`DELETE /v1/me/devices/{installationId}` (the app must match a held role) |
+| Catalogue | `GET /v1/fleet/vehicle-types` |
 | Driver onboarding | `POST /v1/driver/registration`, `GET`/`PATCH /v1/driver/profile`, `POST`/`GET /v1/driver/vehicles`, `POST /v1/driver/documents/upload-requests`, `POST /v1/driver/documents/{id}/confirm`, `GET /v1/driver/documents`, `POST /v1/driver/verification/submit` |
 | Driver operations | `PUT /v1/driver/availability`, `PUT /v1/driver/location`, `GET /v1/driver/offers`, `POST /v1/driver/offers/{id}/accept`, `…/decline`, `…/counteroffer`, `GET /v1/driver/rides`, `GET /v1/driver/rides/current`, `GET /v1/driver/rides/{id}`, `POST /v1/driver/rides/{id}/arrive`, `…/start`, `…/complete`, `…/cancel`, `…/cash-collection`, `GET /v1/driver/earnings` |
 | Passenger rides | `POST /v1/fare-quotes`, `POST /v1/rides`, `GET /v1/rides`, `GET /v1/rides/{id}`, `POST /v1/rides/{id}/cancel`, `POST /v1/rides/{id}/offers/{offerId}/accept-counteroffer`, `…/reject-counteroffer` |
