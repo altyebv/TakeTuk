@@ -5,6 +5,7 @@ import { DocumentBuilder, SwaggerModule, type OpenAPIObject } from '@nestjs/swag
 import type { AppConfig } from './config/app-config';
 import { AppModule } from './app.module';
 import { openApiComponents } from './shared/http/openapi';
+import { ERROR_CODES, HTTP_STATUS_BY_KIND } from './shared/errors/error-codes';
 
 const LOG_LEVELS: Record<AppConfig['log']['level'], LogLevel[]> = {
   debug: ['debug', 'log', 'warn', 'error', 'fatal'],
@@ -51,7 +52,18 @@ export function buildOpenApiDocument(app: NestExpressApplication): OpenAPIObject
     ...document.components,
     schemas: { ...document.components?.schemas, ...openApiComponents() },
   };
-  return document;
+  // Every stable problem code with its HTTP status, so clients can map codes they may receive
+  // from any operation (authentication, validation, rate limiting, outages) and not only the
+  // operation-specific ones listed per operation.
+  return Object.assign(document, {
+    'x-taketuk-problem-codes': Object.entries(ERROR_CODES)
+      .map(([code, definition]) => ({
+        code,
+        status: HTTP_STATUS_BY_KIND[definition.kind],
+        title: definition.title,
+      }))
+      .sort((a, b) => a.code.localeCompare(b.code)),
+  });
 }
 
 export async function createApp(config: AppConfig): Promise<NestExpressApplication> {

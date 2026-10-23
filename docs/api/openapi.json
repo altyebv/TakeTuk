@@ -8882,5 +8882,272 @@
         "additionalProperties": false
       }
     }
-  }
+  },
+  "x-taketuk-problem-codes": [
+    {
+      "code": "ACCOUNT_DISABLED",
+      "status": 403,
+      "title": "The account is disabled"
+    },
+    {
+      "code": "ALREADY_REGISTERED",
+      "status": 409,
+      "title": "Already registered with different details"
+    },
+    {
+      "code": "AUTHENTICATION_REQUIRED",
+      "status": 401,
+      "title": "Authentication is required"
+    },
+    {
+      "code": "AUTHENTICATION_UNAVAILABLE",
+      "status": 503,
+      "title": "Token verification is temporarily unavailable"
+    },
+    {
+      "code": "CONCURRENT_UPDATE",
+      "status": 409,
+      "title": "The resource was modified concurrently; retry"
+    },
+    {
+      "code": "COUNTEROFFER_NOT_ABOVE_PROPOSAL",
+      "status": 422,
+      "title": "The counteroffer must be higher than the passenger's proposal"
+    },
+    {
+      "code": "CURRENCY_MISMATCH",
+      "status": 422,
+      "title": "The currency does not match the applicable policy"
+    },
+    {
+      "code": "DATABASE_UNAVAILABLE",
+      "status": 503,
+      "title": "The database is temporarily unavailable"
+    },
+    {
+      "code": "DOCUMENT_NOT_FOUND",
+      "status": 404,
+      "title": "Document not found"
+    },
+    {
+      "code": "DOCUMENT_NOT_UPLOADED",
+      "status": 409,
+      "title": "The document has not been uploaded to storage"
+    },
+    {
+      "code": "DRIVER_BUSY",
+      "status": 409,
+      "title": "The driver already has an active job"
+    },
+    {
+      "code": "DRIVER_NOT_APPROVED",
+      "status": 403,
+      "title": "The driver is not approved"
+    },
+    {
+      "code": "DRIVER_NOT_AVAILABLE",
+      "status": 409,
+      "title": "The driver is no longer available"
+    },
+    {
+      "code": "DRIVER_NOT_FOUND",
+      "status": 404,
+      "title": "Driver not found"
+    },
+    {
+      "code": "FARE_BELOW_MINIMUM",
+      "status": 422,
+      "title": "The fare is below the minimum fare"
+    },
+    {
+      "code": "IDEMPOTENCY_KEY_REQUIRED",
+      "status": 400,
+      "title": "An Idempotency-Key header is required"
+    },
+    {
+      "code": "IDEMPOTENCY_KEY_REUSED",
+      "status": 422,
+      "title": "The Idempotency-Key was already used with a different request"
+    },
+    {
+      "code": "INTERNAL_ERROR",
+      "status": 500,
+      "title": "An unexpected error occurred"
+    },
+    {
+      "code": "INVALID_STATE_TRANSITION",
+      "status": 409,
+      "title": "The operation is not allowed in the current state"
+    },
+    {
+      "code": "INVALID_TOKEN",
+      "status": 401,
+      "title": "The access token is invalid or expired"
+    },
+    {
+      "code": "NO_ROUTE_FOUND",
+      "status": 422,
+      "title": "No route was found between the locations"
+    },
+    {
+      "code": "NOT_FOUND",
+      "status": 404,
+      "title": "The resource was not found"
+    },
+    {
+      "code": "OFFER_EXPIRED",
+      "status": 409,
+      "title": "The offer has expired"
+    },
+    {
+      "code": "OFFER_NOT_FOUND",
+      "status": 404,
+      "title": "Offer not found"
+    },
+    {
+      "code": "OFFER_NOT_OPEN",
+      "status": 409,
+      "title": "The offer is no longer open"
+    },
+    {
+      "code": "OUTSIDE_SERVICE_AREA",
+      "status": 422,
+      "title": "The location is outside the service area"
+    },
+    {
+      "code": "PAYLOAD_TOO_LARGE",
+      "status": 413,
+      "title": "The request body is too large"
+    },
+    {
+      "code": "PAYMENT_ALREADY_REPORTED",
+      "status": 409,
+      "title": "The payment has already been reported differently"
+    },
+    {
+      "code": "PAYMENT_NOT_FOUND",
+      "status": 404,
+      "title": "Payment record not found"
+    },
+    {
+      "code": "PERMISSION_DENIED",
+      "status": 403,
+      "title": "You do not have permission for this operation"
+    },
+    {
+      "code": "PICKUP_EQUALS_DESTINATION",
+      "status": 422,
+      "title": "Pickup and destination must differ"
+    },
+    {
+      "code": "POLICY_NOT_FOUND",
+      "status": 404,
+      "title": "Policy not found"
+    },
+    {
+      "code": "PRICING_NOT_CONFIGURED",
+      "status": 503,
+      "title": "Pricing is not configured for this service"
+    },
+    {
+      "code": "PROFILE_NOT_EDITABLE",
+      "status": 409,
+      "title": "The profile cannot be edited in its current state"
+    },
+    {
+      "code": "QUOTE_ALREADY_USED",
+      "status": 409,
+      "title": "The quote has already been used"
+    },
+    {
+      "code": "QUOTE_EXPIRED",
+      "status": 409,
+      "title": "The quote has expired"
+    },
+    {
+      "code": "QUOTE_NOT_FOUND",
+      "status": 404,
+      "title": "Quote not found"
+    },
+    {
+      "code": "RATE_LIMITED",
+      "status": 429,
+      "title": "Too many requests"
+    },
+    {
+      "code": "REGISTRATION_REQUIRED",
+      "status": 403,
+      "title": "Registration is required"
+    },
+    {
+      "code": "RIDE_ALREADY_OPEN",
+      "status": 409,
+      "title": "You already have an open ride"
+    },
+    {
+      "code": "RIDE_NO_LONGER_AVAILABLE",
+      "status": 409,
+      "title": "The ride is no longer available"
+    },
+    {
+      "code": "RIDE_NOT_FOUND",
+      "status": 404,
+      "title": "Ride not found"
+    },
+    {
+      "code": "ROUTING_UNAVAILABLE",
+      "status": 503,
+      "title": "Route estimation is temporarily unavailable"
+    },
+    {
+      "code": "SELF_REVIEW_FORBIDDEN",
+      "status": 403,
+      "title": "Reviewing your own submission is not allowed"
+    },
+    {
+      "code": "SERVICE_AREA_NOT_FOUND",
+      "status": 404,
+      "title": "Service area not found"
+    },
+    {
+      "code": "SERVICE_NOT_AVAILABLE",
+      "status": 422,
+      "title": "The service is not available in this area"
+    },
+    {
+      "code": "STORAGE_UNAVAILABLE",
+      "status": 503,
+      "title": "File storage is temporarily unavailable"
+    },
+    {
+      "code": "USER_NOT_FOUND",
+      "status": 404,
+      "title": "User not found"
+    },
+    {
+      "code": "VALIDATION_FAILED",
+      "status": 400,
+      "title": "The request is invalid"
+    },
+    {
+      "code": "VEHICLE_ALREADY_REGISTERED",
+      "status": 409,
+      "title": "The vehicle is already registered"
+    },
+    {
+      "code": "VEHICLE_NOT_ELIGIBLE",
+      "status": 422,
+      "title": "The vehicle is not eligible"
+    },
+    {
+      "code": "VEHICLE_NOT_FOUND",
+      "status": 404,
+      "title": "Vehicle not found"
+    },
+    {
+      "code": "VERIFICATION_REQUIREMENTS_NOT_MET",
+      "status": 422,
+      "title": "Verification requirements are not met"
+    }
+  ]
 }

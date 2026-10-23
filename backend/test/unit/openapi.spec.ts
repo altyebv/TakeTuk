@@ -86,6 +86,22 @@ describe('openapi document', () => {
     ).toEqual(['cursor', 'limit']);
   });
 
+  it('lists every problem code an operation documents in the root problem-code registry', () => {
+    const registry = new Set(
+      (doc as unknown as { 'x-taketuk-problem-codes': Array<{ code: string }> })[
+        'x-taketuk-problem-codes'
+      ].map((entry) => entry.code),
+    );
+    expect(registry.has('AUTHENTICATION_REQUIRED')).toBe(true);
+    for (const item of Object.values(doc.paths)) {
+      for (const op of Object.values(
+        item as Record<string, { 'x-taketuk-problem-codes'?: string[] }>,
+      )) {
+        for (const code of op['x-taketuk-problem-codes'] ?? []) expect(registry).toContain(code);
+      }
+    }
+  });
+
   it('matches the committed docs/api/openapi.json', () => {
     if (process.env.UPDATE_OPENAPI === '1') {
       writeFileSync(TARGET, json);
