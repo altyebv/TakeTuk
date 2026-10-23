@@ -1,0 +1,13 @@
+{
+  "@@locale": "en",
+  "appName": "TAKE-TUK",
+  "registerTitle": "Welcome to TAKE-TUK",
+  "registerIntro": "What should drivers call you?",
+  "nameLabel": "Your name",
+  "errorNameRequired": "Enter your name.",
+  "continueButton": "Continue",
+  "homeGreeting": "Hello, {name}",
+  "@homeGreeting": { "placeholders": { "name": { "type": "String" } } },
+  "homeNextPhase": "Requesting rides arrives in the next version of the app.",
+  "signOut": "Sign out"
+}

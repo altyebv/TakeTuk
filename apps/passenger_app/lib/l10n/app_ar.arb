@@ -1,0 +1,12 @@
+{
+  "@@locale": "ar",
+  "appName": "تك تك",
+  "registerTitle": "مرحبًا بك في تك تك",
+  "registerIntro": "بماذا يناديك السائقون؟",
+  "nameLabel": "اسمك",
+  "errorNameRequired": "أدخل اسمك.",
+  "continueButton": "متابعة",
+  "homeGreeting": "مرحبًا، {name}",
+  "homeNextPhase": "طلب المشاوير متاح في الإصدار القادم من التطبيق.",
+  "signOut": "تسجيل الخروج"
+}

@@ -1,0 +1,6 @@
+arb-dir: lib/l10n
+template-arb-file: auth_en.arb
+output-dir: lib/src/l10n
+output-localization-file: taketuk_auth_localizations.dart
+output-class: TaketukAuthLocalizations
+nullable-getter: false

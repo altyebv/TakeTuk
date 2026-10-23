@@ -1,0 +1,24 @@
+name: taketuk_ui
+description: TAKE-TUK design primitives, Arabic/RTL support and shared localized messages.
+publish_to: none
+version: 0.1.0
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+  flutter: ">=3.47.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: any
+  taketuk_api: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  generate: true

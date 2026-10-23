@@ -1,0 +1,68 @@
+name: mobile
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - apps/**
+      - packages/**
+      - pubspec.yaml
+      - pubspec.lock
+      - analysis_options.yaml
+      # The Dart API client is generated from the contract.
+      - docs/api/openapi.json
+      - .github/workflows/mobile.yml
+  pull_request:
+    paths:
+      - apps/**
+      - packages/**
+      - pubspec.yaml
+      - pubspec.lock
+      - analysis_options.yaml
+      # The Dart API client is generated from the contract.
+      - docs/api/openapi.json
+      - .github/workflows/mobile.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DART_PACKAGES: packages/taketuk_ui packages/taketuk_auth apps/passenger_app apps/driver_app
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.47.7
+          cache: true
+      - run: flutter pub get
+      - name: Format
+        run: dart format --output=none --set-exit-if-changed packages apps
+      - name: Generated code matches its sources
+        run: |
+          (cd packages/taketuk_api && dart run tool/generate.dart)
+          for dir in $DART_PACKAGES; do (cd "$dir" && flutter gen-l10n); done
+          git diff --exit-code
+      - name: Analyze
+        run: |
+          (cd packages/taketuk_api && dart analyze --fatal-infos)
+          for dir in $DART_PACKAGES; do (cd "$dir" && flutter analyze --fatal-infos); done
+      - name: Tests
+        run: |
+          (cd packages/taketuk_api && dart test)
+          for dir in $DART_PACKAGES; do (cd "$dir" && flutter test); done
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: Build Android debug APKs
+        run: |
+          for app in passenger_app driver_app; do
+            (cd "apps/$app" && flutter build apk --debug --dart-define-from-file=config/example.json)
+          done

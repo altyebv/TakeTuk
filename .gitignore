@@ -1,0 +1,7 @@
+# Dart and Flutter (the pub workspace resolves at the repository root).
+.dart_tool/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+*.iml
+.idea/

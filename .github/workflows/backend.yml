@@ -3,7 +3,23 @@ name: backend
 on:
   push:
     branches: [main]
+    paths:
+      - backend/**
+      - supabase/**
+      - docs/api/**
+      # The client contract fixtures are checked against live responses by the backend tests.
+      - packages/taketuk_api/test/fixtures/**
+      - .nvmrc
+      - .github/workflows/backend.yml
   pull_request:
+    paths:
+      - backend/**
+      - supabase/**
+      - docs/api/**
+      # The client contract fixtures are checked against live responses by the backend tests.
+      - packages/taketuk_api/test/fixtures/**
+      - .nvmrc
+      - .github/workflows/backend.yml
   workflow_dispatch:
 
 permissions:

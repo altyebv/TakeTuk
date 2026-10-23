@@ -1,0 +1,14 @@
+{
+  "@@locale": "ar",
+  "retry": "حاول مرة أخرى",
+  "errorNetwork": "لا يوجد اتصال. تحقّق من الإنترنت وحاول مرة أخرى.",
+  "errorServiceUnavailable": "الخدمة غير متاحة مؤقتًا. حاول مرة أخرى بعد قليل.",
+  "errorSignedOut": "انتهت جلستك. سجّل الدخول مرة أخرى.",
+  "errorAccountDisabled": "هذا الحساب معطّل. يرجى التواصل مع الدعم.",
+  "errorRateLimited": "محاولات كثيرة. انتظر قليلًا ثم حاول مرة أخرى.",
+  "errorValidation": "بعض البيانات غير صحيحة. راجعها وحاول مرة أخرى.",
+  "errorUpdateRequired": "إصدار التطبيق قديم. يرجى تحديثه.",
+  "errorGeneric": "حدث خطأ ما. حاول مرة أخرى.",
+  "supportReference": "رقم المرجع: {requestId}",
+  "currencySdg": "ج.س"
+}

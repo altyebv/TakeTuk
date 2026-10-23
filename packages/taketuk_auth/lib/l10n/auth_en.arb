@@ -1,0 +1,27 @@
+{
+  "@@locale": "en",
+  "signInTitle": "Sign in",
+  "phoneLabel": "Mobile number",
+  "phoneHint": "0912345678",
+  "phoneHelp": "We will send you a code by SMS.",
+  "sendCode": "Send code",
+  "codeTitle": "Enter the code",
+  "codeSentTo": "Enter the code we sent to {phone}.",
+  "@codeSentTo": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "codeLabel": "Verification code",
+  "verify": "Confirm",
+  "resendCode": "Send a new code",
+  "codeResent": "A new code is on its way.",
+  "changeNumber": "Change number",
+  "signOut": "Sign out",
+  "errorInvalidPhone": "Enter a Sudanese mobile number, for example 0912345678.",
+  "errorInvalidCode": "The code is wrong or has expired.",
+  "loading": "Loading…",
+  "accountErrorTitle": "We could not load your account"
+}
