@@ -117,7 +117,7 @@ As of 2026-10-23 (third increment and the first live Supabase check). Details ar
 | Self-hosted routing (OSRM) | Implemented. Verified against a real OSRM server on a synthetic network. **Not yet run on Wad Madani map data** | ADR-0017, `infra/osrm/README.md` |
 | Flutter apps (passenger, driver) and shared packages | Implemented and tested with widget tests: sign-in by SMS code (or email code in development builds), registration, the passenger ride flow, driver onboarding, offers and trips, Arabic/RTL. Debug APKs build in CI. **Not yet run on a device** | `apps/README.md`, ADR-0018 |
 | CI workflow | Runs and passes on GitHub Actions (format, lint, type check, tests against PostGIS, build, audit) | `.github/workflows/backend.yml` |
-| Container image | Dockerfile written. **Not yet built** | `backend/Dockerfile` |
+| Container image | Built by the backend CI workflow. A staging Blueprint for Render (`render.yaml`) is written. **Not yet deployed** | `backend/Dockerfile`, OPERATIONS §7a |
 | Web dashboards, marketplace, deliveries, disputes, digital payments | Planned | `docs/IMPLEMENTATION_ROADMAP.md` |
 
 This table is updated at every milestone. If it disagrees with the implementation report, the report is authoritative and this table is corrected.

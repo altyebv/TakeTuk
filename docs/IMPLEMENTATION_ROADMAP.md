@@ -85,6 +85,7 @@ Also in this increment: the backend accepts the FCM key from an environment vari
   - FCM;
   - OSRM on real data.
 - 📋 **Phone sign-in** waits for an SMS provider (IDN-1).
+- 🟡 **Staging on Render.** `render.yaml` is validated against Render's schema, and CI builds the image. It is not yet deployed (OPERATIONS §7a).
 
 ---
 

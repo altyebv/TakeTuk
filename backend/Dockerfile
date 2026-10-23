@@ -2,7 +2,7 @@
 # TAKE-TUK API image. Build from the REPOSITORY ROOT (the image includes supabase/migrations so the
 # operator CLI can migrate plain PostgreSQL databases):
 #   docker build -f backend/Dockerfile -t taketuk-api .
-# NOTE: not yet built or run in CI; see docs/IMPLEMENTATION_REPORT.md.
+# Built by the backend CI workflow. Staging runs it on Render (render.yaml, OPERATIONS §7a).
 
 FROM node:24-bookworm-slim AS build
 WORKDIR /app/backend

@@ -94,6 +94,24 @@ This prints a sign-in code and creates the account on first use. No email is sen
 
 With real addresses and Supabase's built-in email service, both addresses must belong to members of the project's organization.
 
+### 2d. Reaching the local API from anywhere (Cloudflare quick tunnel)
+
+Gives the API from §2c a public https address, so phones on mobile data can use it too. It is free and needs no Cloudflare account. **Not verified yet.**
+
+1. **Install `cloudflared`:**
+   - Windows: `winget install --id Cloudflare.cloudflared`;
+   - macOS: `brew install cloudflared`;
+   - Linux: Cloudflare's packages.
+2. **Start the API** (§2c), then run `cloudflared tunnel --url http://localhost:3000`. It prints an address like `https://<random-words>.trycloudflare.com`.
+3. **Point the apps at it.** Set `API_BASE_URL` in `config/local.json` to that address and rebuild. The address is compiled into the app.
+4. **Optionally, set `TRUST_PROXY=true`** in `backend/.env`. The API then reads client addresses from the tunnel's forwarding headers.
+
+Things to know:
+- A new address is issued every time the tunnel starts, so each restart means rebuilding the apps. A fixed address needs a named tunnel, which requires a free Cloudflare account and a domain on Cloudflare.
+- The API only runs while the laptop is on and awake, but unlike Render's free plan it never sleeps on its own.
+- While the tunnel runs, the API is on the public internet. Every business endpoint still requires a signed-in user. Only `/health` and, when `API_DOCS_ENABLED=true`, the Swagger UI are open. Stop the tunnel when testing ends.
+- Quick tunnels are meant for testing, and Cloudflare limits them. That suits a few testers. The apps poll and need nothing else from the tunnel.
+
 ## 3. Environment variables
 
 Validated at startup by `backend/src/config/app-config.ts`. Invalid configuration means the process exits with a list of issues. Placeholders are in `backend/.env.example`.
@@ -209,12 +227,54 @@ Live checks, on demand only (`npm run test:live -- <name>`):
 
 Behind an HTTPS proxy, Node's `fetch` needs `NODE_USE_ENV_PROXY=1`. The Flutter apps and packages have their own checks: see [apps/README.md](../../apps/README.md).
 
-## 7. Deployment (planned; not performed)
+## 7. Deployment
 
-- Build: `docker build -f backend/Dockerfile -t taketuk-api .` (from the repository root). Not yet built.
-- Run on a managed container platform with: ≥ 1 always-on instance, health check `GET /health/ready`, `SIGTERM` graceful shutdown (enabled), secrets injected as env vars or mounted files, and HTTPS terminated by the platform.
-- Release order: (1) `supabase db push` (migrations are additive and backward compatible within a release), (2) deploy the API, (3) verify `/health/ready` and a smoke test.
-- Workers run in every instance with `WORKERS_ENABLED=true`. They are multi-instance safe (`SKIP LOCKED` and claims). To isolate them, run one instance with workers on and the rest off.
+- **Build:** `docker build -f backend/Dockerfile -t taketuk-api .`, from the repository root. The backend CI workflow builds the image on every change.
+- **Requirements:** a managed container platform with:
+  - at least one always-on instance;
+  - health check `GET /health/ready`;
+  - `SIGTERM` graceful shutdown (enabled);
+  - secrets injected as environment variables or mounted files;
+  - HTTPS terminated by the platform.
+- **Release order:**
+  1. `supabase db push`. Migrations are additive and backward compatible within a release.
+  2. Deploy the API.
+  3. Verify `/health/ready` and run a smoke test.
+- **Workers** run in every instance with `WORKERS_ENABLED=true`. They are multi-instance safe (`SKIP LOCKED` and claims). To isolate them, run one instance with workers on and the rest off.
+
+### 7a. Staging on Render (free plan)
+
+`render.yaml` at the repository root is a Render Blueprint for one web service, `taketuk-api-staging`. It is validated against Render's published schema (`https://render.com/schema/render.yaml.json`), but **it has not been deployed yet**.
+
+Staging is not production. It runs with `NODE_ENV=development`:
+- the development routing estimate (`dev_fake`);
+- logged notifications instead of push;
+- Swagger UI at `/docs`.
+
+Production mode refuses those, so move to `NODE_ENV=production` once OSRM and FCM exist (§3).
+
+**Before the first deploy**
+1. Apply the schema, create the API login role (§4) and add the reference data (§2c step 1).
+2. **Region.** Set `region` in `render.yaml` to the one nearest the Supabase project (*Project Settings → General*). For example, Supabase `eu-central-1` is Render `frankfurt`, and `us-east-1` is `virginia`. Render's regions are `oregon`, `ohio`, `virginia`, `frankfurt` and `singapore`. A service's region cannot be changed after it is created.
+
+**Create the service**
+1. In Render, choose *New → Blueprint* and pick this GitHub repository. Render reads `render.yaml`.
+2. Enter the three secrets when prompted. They are never committed.
+   - `SUPABASE_URL`: `https://<project-ref>.supabase.co`.
+   - `SUPABASE_SECRET_KEY`: the project's secret key.
+   - `DATABASE_URL`: the session pooler, as the API login role, verifying the server certificate:
+     ```text
+     postgresql://taketuk_api_login.<project-ref>:<password>@<session-pooler-host>:5432/postgres?sslmode=verify-full&sslrootcert=/etc/secrets/supabase-ca.crt
+     ```
+3. **The certificate.** In the service, open *Environment → Secret Files* and add `supabase-ca.crt`, with the contents of the certificate from *Project Settings → Database → SSL Configuration*. Render mounts it at `/etc/secrets/supabase-ca.crt`.
+4. **Deploy.** The deploy succeeds only once `/health/ready` answers, which means the database is reachable. If it fails, the deploy log shows the connection error.
+
+**Day to day**
+- **Deploys.** A push to `main` that touches `backend/`, `supabase/migrations/` or `render.yaml` deploys automatically, but only after its GitHub checks pass (`autoDeployTrigger: checksPass`). Apply new migrations with `supabase db push` before merging changes that need them.
+- **Sleep.** Free instances sleep after 15 minutes without requests. While asleep, dispatch and offer timeouts pause, and the next request takes about a minute to wake the service. During test sessions, keep it awake with a free uptime monitor requesting `https://<service>.onrender.com/health/live` every 5 to 10 minutes. The 750 free hours a month cover one service running all month.
+- **The apps.** Set `API_BASE_URL=https://<service>.onrender.com` in `config/local.json`. Because it is https, release builds work too.
+- **Test accounts.** Get codes with `npm run cli -- sign-in-code` from a development machine configured for the same Supabase project (§2c). The CLI does not run on Render.
+- **Limits.** The free plan gives 512 MB and 0.1 CPU, so the API works but is slow. Logs are kept only briefly.
 
 ## 8. Monitoring (minimum viable)
 
