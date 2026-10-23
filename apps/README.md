@@ -3,7 +3,7 @@
 | Directory | Stack | State |
 |---|---|---|
 | `passenger_app/` | Flutter | Sign-in by SMS code and registration (phase 9). **Ride flow (phase 10):** pickup and destination on a map, minimum fare, proposed fare, request, searching with drivers' counteroffers, assigned driver, trip status, cash fare, cancellation and ride history |
-| `driver_app/` | Flutter | **Foundation (phase 9):** sign-in by SMS code, driver applicant registration, review status. Onboarding, availability, offers and trips follow in phase 10 |
+| `driver_app/` | Flutter | Sign-in by SMS code and applicant registration (phase 9). **Phase 10:** onboarding (document photos uploaded to signed URLs, vehicle, submission, reviewer's note), going online with an approved vehicle, position reports, offers (accept, decline, propose a higher fare), the trip (arrive, start, complete, cancel with a reason), cash reporting and earnings |
 | `admin_web/` | React + TypeScript | Planned (phase 11) |
 | `merchant_web/` | React + TypeScript | Planned (marketplace phase) |
 
@@ -75,13 +75,16 @@ The generated files are committed. CI fails when any of them is out of date.
 
 - **Verified:** debug APKs of both apps build in CI (`mobile` workflow). Tests run here:
   - analysis and formatting clean;
-  - 47 tests covering:
+  - 65 tests covering:
     - the generated client against recorded backend responses;
-    - transport errors;
-    - unknown enum values;
-    - phone normalisation;
-    - session state;
-    - the sign-in and registration flows of both apps, in Arabic and English.
+    - transport errors and unknown enum values;
+    - phone normalisation and session state;
+    - sign-in and registration in both apps, in Arabic and English;
+    - the passenger ride flow (quote, offer, retry-safe request, counteroffers, trip, cancellation, history);
+    - the driver flow (document uploads, vehicle, submission, going online, offers, counteroffers, trip, cash reporting, earnings).
+- **Known limits:**
+  - Ride and offer updates arrive by polling (every 4 s), not push (OPEN_DECISIONS API-1).
+  - Drivers report their position only while the app is open, so they must keep it open to receive offers (DRV-6).
 - **Not verified:**
   - a run on a device;
   - sign-in against a live Supabase project;

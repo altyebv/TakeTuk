@@ -17,9 +17,9 @@
       }
     }
   },
-  "statusApplicant": "Next: add your vehicle and documents. This arrives in the next version of the app.",
+  "statusApplicant": "Next: add your vehicle and upload your documents.",
   "statusPendingReview": "Your application is being reviewed.",
-  "statusApproved": "You are approved. Going online arrives in the next version of the app.",
+  "statusApproved": "You are approved. Go online to receive ride offers.",
   "statusRejected": "Your application was not approved.",
   "reviewNote": "Reviewer's note: {note}",
   "@reviewNote": {
@@ -31,5 +31,168 @@
   },
   "statusSuspended": "Your account is suspended. Please contact support.",
   "statusUnknown": "Your account status cannot be shown in this version. Please update the app.",
-  "signOut": "Sign out"
+  "signOut": "Sign out",
+  "documentsTitle": "Your documents",
+  "vehicleTitle": "Your vehicle",
+  "docDriverPhoto": "Your photo",
+  "docDrivingLicense": "Driving licence",
+  "docNationalId": "National ID",
+  "docVehicleRegistration": "Vehicle registration",
+  "docVehiclePhoto": "Vehicle photo",
+  "docUploaded": "Uploaded",
+  "docMissing": "Not uploaded yet",
+  "upload": "Upload",
+  "replace": "Replace",
+  "takePhoto": "Take a photo",
+  "chooseFromGallery": "Choose from gallery",
+  "addVehicle": "Add your vehicle",
+  "vehicleTypeLabel": "Vehicle type",
+  "plateLabel": "Plate number",
+  "vehicleDescriptionLabel": "Description (optional), e.g. colour",
+  "save": "Save",
+  "vehicleStatusPendingReview": "Waiting for review",
+  "vehicleStatusApproved": "Approved",
+  "vehicleStatusRejected": "Not approved",
+  "vehicleStatusSuspended": "Suspended",
+  "vehicleStatusUnknown": "Unknown status",
+  "submitForReview": "Submit for review",
+  "submitHelp": "Upload every document and add your vehicle, then submit. We review applications before you can take rides.",
+  "resubmitHelp": "Fix what the reviewer noted, then submit again.",
+  "errorRequirementsNotMet": "Some documents or the vehicle are still missing.",
+  "errorVehicleAlreadyRegistered": "This vehicle is already registered.",
+  "errorVehicleNotEligible": "This vehicle cannot be used for this service.",
+  "online": "Online",
+  "offline": "Offline",
+  "goOnline": "Go online",
+  "goOffline": "Go offline",
+  "onlineHelp": "You receive ride offers while you are online and the app is open.",
+  "chooseVehicle": "Vehicle for this shift",
+  "noApprovedVehicle": "You need an approved vehicle to go online.",
+  "locationOff": "Your location is not available. Turn on location to receive offers.",
+  "waitingForOffers": "Waiting for ride offers…",
+  "offerFrom": "{passenger} offers {amount}",
+  "@offerFrom": {
+    "placeholders": {
+      "passenger": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "offerTrip": "{toPickup} to pickup · trip {trip}",
+  "@offerTrip": {
+    "placeholders": {
+      "toPickup": {
+        "type": "String"
+      },
+      "trip": {
+        "type": "String"
+      }
+    }
+  },
+  "offerMinimum": "Minimum fare {amount}",
+  "@offerMinimum": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "offerCountered": "You proposed {amount}. Waiting for the passenger.",
+  "@offerCountered": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "acceptOffer": "Accept",
+  "declineOffer": "Decline",
+  "proposeFare": "Propose a fare",
+  "proposeFareTitle": "Your fare",
+  "proposeFareHelp": "It must be higher than the passenger's offer.",
+  "send": "Send",
+  "cancel": "Cancel",
+  "km": "{value} km",
+  "@km": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "tripToPickup": "Go to the pickup",
+  "tripAtPickup": "Waiting for the passenger",
+  "tripInProgress": "Trip in progress",
+  "tripCompleted": "Trip completed",
+  "tripCancelled": "This ride was cancelled",
+  "arrived": "I have arrived",
+  "startTrip": "Start trip",
+  "completeTrip": "Complete trip",
+  "cancelRide": "Cancel ride",
+  "cancelReasonRequired": "Reason (required)",
+  "errorReasonTooShort": "Enter at least 3 characters.",
+  "keepRide": "Keep ride",
+  "callPassenger": "Call passenger",
+  "pickupPoint": "Pickup",
+  "destinationPoint": "Destination",
+  "fareToCollect": "Collect {amount} in cash",
+  "@fareToCollect": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "collectedFull": "Collected {amount}",
+  "@collectedFull": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "collectedOther": "Collected a different amount",
+  "notCollected": "The passenger did not pay",
+  "amountLabel": "Amount ({currency})",
+  "@amountLabel": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentRecorded": "Payment recorded.",
+  "done": "Done",
+  "earnings": "Earnings",
+  "commissionOwed": "Commission owed: {amount}",
+  "@commissionOwed": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "noCommissionOwed": "No commission owed.",
+  "noEarnings": "No completed rides yet.",
+  "earningLine": "Fare {fare} · commission {commission}",
+  "@earningLine": {
+    "placeholders": {
+      "fare": {
+        "type": "String"
+      },
+      "commission": {
+        "type": "String"
+      }
+    }
+  },
+  "loadMore": "Show more",
+  "errorOfferGone": "This offer is no longer available.",
+  "errorBelowMinimum": "Your fare must be at least the minimum fare.",
+  "errorNotAboveProposal": "Your fare must be higher than the passenger's offer.",
+  "errorBusy": "You already have an active ride.",
+  "errorNotAvailable": "Go online to accept offers.",
+  "errorPaymentReported": "This payment was already reported."
 }

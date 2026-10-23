@@ -8,6 +8,7 @@ abstract final class Routes {
   static const register = '/register';
   static const accountError = '/account-error';
   static const home = '/';
+  static const earnings = '/earnings';
 }
 
 bool isDriver(Me? me) =>

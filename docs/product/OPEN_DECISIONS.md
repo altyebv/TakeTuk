@@ -48,6 +48,7 @@ Status values: `open` (provisional behaviour implemented), `needs-input` (blocke
 | DRV-3 | Vehicle ownership and shared vehicles (shift driving, fleet owners) | A vehicle record belongs to one driver. The same plate may be registered by different drivers, and reviewers see duplicates. | open |
 | DRV-4 | Can a driver go offline with an active trip? | Yes. Offline only stops new offers. | open |
 | DRV-5 | Document retention period after approval or rejection | Not defined. Documents are kept until a retention policy exists. | needs-input |
+| DRV-6 | Driver position reports in the background | Reported every 15 s while online and the app is in the foreground. Dispatch ignores positions older than `DRIVER_LOCATION_MAX_AGE_SECONDS`, so a driver must keep the app open to receive offers. Background reporting needs a foreground service on Android and a policy decision about battery and data use. | open |
 
 ## Identity, contact and privacy
 
