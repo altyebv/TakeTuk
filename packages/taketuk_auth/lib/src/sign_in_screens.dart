@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:taketuk_ui/taketuk_ui.dart';
@@ -44,12 +45,17 @@ class SignInScreen extends StatefulWidget {
     required this.onCodeSent,
     this.method = SignInMethod.phone,
     this.heading,
+    this.offerExistingCode = !kReleaseMode,
     super.key,
   });
 
   final AuthGateway auth;
   final SignInMethod method;
   final void Function(SignInAddress address) onCodeSent;
+
+  /// Development builds: go to code entry without sending a code, for codes issued by
+  /// `cli sign-in-code` to test accounts (OPERATIONS §2c).
+  final bool offerExistingCode;
 
   /// Shown above the form, for example the app's name.
   final String? heading;
@@ -101,6 +107,20 @@ class _SignInScreenState extends State<SignInScreen> {
         );
       }
     }
+  }
+
+  void _useExistingCode() {
+    final address = _address();
+    if (address == null) {
+      setState(
+        () => _error = _invalidAddress(
+          TaketukAuthLocalizations.of(context),
+          widget.method,
+        ),
+      );
+      return;
+    }
+    widget.onCodeSent(address);
   }
 
   @override
@@ -157,6 +177,11 @@ class _SignInScreenState extends State<SignInScreen> {
             },
             const SizedBox(height: 24),
             BusyButton(label: l10n.sendCode, onPressed: _send),
+            if (widget.offerExistingCode)
+              TextButton(
+                onPressed: _useExistingCode,
+                child: Text(l10n.haveCode),
+              ),
           ],
         ),
       ),

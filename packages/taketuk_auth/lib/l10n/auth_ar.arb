@@ -8,6 +8,7 @@
   "emailHint": "name@example.com",
   "emailHelp": "سنرسل إليك رمزًا بالبريد الإلكتروني.",
   "sendCode": "إرسال الرمز",
+  "haveCode": "لدي رمز بالفعل",
   "codeTitle": "أدخل الرمز",
   "codeSentTo": "أدخل الرمز الذي أرسلناه إلى {address}.",
   "codeLabel": "رمز التحقق",

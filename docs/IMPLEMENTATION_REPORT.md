@@ -366,3 +366,16 @@ The test objects were removed, and the bucket is empty.
 **Also fixed:** the npm scripts never read `backend/.env`, although OPERATIONS §2a told developers to create one. So `npm run start:dev` would have failed with `DATABASE_URL` missing. `start`, `start:dev`, `cli`, `db:migrate` and `db:seed:dev` now load it with `node --env-file-if-exists`. A check here showed that the file is read, and that a variable set in the environment takes precedence over it. The container image is unchanged.
 
 Not verified yet: the API connecting to the project's database through the session pooler with `sslmode=verify-full` (OPERATIONS §2c).
+
+### 11.8 Test accounts
+
+- **`npm run cli -- sign-in-code --email <name>@example.com`** prints a sign-in code for a test account and creates the account on first use. The code comes from the Auth admin API, so no email or SMS is needed.
+  - It accepts only `@example.com` addresses, so it can never sign in as a real person.
+  - It refuses `NODE_ENV=production`.
+  - It never echoes Supabase's responses.
+- **"I already have a code"** on the sign-in screen goes straight to code entry. It appears in development builds only.
+- **Verified against the live project:**
+  - the command created `passenger@example.com` and `driver@example.com`, and reused an account on a second run;
+  - each printed code signed in through the same request the apps make (HTTP 200);
+  - it refused another domain and production.
+- **Tests:** 4 backend unit tests (backend `npm test`: 204) and 1 widget test (`taketuk_auth`: 20).

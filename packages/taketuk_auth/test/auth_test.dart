@@ -326,6 +326,49 @@ void main() {
       expect(sentTo, const EmailAddress('hiba@example.com'));
     });
 
+    testWidgets('development builds can skip to a code issued elsewhere', (
+      tester,
+    ) async {
+      final auth = FakeAuthGateway();
+      SignInAddress? sentTo;
+      await tester.pumpWidget(
+        _app(
+          SignInScreen(
+            auth: auth,
+            method: SignInMethod.email,
+            onCodeSent: (a) => sentTo = a,
+          ),
+        ),
+      );
+      await tester.tap(find.text('I already have a code'));
+      await tester.pump();
+      expect(
+        find.textContaining('Enter a valid email address'),
+        findsOneWidget,
+      );
+      expect(sentTo, isNull);
+
+      await tester.enterText(
+        find.byKey(const Key('email')),
+        'Passenger@Example.com',
+      );
+      await tester.tap(find.text('I already have a code'));
+      await tester.pump();
+      expect(sentTo, const EmailAddress('passenger@example.com'));
+      expect(auth.codesRequested, isEmpty);
+
+      await tester.pumpWidget(
+        _app(
+          SignInScreen(
+            auth: auth,
+            onCodeSent: (_) {},
+            offerExistingCode: false,
+          ),
+        ),
+      );
+      expect(find.text('I already have a code'), findsNothing);
+    });
+
     testWidgets('phone entry explains rate limits and network failures', (
       tester,
     ) async {

@@ -34,6 +34,9 @@ class TaketukAuthLocalizationsEn extends TaketukAuthLocalizations {
   String get sendCode => 'Send code';
 
   @override
+  String get haveCode => 'I already have a code';
+
+  @override
   String get codeTitle => 'Enter the code';
 
   @override

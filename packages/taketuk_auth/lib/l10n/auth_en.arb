@@ -8,6 +8,7 @@
   "emailHint": "name@example.com",
   "emailHelp": "We will send you a code by email.",
   "sendCode": "Send code",
+  "haveCode": "I already have a code",
   "codeTitle": "Enter the code",
   "codeSentTo": "Enter the code we sent to {address}.",
   "@codeSentTo": {

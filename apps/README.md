@@ -50,6 +50,13 @@ With the local Supabase CLI stack (`supabase start`), the test numbers in `supab
 
 With a hosted project and `SIGN_IN_METHOD=email`, the code arrives by email (8 digits on the current project). Supabase's built-in email service only delivers to members of the project's organization; others need custom SMTP.
 
+**Test accounts** need no email at all:
+1. In `backend/`, run `npm run cli -- sign-in-code --email passenger@example.com` (or `driver@example.com`). It prints a code.
+2. In the app, enter the address and tap **I already have a code**. That button appears in development builds only.
+3. Enter the printed code.
+
+See OPERATIONS §2c.
+
 ## Checks
 
 These are what CI runs (`.github/workflows/mobile.yml`):

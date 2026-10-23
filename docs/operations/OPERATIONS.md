@@ -83,7 +83,16 @@ For a device test before a hosted backend exists. The phone and the machine must
    - To get a token without the app, request a code with `POST <SUPABASE_URL>/auth/v1/otp` (`{"email": …}`). Then exchange it with `POST <SUPABASE_URL>/auth/v1/verify` (`{"type": "email", "email": …, "token": …}`). Both need the `apikey: <publishable key>` header, and the response's `access_token` is the token.
    - List applicants with `GET /v1/admin/drivers?status=pending_review`. Then approve with `POST /v1/admin/vehicles/{id}/approve` and `POST /v1/admin/drivers/{id}/approve`.
 
-A ride needs two accounts, because drivers never receive their own requests (IDN-3). With Supabase's built-in email service, both addresses must belong to members of the project's organization.
+A ride needs two accounts, because drivers never receive their own requests (IDN-3). **Test accounts** avoid email delivery altogether:
+```bash
+npm run cli -- sign-in-code --email passenger@example.com   # or driver@example.com
+```
+This prints a sign-in code and creates the account on first use. No email is sent; the code comes from the Auth admin API with `SUPABASE_SECRET_KEY`. In the app, enter the address, tap **I already have a code**, then enter the code. That button only appears in development builds.
+- The command only accepts `@example.com` addresses, so it can never sign in as a real person.
+- It refuses `NODE_ENV=production`.
+- `passenger@example.com` and `driver@example.com` already exist in the current project.
+
+With real addresses and Supabase's built-in email service, both addresses must belong to members of the project's organization.
 
 ## 3. Environment variables
 
@@ -168,6 +177,7 @@ From `backend/` after `npm run build`:
 | `npm run cli -- migrate` | `DATABASE_ADMIN_URL` | plain PostgreSQL migrations |
 | `npm run cli -- seed-dev` | `DATABASE_ADMIN_URL` | development seed. Refused in production. |
 | `npm run cli -- grant-role --user <uuid> --role admin --operator "<name>" --reason "<ticket>"` | `DATABASE_URL` | grant a role to a **registered** user. Writes an audit event (`user.role_granted`, actor `system`, `via: cli`). |
+| `npm run cli -- sign-in-code --email <name>@example.com` | `SUPABASE_URL`, `SUPABASE_SECRET_KEY` | **Development only.** Prints a sign-in code for a test account, creating it on first use; no email is sent (§2c). Accepts only `@example.com` addresses and refuses production. |
 
 Admin bootstrap: the staff member signs in with the app or the admin dashboard and registers. An operator then runs `grant-role`.
 

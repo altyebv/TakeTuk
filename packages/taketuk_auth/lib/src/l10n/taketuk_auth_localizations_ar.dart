@@ -34,6 +34,9 @@ class TaketukAuthLocalizationsAr extends TaketukAuthLocalizations {
   String get sendCode => 'إرسال الرمز';
 
   @override
+  String get haveCode => 'لدي رمز بالفعل';
+
+  @override
   String get codeTitle => 'أدخل الرمز';
 
   @override

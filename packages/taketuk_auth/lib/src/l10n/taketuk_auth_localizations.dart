@@ -149,6 +149,12 @@ abstract class TaketukAuthLocalizations {
   /// **'Send code'**
   String get sendCode;
 
+  /// No description provided for @haveCode.
+  ///
+  /// In en, this message translates to:
+  /// **'I already have a code'**
+  String get haveCode;
+
   /// No description provided for @codeTitle.
   ///
   /// In en, this message translates to:
