@@ -236,6 +236,6 @@ Mutation checks were run by hand and reverted:
    - a Supabase project: `db push`, the login role, JWKS with real OTP tokens, Storage, test SMS numbers, then real SMS to Sudan;
    - an OSRM dataset from a real extract, with quotes compared to known trips;
    - an FCM project.
-3. **Phase 10, passenger ride flow:** quote → proposed fare → searching → counteroffer → trip. This needs the map-display decision (MAP-6).
+3. **Phase 10, passenger ride flow:** quote → proposed fare → searching → counteroffer → trip. Maps use `flutter_map` (MAP-6, resolved); the map-image provider and place search are still to choose.
 4. **Phase 10, driver onboarding:** vehicle, documents through signed upload URLs, submission, availability and offers.
 

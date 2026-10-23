@@ -35,4 +35,4 @@ The directive specifies Google, it has broad coverage, and it involves no infras
 
 ## Amendments
 
-- **2026-10-23:** Google Maps Platform billing needs a payment card that the team cannot use for now (prepaid cards are refused). ADR-0017 adds a self-hosted OSRM provider behind the same port. Google stays supported, and which provider runs in production is a configuration choice (OPEN_DECISIONS MAP-5). Map display in the clients (Google Maps SDK) has the same billing requirement; the client map provider is decided with the Flutter work.
+- **2026-10-23:** Google Maps Platform billing needs a payment card that the team cannot use for now (prepaid cards are refused). ADR-0017 adds a self-hosted OSRM provider behind the same port. Google stays supported, and which provider runs in production is a configuration choice (OPEN_DECISIONS MAP-5). Map display in the clients (Google Maps SDK) has the same billing requirement. The apps use `flutter_map` with OpenStreetMap-based maps instead (OPEN_DECISIONS MAP-6, resolved).
