@@ -1,0 +1,12 @@
+**/node_modules
+**/dist
+**/coverage
+**/.env
+**/.env.*
+.git
+.github
+apps
+docs
+supabase/seed.sql
+supabase/.temp
+supabase/.branches
