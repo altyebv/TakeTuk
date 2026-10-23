@@ -6675,6 +6675,9 @@
           }
         ],
         "responses": {
+          "204": {
+            "description": "Removed (also when it was already absent)"
+          },
           "default": {
             "description": "Problem details (RFC 9457)",
             "content": {

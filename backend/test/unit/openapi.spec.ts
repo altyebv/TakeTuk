@@ -53,6 +53,20 @@ describe('openapi document', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
+  it('documents a success response for every operation', () => {
+    for (const [path, item] of Object.entries(doc.paths)) {
+      for (const [method, op] of Object.entries(
+        item as Record<string, { responses: Record<string, unknown> }>,
+      )) {
+        const success = Object.keys(op.responses).filter((code) => code.startsWith('2'));
+        expect({ op: `${method} ${path}`, documented: success.length > 0 }).toEqual({
+          op: `${method} ${path}`,
+          documented: true,
+        });
+      }
+    }
+  });
+
   it('declares every path template variable as a required path parameter', () => {
     for (const [path, item] of Object.entries(doc.paths)) {
       const variables = [...path.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort();

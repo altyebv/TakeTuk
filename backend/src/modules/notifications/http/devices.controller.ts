@@ -1,4 +1,5 @@
 import { Body, Controller, Delete, HttpCode, Put } from '@nestjs/common';
+import { ApiResponse } from '@nestjs/swagger';
 import { z } from 'zod';
 import { Database } from '../../../infrastructure/database/database';
 import { CurrentAuth, RequirePermissions } from '../../../shared/auth/access.decorators';
@@ -65,6 +66,7 @@ export class DevicesController {
     summary: 'Remove this installation (e.g. on sign-out)',
     tag: 'identity',
   })
+  @ApiResponse({ status: 204, description: 'Removed (also when it was already absent)' })
   async remove(
     @CurrentAuth() auth: AuthContext,
     @ZodParams(InstallationParamsSchema) params: z.infer<typeof InstallationParamsSchema>,
