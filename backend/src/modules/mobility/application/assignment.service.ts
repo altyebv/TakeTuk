@@ -18,6 +18,7 @@ import { rideStateMachine, type Ride } from '../domain/ride';
 import { AssignmentsRepository } from '../infrastructure/assignments.repository';
 import { OffersRepository } from '../infrastructure/offers.repository';
 import { RidesRepository } from '../infrastructure/rides.repository';
+import { required } from '../../../shared/required';
 
 export interface ConfirmAssignmentInput {
   readonly rideId: string;
@@ -78,18 +79,20 @@ export class AssignmentService {
       if (agreement?.offerId === offer.id) return { ride, replayed: true };
     }
 
-    // 3. Preconditions on offer and ride, evaluated with the database clock.
+    // 3. Preconditions on ride and offer, evaluated with the database clock. The ride is checked
+    //    first so that the loser of an acceptance race learns the ride was taken (its own offer
+    //    was withdrawn by the winner).
+    if (ride.status !== 'searching' || lockedRide.searchExpired) {
+      throw new AppError('RIDE_NO_LONGER_AVAILABLE', undefined, {
+        extensions: { currentStatus: ride.status },
+      });
+    }
     if (offer.status !== input.expectedOfferStatus) {
       throw new AppError('OFFER_NOT_OPEN', `The offer is ${offer.status}.`, {
         extensions: { currentStatus: offer.status },
       });
     }
     if (lockedOffer.expired) throw new AppError('OFFER_EXPIRED');
-    if (ride.status !== 'searching' || lockedRide.searchExpired) {
-      throw new AppError('RIDE_NO_LONGER_AVAILABLE', undefined, {
-        extensions: { currentStatus: ride.status },
-      });
-    }
 
     // 4. Driver lock and eligibility re-check.
     const driver = await this.driverOps.lockOperationalDriver(tx, offer.driverId);
@@ -211,6 +214,6 @@ export class AssignmentService {
       },
     });
 
-    return { ride: (await this.rides.find(tx, ride.id))!, replayed: false };
+    return { ride: required(await this.rides.find(tx, ride.id), 'record'), replayed: false };
   }
 }

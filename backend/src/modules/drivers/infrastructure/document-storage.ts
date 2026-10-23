@@ -62,7 +62,7 @@ export class SupabaseDocumentStorage implements DocumentStorage {
     const { data, error } = await this.client.from(bucket).exists(path);
     if (error) {
       // storage-js reports a missing object as an error with data=false.
-      if (data === false && /not.?found|404/i.test(`${error.name} ${error.message}`)) return false;
+      if (!data && /not.?found|404/i.test(`${error.name} ${error.message}`)) return false;
       this.logger.warn(`exists failed: ${error.message}`);
       throw new AppError('STORAGE_UNAVAILABLE', undefined, { cause: error });
     }

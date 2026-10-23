@@ -10,22 +10,28 @@ export const MAX_AMOUNT_MINOR = 1_000_000_000_000;
 
 export const CurrencySchema = z.string().regex(/^[A-Z]{3}$/, 'must be an ISO 4217 code');
 
-export const MoneySchema = z.strictObject({
-  amountMinor: z.number().int().positive().max(MAX_AMOUNT_MINOR),
-  currency: CurrencySchema,
-});
+export const MoneySchema = z
+  .strictObject({
+    amountMinor: z.number().int().positive().max(MAX_AMOUNT_MINOR),
+    currency: CurrencySchema,
+  })
+  .meta({ id: 'MoneyInput' });
 export type MoneyInput = z.infer<typeof MoneySchema>;
 
-export const MoneyResponseSchema = z.object({
-  amountMinor: z.number().int(),
-  currency: z.string(),
-});
+export const MoneyResponseSchema = z
+  .object({
+    amountMinor: z.number().int(),
+    currency: z.string(),
+  })
+  .meta({ id: 'Money' });
 export type Money = z.infer<typeof MoneyResponseSchema>;
 
-export const CoordinatesSchema = z.strictObject({
-  lat: z.number().min(-90).max(90),
-  lng: z.number().min(-180).max(180),
-});
+export const CoordinatesSchema = z
+  .strictObject({
+    lat: z.number().min(-90).max(90),
+    lng: z.number().min(-180).max(180),
+  })
+  .meta({ id: 'Coordinates' });
 export type Coordinates = z.infer<typeof CoordinatesSchema>;
 
 export const LocationLabelSchema = z.string().trim().min(1).max(200);

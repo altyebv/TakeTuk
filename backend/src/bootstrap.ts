@@ -4,6 +4,7 @@ import type { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule, type OpenAPIObject } from '@nestjs/swagger';
 import type { AppConfig } from './config/app-config';
 import { AppModule } from './app.module';
+import { openApiComponents } from './shared/http/openapi';
 
 const LOG_LEVELS: Record<AppConfig['log']['level'], LogLevel[]> = {
   debug: ['debug', 'log', 'warn', 'error', 'fatal'],
@@ -43,9 +44,14 @@ export function buildOpenApiDocument(app: NestExpressApplication): OpenAPIObject
       description: 'Supabase access token',
     })
     .build();
-  return SwaggerModule.createDocument(app, config, {
+  const document = SwaggerModule.createDocument(app, config, {
     operationIdFactory: (_controllerKey, methodKey) => methodKey,
   });
+  document.components = {
+    ...document.components,
+    schemas: { ...document.components?.schemas, ...openApiComponents() },
+  };
+  return document;
 }
 
 export async function createApp(config: AppConfig): Promise<NestExpressApplication> {

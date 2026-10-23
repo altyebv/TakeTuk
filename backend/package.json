@@ -19,7 +19,7 @@
     "test:unit": "node --experimental-vm-modules node_modules/jest/bin/jest.js --selectProjects unit",
     "test:integration": "node --experimental-vm-modules node_modules/jest/bin/jest.js --selectProjects integration",
     "db:migrate": "node --experimental-strip-types scripts/migrate.ts",
-    "openapi": "node --experimental-vm-modules node_modules/jest/bin/jest.js --selectProjects unit -t 'openapi document' --ci=false",
+    "openapi": "UPDATE_OPENAPI=1 node --experimental-vm-modules node_modules/jest/bin/jest.js --selectProjects unit test/unit/openapi.spec.ts",
     "cli": "node dist/src/cli/main.js",
     "check": "npm run format:check && npm run lint && npm run typecheck && npm test"
   },

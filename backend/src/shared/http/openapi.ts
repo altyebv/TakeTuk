@@ -4,6 +4,34 @@ import type { SchemaObject } from '@nestjs/swagger';
 import { z } from 'zod';
 import type { ErrorCode } from '../errors/error-codes';
 
+/**
+ * Named schemas (Zod `.meta({ id })`) are hoisted into OpenAPI `components/schemas` instead of
+ * being inlined at every use. Filled as controllers are decorated; read by the document builder.
+ */
+const COMPONENTS = new Map<string, string>();
+
+export function openApiComponents(): Record<string, SchemaObject> {
+  return Object.fromEntries(
+    [...COMPONENTS.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([id, json]) => [id, JSON.parse(json) as SchemaObject]),
+  );
+}
+
+function rewriteRefs(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(rewriteRefs);
+  if (value !== null && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, v]) =>
+        key === '$ref' && typeof v === 'string'
+          ? [key, v.replace('#/definitions/', '#/components/schemas/')]
+          : [key, rewriteRefs(v)],
+      ),
+    );
+  }
+  return value;
+}
+
 /** Converts a Zod schema to an OpenAPI 3.0 schema object (ADR-0014: one schema, two uses). */
 export function toOpenApiSchema(schema: z.ZodType, io: 'input' | 'output'): SchemaObject {
   const json = z.toJSONSchema(schema, {
@@ -12,7 +40,17 @@ export function toOpenApiSchema(schema: z.ZodType, io: 'input' | 'output'): Sche
     unrepresentable: 'any',
   }) as Record<string, unknown>;
   delete json.$schema;
-  return json;
+  const definitions = (json.definitions ?? {}) as Record<string, unknown>;
+  delete json.definitions;
+  for (const [id, definition] of Object.entries(definitions)) {
+    const serialized = JSON.stringify(rewriteRefs(definition));
+    const existing = COMPONENTS.get(id);
+    if (existing !== undefined && existing !== serialized) {
+      throw new Error(`OpenAPI component id '${id}' is used by two different schemas`);
+    }
+    COMPONENTS.set(id, serialized);
+  }
+  return rewriteRefs(json) as SchemaObject;
 }
 
 export const ApiZodBody = (schema: z.ZodType, description?: string) =>

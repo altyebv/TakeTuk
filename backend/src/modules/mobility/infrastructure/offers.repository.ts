@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { Queryable, Tx } from '../../../infrastructure/database/database';
 import type { OfferStatus, RideOffer } from '../domain/offer';
+import { required } from '../../../shared/required';
 
 interface OfferRow {
   id: string;
@@ -149,7 +150,7 @@ export class OffersRepository {
         returning ${COLUMNS}`,
       [offerId, input.counterFareMinor, input.responseTimeoutSeconds, input.searchExpiresAt],
     );
-    return toOffer(rows[0]!);
+    return toOffer(required(rows[0], 'row'));
   }
 
   async close(

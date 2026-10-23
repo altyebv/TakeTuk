@@ -9,43 +9,49 @@ import {
   type DriverDocument,
 } from '../domain/driver';
 
-export const DriverProfileSchema = z.object({
-  userId: z.uuid(),
-  serviceAreaCode: z.string(),
-  status: z.enum(DRIVER_STATUSES),
-  fullLegalName: z.string(),
-  drivingLicenseNumber: z.string(),
-  submittedAt: z.string().nullable(),
-  reviewedAt: z.string().nullable(),
-  reviewNote: z.string().nullable(),
-  availability: z.enum(['offline', 'online']),
-  activeVehicleId: z.uuid().nullable(),
-  createdAt: z.string(),
-});
+export const DriverProfileSchema = z
+  .object({
+    userId: z.uuid(),
+    serviceAreaCode: z.string(),
+    status: z.enum(DRIVER_STATUSES),
+    fullLegalName: z.string(),
+    drivingLicenseNumber: z.string(),
+    submittedAt: z.string().nullable(),
+    reviewedAt: z.string().nullable(),
+    reviewNote: z.string().nullable(),
+    availability: z.enum(['offline', 'online']),
+    activeVehicleId: z.uuid().nullable(),
+    createdAt: z.string(),
+  })
+  .meta({ id: 'DriverProfile' });
 export type DriverProfileResponse = z.infer<typeof DriverProfileSchema>;
 
-export const VehicleSchema = z.object({
-  id: z.uuid(),
-  driverId: z.uuid(),
-  vehicleTypeCode: z.string(),
-  plateNumber: z.string(),
-  description: z.string().nullable(),
-  status: z.enum(VEHICLE_STATUSES),
-  reviewNote: z.string().nullable(),
-  reviewedAt: z.string().nullable(),
-  createdAt: z.string(),
-});
+export const VehicleSchema = z
+  .object({
+    id: z.uuid(),
+    driverId: z.uuid(),
+    vehicleTypeCode: z.string(),
+    plateNumber: z.string(),
+    description: z.string().nullable(),
+    status: z.enum(VEHICLE_STATUSES),
+    reviewNote: z.string().nullable(),
+    reviewedAt: z.string().nullable(),
+    createdAt: z.string(),
+  })
+  .meta({ id: 'Vehicle' });
 export type VehicleResponse = z.infer<typeof VehicleSchema>;
 
-export const DriverDocumentSchema = z.object({
-  id: z.uuid(),
-  documentType: z.enum(DOCUMENT_TYPES),
-  vehicleId: z.uuid().nullable(),
-  contentType: z.enum(DOCUMENT_CONTENT_TYPES),
-  status: z.enum(['upload_pending', 'uploaded', 'superseded']),
-  createdAt: z.string(),
-  uploadedAt: z.string().nullable(),
-});
+export const DriverDocumentSchema = z
+  .object({
+    id: z.uuid(),
+    documentType: z.enum(DOCUMENT_TYPES),
+    vehicleId: z.uuid().nullable(),
+    contentType: z.enum(DOCUMENT_CONTENT_TYPES),
+    status: z.enum(['upload_pending', 'uploaded', 'superseded']),
+    createdAt: z.string(),
+    uploadedAt: z.string().nullable(),
+  })
+  .meta({ id: 'DriverDocument' });
 export type DriverDocumentResponse = z.infer<typeof DriverDocumentSchema>;
 
 export const presentDriver = (driver: Driver): DriverProfileResponse => ({

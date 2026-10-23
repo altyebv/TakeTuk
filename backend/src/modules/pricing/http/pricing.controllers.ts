@@ -28,21 +28,23 @@ const CreateQuoteSchema = z.strictObject({
   destinationLabel: LocationLabelSchema.optional(),
 });
 
-const QuoteSchema = z.object({
-  id: z.uuid(),
-  serviceTypeCode: z.string(),
-  pickup: z.object({ lat: z.number(), lng: z.number(), label: z.string().nullable() }),
-  destination: z.object({ lat: z.number(), lng: z.number(), label: z.string().nullable() }),
-  route: z.object({
-    distanceMeters: z.number().int(),
-    durationSeconds: z.number().int().nullable(),
-    provider: z.string(),
-    estimatedAt: z.string(),
-  }),
-  minimumFare: MoneyResponseSchema,
-  farePolicy: z.object({ id: z.uuid(), version: z.number().int() }),
-  expiresAt: z.string(),
-});
+const QuoteSchema = z
+  .object({
+    id: z.uuid(),
+    serviceTypeCode: z.string(),
+    pickup: z.object({ lat: z.number(), lng: z.number(), label: z.string().nullable() }),
+    destination: z.object({ lat: z.number(), lng: z.number(), label: z.string().nullable() }),
+    route: z.object({
+      distanceMeters: z.number().int(),
+      durationSeconds: z.number().int().nullable(),
+      provider: z.string(),
+      estimatedAt: z.string(),
+    }),
+    minimumFare: MoneyResponseSchema,
+    farePolicy: z.object({ id: z.uuid(), version: z.number().int() }),
+    expiresAt: z.string(),
+  })
+  .meta({ id: 'FareQuote' });
 type QuoteResponse = z.infer<typeof QuoteSchema>;
 
 const presentQuote = (q: FareQuote): QuoteResponse => ({
@@ -93,22 +95,24 @@ export class FareQuotesController {
   }
 }
 
-const FarePolicySchema = z.object({
-  id: z.uuid(),
-  serviceAreaCode: z.string(),
-  serviceTypeCode: z.string(),
-  version: z.number().int(),
-  status: z.enum(POLICY_STATUSES),
-  currency: z.string(),
-  baseFareMinor: z.number().int(),
-  perKmFareMinor: z.number().int(),
-  minimumFareMinor: z.number().int(),
-  roundingIncrementMinor: z.number().int(),
-  notes: z.string().nullable(),
-  createdAt: z.string(),
-  activatedAt: z.string().nullable(),
-  retiredAt: z.string().nullable(),
-});
+const FarePolicySchema = z
+  .object({
+    id: z.uuid(),
+    serviceAreaCode: z.string(),
+    serviceTypeCode: z.string(),
+    version: z.number().int(),
+    status: z.enum(POLICY_STATUSES),
+    currency: z.string(),
+    baseFareMinor: z.number().int(),
+    perKmFareMinor: z.number().int(),
+    minimumFareMinor: z.number().int(),
+    roundingIncrementMinor: z.number().int(),
+    notes: z.string().nullable(),
+    createdAt: z.string(),
+    activatedAt: z.string().nullable(),
+    retiredAt: z.string().nullable(),
+  })
+  .meta({ id: 'FarePolicy' });
 type FarePolicyResponse = z.infer<typeof FarePolicySchema>;
 
 const presentPolicy = (p: FarePolicy): FarePolicyResponse => ({

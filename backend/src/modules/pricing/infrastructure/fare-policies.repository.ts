@@ -3,6 +3,7 @@ import type { Queryable, Tx } from '../../../infrastructure/database/database';
 import type { PolicyStatus } from '../../../shared/policy-lifecycle';
 import { policyScopeLockKey } from '../../../shared/policy-lifecycle';
 import type { FarePolicy } from '../domain/fare-policy';
+import { required } from '../../../shared/required';
 
 interface FarePolicyRow {
   id: string;
@@ -90,7 +91,7 @@ export class FarePoliciesRepository {
         input.createdBy,
       ],
     );
-    return (await this.find(tx, rows[0]!.id))!;
+    return required(await this.find(tx, required(rows[0], 'row').id), 'record');
   }
 
   async find(db: Queryable, id: string): Promise<FarePolicy | null> {

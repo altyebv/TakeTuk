@@ -7,6 +7,7 @@ import type { PolicyStatus } from '../../../shared/policy-lifecycle';
 import { ServiceAreasService } from '../../geography';
 import { commissionPolicyStateMachine, type CommissionPolicy } from '../domain/finance';
 import { FinanceRepository } from '../infrastructure/finance.repository';
+import { required } from '../../../shared/required';
 
 /** Admin management of versioned commission policies (STATE_MACHINES §7). */
 @Injectable()
@@ -61,7 +62,7 @@ export class CommissionPolicyService {
       const found = await this.finance.findPolicy(tx, policyId);
       if (!found) throw new AppError('POLICY_NOT_FOUND');
       await this.finance.lockPolicyScope(tx, found.serviceAreaId, found.serviceTypeCode);
-      const policy = (await this.finance.lockPolicy(tx, policyId))!;
+      const policy = required(await this.finance.lockPolicy(tx, policyId), 'record');
       if (policy.status === 'active') return policy;
       commissionPolicyStateMachine.assert(policy.status, 'active', 'admin');
       const retiredId = await this.finance.retireActivePolicy(
@@ -78,7 +79,7 @@ export class CommissionPolicyService {
         entityId: policy.id,
         metadata: { version: policy.version, supersededPolicyId: retiredId },
       });
-      return (await this.finance.findPolicy(tx, policy.id))!;
+      return required(await this.finance.findPolicy(tx, policy.id), 'record');
     });
   }
 
@@ -97,7 +98,7 @@ export class CommissionPolicyService {
         entityId: policy.id,
         metadata: { version: policy.version },
       });
-      return (await this.finance.findPolicy(tx, policy.id))!;
+      return required(await this.finance.findPolicy(tx, policy.id), 'record');
     });
   }
 

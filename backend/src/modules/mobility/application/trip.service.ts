@@ -12,6 +12,7 @@ import { AssignmentsRepository } from '../infrastructure/assignments.repository'
 import { RidesRepository } from '../infrastructure/rides.repository';
 import { RideLifecycleService } from './ride-lifecycle.service';
 import { RideViews, type AdminRideView, type DriverRideView } from './ride-views';
+import { required } from '../../../shared/required';
 
 const TRIP_EVENT: Readonly<Record<DriverTripAction, string>> = {
   arrive: 'ride.driver_arrived',
@@ -96,7 +97,7 @@ export class TripService {
         aggregateId: ride.id,
         payload: { rideId: ride.id, passengerId: ride.passengerId, driverId: driver.userId },
       });
-      return this.views.driverRideView(tx, (await this.rides.find(tx, ride.id))!);
+      return this.views.driverRideView(tx, required(await this.rides.find(tx, ride.id), 'record'));
     });
   }
 

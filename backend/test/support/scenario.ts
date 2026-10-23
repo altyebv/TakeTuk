@@ -298,15 +298,12 @@ export class Scenario {
     from: { lat: number; lng: number } = PLACES.pickup,
     to: { lat: number; lng: number } = PLACES.destination,
   ): Promise<Response> {
-    return this.http()
-      .post('/v1/fare-quotes')
-      .set('Authorization', passenger.auth)
-      .send({
-        pickup: from,
-        destination: to,
-        pickupLabel: 'University main gate',
-        destinationLabel: 'Souq',
-      });
+    return this.http().post('/v1/fare-quotes').set('Authorization', passenger.auth).send({
+      pickup: from,
+      destination: to,
+      pickupLabel: 'University main gate',
+      destinationLabel: 'Souq',
+    });
   }
 
   async requestRide(

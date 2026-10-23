@@ -13,6 +13,7 @@ import { OffersRepository, type LockedOffer } from '../infrastructure/offers.rep
 import { RidesRepository, type LockedRide } from '../infrastructure/rides.repository';
 import { AssignmentService } from './assignment.service';
 import { RideViews, type DriverOfferView, type DriverRideView } from './ride-views';
+import { required } from '../../../shared/required';
 
 /** Driver responses to dispatch offers: accept, decline, counteroffer (STATE_MACHINES §2). */
 @Injectable()
@@ -73,7 +74,7 @@ export class DriverOffersService {
         entityId: offerId,
         metadata: { rideId: ride.ride.id },
       });
-      const closed = (await this.offers.find(tx, offerId))!;
+      const closed = required(await this.offers.find(tx, offerId), 'record');
       return this.views.driverOfferView(tx, closed, ride.ride);
     });
   }
@@ -176,7 +177,7 @@ export class DriverOffersService {
   }
 
   private async offerView(offer: RideOffer): Promise<DriverOfferView> {
-    const ride = (await this.rides.find(this.db, offer.rideId))!;
+    const ride = required(await this.rides.find(this.db, offer.rideId), 'record');
     return this.views.driverOfferView(this.db, offer, ride);
   }
 }

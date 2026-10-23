@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { Queryable, Tx } from '../../../infrastructure/database/database';
 import { sqlLatLng, sqlPoint } from '../../geography';
 import type { FareQuote } from '../domain/fare-policy';
+import { required } from '../../../shared/required';
 
 interface QuoteRow {
   id: string;
@@ -117,7 +118,7 @@ export class FareQuotesRepository {
         q.ttlSeconds,
       ],
     );
-    return (await this.find(db, rows[0]!.id))!;
+    return required(await this.find(db, required(rows[0], 'row').id), 'record');
   }
 
   async find(db: Queryable, id: string): Promise<FareQuote | null> {

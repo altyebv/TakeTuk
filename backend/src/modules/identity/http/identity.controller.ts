@@ -17,14 +17,16 @@ export const DisplayNameSchema = z.string().trim().min(1).max(100);
 const RegisterPassengerSchema = z.strictObject({ displayName: DisplayNameSchema });
 const UpdateProfileSchema = z.strictObject({ displayName: DisplayNameSchema });
 
-const MeSchema = z.object({
-  userId: z.uuid(),
-  registered: z.boolean(),
-  displayName: z.string().nullable(),
-  phoneE164: z.string().nullable(),
-  status: z.enum(['active', 'disabled']).nullable(),
-  roles: z.array(z.enum(ROLES)),
-});
+const MeSchema = z
+  .object({
+    userId: z.uuid(),
+    registered: z.boolean(),
+    displayName: z.string().nullable(),
+    phoneE164: z.string().nullable(),
+    status: z.enum(['active', 'disabled']).nullable(),
+    roles: z.array(z.enum(ROLES)),
+  })
+  .meta({ id: 'Me' });
 type MeResponse = z.infer<typeof MeSchema>;
 
 const toMe = (userId: string, user: RegisteredUser | null, roles: readonly Role[]): MeResponse => ({

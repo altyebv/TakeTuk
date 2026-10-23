@@ -12,18 +12,20 @@ const AuditQuerySchema = PageQuerySchema.extend({
   entityId: z.string().min(1).max(100).optional(),
 });
 
-const AuditEventSchema = z.object({
-  id: z.number().int(),
-  occurredAt: z.string(),
-  actorType: z.enum(['user', 'system']),
-  actorUserId: z.string().nullable(),
-  actorRole: z.string().nullable(),
-  action: z.string(),
-  entityType: z.string(),
-  entityId: z.string(),
-  requestId: z.string().nullable(),
-  metadata: z.record(z.string(), z.unknown()),
-});
+const AuditEventSchema = z
+  .object({
+    id: z.number().int(),
+    occurredAt: z.string(),
+    actorType: z.enum(['user', 'system']),
+    actorUserId: z.string().nullable(),
+    actorRole: z.string().nullable(),
+    action: z.string(),
+    entityType: z.string(),
+    entityId: z.string(),
+    requestId: z.string().nullable(),
+    metadata: z.record(z.string(), z.unknown()),
+  })
+  .meta({ id: 'AuditEvent' });
 
 @Controller('v1/admin/audit-events')
 export class AdminAuditController {

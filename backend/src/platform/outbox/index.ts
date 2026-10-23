@@ -7,3 +7,4 @@ export {
   type OutboxHandler,
 } from './outbox.service';
 export { OutboxWorker, outboxBackoffSeconds, type OutboxRunResult } from './outbox.worker';
+export { OutboxRetentionWorker } from './outbox-retention.worker';

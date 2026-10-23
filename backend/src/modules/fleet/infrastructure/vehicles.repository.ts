@@ -3,6 +3,7 @@ import type { Queryable, Tx } from '../../../infrastructure/database/database';
 import { isUniqueViolation } from '../../../infrastructure/database/pg-errors';
 import { AppError } from '../../../shared/errors/app-error';
 import type { Vehicle, VehicleStatus, VehicleTypeInfo } from '../domain/vehicle';
+import { required } from '../../../shared/required';
 
 interface VehicleRow {
   id: string;
@@ -95,7 +96,7 @@ export class VehiclesRepository {
          returning ${VEHICLE_COLUMNS}`,
         [input.driverId, input.vehicleTypeCode, input.plateNumber, input.description],
       );
-      return toVehicle(rows[0]!);
+      return toVehicle(required(rows[0], 'row'));
     } catch (error) {
       if (isUniqueViolation(error, 'vehicles_driver_plate_unique')) {
         throw new AppError(
@@ -143,6 +144,6 @@ export class VehiclesRepository {
         returning ${VEHICLE_COLUMNS}`,
       [vehicleId, change.status, change.reviewedBy, change.note],
     );
-    return toVehicle(rows[0]!);
+    return toVehicle(required(rows[0], 'row'));
   }
 }

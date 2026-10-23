@@ -15,6 +15,7 @@ import {
 } from '../domain/driver';
 import { DOCUMENT_STORAGE, type DocumentStorage } from '../infrastructure/document-storage';
 import { DriversRepository } from '../infrastructure/drivers.repository';
+import { required } from '../../../shared/required';
 
 export type DriverDecision = 'approve' | 'reject' | 'suspend' | 'reinstate';
 
@@ -159,7 +160,7 @@ export class DriverReviewService {
         aggregateId: driverId,
         payload: { driverId, status: rule.to },
       });
-      return (await this.drivers.find(tx, driverId))!;
+      return required(await this.drivers.find(tx, driverId), 'record');
     });
   }
 

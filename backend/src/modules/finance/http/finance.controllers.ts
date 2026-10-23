@@ -13,14 +13,16 @@ import { PAYMENT_STATUSES, type CommissionPolicy, type RidePayment } from '../do
 
 const CodeSchema = z.string().regex(/^[a-z][a-z0-9_]{1,39}$/);
 
-export const RidePaymentSchema = z.object({
-  rideId: z.uuid(),
-  method: z.literal('cash'),
-  status: z.enum(PAYMENT_STATUSES),
-  amountDue: MoneyResponseSchema,
-  amountCollected: MoneyResponseSchema.nullable(),
-  reportedAt: z.string().nullable(),
-});
+export const RidePaymentSchema = z
+  .object({
+    rideId: z.uuid(),
+    method: z.literal('cash'),
+    status: z.enum(PAYMENT_STATUSES),
+    amountDue: MoneyResponseSchema,
+    amountCollected: MoneyResponseSchema.nullable(),
+    reportedAt: z.string().nullable(),
+  })
+  .meta({ id: 'RidePayment' });
 export type RidePaymentResponse = z.infer<typeof RidePaymentSchema>;
 
 export const presentPayment = (p: RidePayment): RidePaymentResponse => ({
@@ -118,18 +120,20 @@ export class DriverFinanceController {
   }
 }
 
-const CommissionPolicySchema = z.object({
-  id: z.uuid(),
-  serviceAreaCode: z.string(),
-  serviceTypeCode: z.string(),
-  version: z.number().int(),
-  status: z.enum(POLICY_STATUSES),
-  rateBasisPoints: z.number().int(),
-  notes: z.string().nullable(),
-  createdAt: z.string(),
-  activatedAt: z.string().nullable(),
-  retiredAt: z.string().nullable(),
-});
+const CommissionPolicySchema = z
+  .object({
+    id: z.uuid(),
+    serviceAreaCode: z.string(),
+    serviceTypeCode: z.string(),
+    version: z.number().int(),
+    status: z.enum(POLICY_STATUSES),
+    rateBasisPoints: z.number().int(),
+    notes: z.string().nullable(),
+    createdAt: z.string(),
+    activatedAt: z.string().nullable(),
+    retiredAt: z.string().nullable(),
+  })
+  .meta({ id: 'CommissionPolicy' });
 type CommissionPolicyResponse = z.infer<typeof CommissionPolicySchema>;
 
 const presentCommissionPolicy = (p: CommissionPolicy): CommissionPolicyResponse => ({

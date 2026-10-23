@@ -13,6 +13,7 @@ import {
   type RidePayment,
 } from '../domain/finance';
 import { FinanceRepository, type EarningsRow } from '../infrastructure/finance.repository';
+import { required } from '../../../shared/required';
 
 export interface RideCompletionFacts {
   readonly rideId: string;
@@ -66,7 +67,7 @@ export class FinanceService {
       amountDueMinor: facts.agreedFareMinor,
     });
     if (!created) {
-      return (await this.finance.findPaymentByRide(tx, facts.rideId))!;
+      return required(await this.finance.findPaymentByRide(tx, facts.rideId), 'record');
     }
 
     const commissionMinor = calculateCommission(

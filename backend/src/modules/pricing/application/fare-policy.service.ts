@@ -7,6 +7,7 @@ import type { PolicyStatus } from '../../../shared/policy-lifecycle';
 import { ServiceAreasService } from '../../geography';
 import { farePolicyStateMachine, type FarePolicy } from '../domain/fare-policy';
 import { FarePoliciesRepository } from '../infrastructure/fare-policies.repository';
+import { required } from '../../../shared/required';
 
 export interface CreateFarePolicyInput {
   readonly serviceAreaCode: string;
@@ -82,7 +83,7 @@ export class FarePolicyService {
       const found = await this.policies.find(tx, policyId);
       if (!found) throw new AppError('POLICY_NOT_FOUND');
       await this.policies.lockScope(tx, found.serviceAreaId, found.serviceTypeCode);
-      const policy = (await this.policies.lock(tx, policyId))!;
+      const policy = required(await this.policies.lock(tx, policyId), 'record');
       if (policy.status === 'active') return policy;
       farePolicyStateMachine.assert(policy.status, 'active', 'admin');
       const retiredId = await this.policies.retireActive(
@@ -99,7 +100,7 @@ export class FarePolicyService {
         entityId: policy.id,
         metadata: { version: policy.version, supersededPolicyId: retiredId },
       });
-      return (await this.policies.find(tx, policy.id))!;
+      return required(await this.policies.find(tx, policy.id), 'record');
     });
   }
 
@@ -118,7 +119,7 @@ export class FarePolicyService {
         entityId: policy.id,
         metadata: { version: policy.version },
       });
-      return (await this.policies.find(tx, policy.id))!;
+      return required(await this.policies.find(tx, policy.id), 'record');
     });
   }
 

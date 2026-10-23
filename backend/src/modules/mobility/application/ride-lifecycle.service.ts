@@ -9,6 +9,7 @@ import { rideStateMachine, type Ride, type RideActor } from '../domain/ride';
 import { AssignmentsRepository } from '../infrastructure/assignments.repository';
 import { OffersRepository } from '../infrastructure/offers.repository';
 import { RidesRepository, type LockedRide } from '../infrastructure/rides.repository';
+import { required } from '../../../shared/required';
 
 /** Cancellation and expiry transitions shared by passenger, driver, admin and system paths. */
 @Injectable()
@@ -80,7 +81,7 @@ export class RideLifecycleService {
         withdrawnDriverIds,
       },
     });
-    return (await this.rides.find(tx, ride.id))!;
+    return required(await this.rides.find(tx, ride.id), 'record');
   }
 
   /** searching → expired when the search window has elapsed (database clock). */

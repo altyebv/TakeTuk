@@ -5,6 +5,7 @@ import { AppError } from '../../../shared/errors/app-error';
 import { sqlLatLng, sqlPoint } from '../../geography';
 import type { FareQuote } from '../../pricing';
 import type { Ride, RideActor, RideStatus } from '../domain/ride';
+import { required } from '../../../shared/required';
 
 interface RideRow {
   id: string;
@@ -152,7 +153,7 @@ export class RidesRepository {
           input.searchTimeoutSeconds,
         ],
       );
-      return (await this.find(tx, rows[0]!.id))!;
+      return required(await this.find(tx, required(rows[0], 'row').id), 'record');
     } catch (error) {
       if (isUniqueViolation(error, 'rides_one_open_per_passenger')) {
         throw new AppError(

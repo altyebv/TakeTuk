@@ -8,6 +8,7 @@ import type {
   FareAgreement,
   RideAssignment,
 } from '../domain/offer';
+import { required } from '../../../shared/required';
 
 interface AgreementRow {
   id: string;
@@ -118,7 +119,7 @@ export class AssignmentsRepository {
           a.routeProvider,
         ],
       );
-      return toAgreement(rows[0]!);
+      return toAgreement(required(rows[0], 'row'));
     } catch (error) {
       if (
         isUniqueViolation(error, 'fare_agreements_one_per_ride') ||
@@ -152,7 +153,7 @@ export class AssignmentsRepository {
           a.commissionRateBasisPoints,
         ],
       );
-      return toAssignment(rows[0]!);
+      return toAssignment(required(rows[0], 'row'));
     } catch (error) {
       if (isUniqueViolation(error, 'ride_assignments_one_active_per_driver')) {
         throw new AppError('DRIVER_BUSY', undefined, { cause: error });

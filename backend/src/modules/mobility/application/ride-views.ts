@@ -46,75 +46,83 @@ const Timeline = {
   expiredAt: z.string().nullable(),
 };
 
-export const CounterofferSchema = z.object({
-  offerId: z.uuid(),
-  status: z.enum(OFFER_STATUSES),
-  amount: MoneyResponseSchema,
-  expiresAt: z.string(),
-  driverDisplayName: z.string(),
-  vehicleTypeCode: z.string(),
-  distanceToPickupMeters: z.number().int(),
-});
+export const CounterofferSchema = z
+  .object({
+    offerId: z.uuid(),
+    status: z.enum(OFFER_STATUSES),
+    amount: MoneyResponseSchema,
+    expiresAt: z.string(),
+    driverDisplayName: z.string(),
+    vehicleTypeCode: z.string(),
+    distanceToPickupMeters: z.number().int(),
+  })
+  .meta({ id: 'Counteroffer' });
 
-export const PassengerRideSchema = z.object({
-  id: z.uuid(),
-  status: z.enum(RIDE_STATUSES),
-  serviceTypeCode: z.string(),
-  pickup: PlaceSchema,
-  destination: PlaceSchema,
-  route: RouteSchema,
-  minimumFare: MoneyResponseSchema,
-  proposedFare: MoneyResponseSchema,
-  agreedFare: MoneyResponseSchema.nullable(),
-  farePolicy: z.object({ id: z.uuid(), version: z.number().int() }),
-  ...Timeline,
-  cancellation: CancellationSchema,
-  negotiation: z.object({
-    driversNotified: z.number().int(),
-    counteroffers: z.array(CounterofferSchema),
-  }),
-  driver: z
-    .object({
-      displayName: z.string(),
-      phoneE164: z.string().nullable(),
-      vehicle: VehicleSummarySchema.nullable(),
-    })
-    .nullable(),
-  payment: RidePaymentSchema.nullable(),
-});
+export const PassengerRideSchema = z
+  .object({
+    id: z.uuid(),
+    status: z.enum(RIDE_STATUSES),
+    serviceTypeCode: z.string(),
+    pickup: PlaceSchema,
+    destination: PlaceSchema,
+    route: RouteSchema,
+    minimumFare: MoneyResponseSchema,
+    proposedFare: MoneyResponseSchema,
+    agreedFare: MoneyResponseSchema.nullable(),
+    farePolicy: z.object({ id: z.uuid(), version: z.number().int() }),
+    ...Timeline,
+    cancellation: CancellationSchema,
+    negotiation: z.object({
+      driversNotified: z.number().int(),
+      counteroffers: z.array(CounterofferSchema),
+    }),
+    driver: z
+      .object({
+        displayName: z.string(),
+        phoneE164: z.string().nullable(),
+        vehicle: VehicleSummarySchema.nullable(),
+      })
+      .nullable(),
+    payment: RidePaymentSchema.nullable(),
+  })
+  .meta({ id: 'PassengerRide' });
 export type PassengerRideView = z.infer<typeof PassengerRideSchema>;
 
-export const DriverOfferSchema = z.object({
-  offerId: z.uuid(),
-  rideId: z.uuid(),
-  status: z.enum(OFFER_STATUSES),
-  expiresAt: z.string(),
-  dispatchRound: z.number().int(),
-  distanceToPickupMeters: z.number().int(),
-  offeredFare: MoneyResponseSchema,
-  minimumFare: MoneyResponseSchema,
-  counterFare: MoneyResponseSchema.nullable(),
-  pickup: PlaceSchema,
-  destination: PlaceSchema,
-  route: RouteSchema,
-  passenger: z.object({ displayName: z.string() }),
-});
+export const DriverOfferSchema = z
+  .object({
+    offerId: z.uuid(),
+    rideId: z.uuid(),
+    status: z.enum(OFFER_STATUSES),
+    expiresAt: z.string(),
+    dispatchRound: z.number().int(),
+    distanceToPickupMeters: z.number().int(),
+    offeredFare: MoneyResponseSchema,
+    minimumFare: MoneyResponseSchema,
+    counterFare: MoneyResponseSchema.nullable(),
+    pickup: PlaceSchema,
+    destination: PlaceSchema,
+    route: RouteSchema,
+    passenger: z.object({ displayName: z.string() }),
+  })
+  .meta({ id: 'DriverOffer' });
 export type DriverOfferView = z.infer<typeof DriverOfferSchema>;
 
-export const DriverRideSchema = z.object({
-  id: z.uuid(),
-  status: z.enum(RIDE_STATUSES),
-  serviceTypeCode: z.string(),
-  pickup: PlaceSchema,
-  destination: PlaceSchema,
-  route: RouteSchema,
-  minimumFare: MoneyResponseSchema,
-  agreedFare: MoneyResponseSchema.nullable(),
-  ...Timeline,
-  cancellation: CancellationSchema,
-  passenger: z.object({ displayName: z.string(), phoneE164: z.string().nullable() }),
-  payment: RidePaymentSchema.nullable(),
-});
+export const DriverRideSchema = z
+  .object({
+    id: z.uuid(),
+    status: z.enum(RIDE_STATUSES),
+    serviceTypeCode: z.string(),
+    pickup: PlaceSchema,
+    destination: PlaceSchema,
+    route: RouteSchema,
+    minimumFare: MoneyResponseSchema,
+    agreedFare: MoneyResponseSchema.nullable(),
+    ...Timeline,
+    cancellation: CancellationSchema,
+    passenger: z.object({ displayName: z.string(), phoneE164: z.string().nullable() }),
+    payment: RidePaymentSchema.nullable(),
+  })
+  .meta({ id: 'DriverRide' });
 export type DriverRideView = z.infer<typeof DriverRideSchema>;
 
 export const AdminRideSchema = PassengerRideSchema.extend({
@@ -160,7 +168,7 @@ export const AdminRideSchema = PassengerRideSchema.extend({
       commissionRateBasisPoints: z.number().int(),
     })
     .nullable(),
-});
+}).meta({ id: 'AdminRide' });
 export type AdminRideView = z.infer<typeof AdminRideSchema>;
 
 const money = (amountMinor: number, currency: string): Money => ({ amountMinor, currency });

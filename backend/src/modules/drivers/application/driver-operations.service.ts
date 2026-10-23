@@ -6,6 +6,7 @@ import { AppError } from '../../../shared/errors/app-error';
 import { FleetService } from '../../fleet';
 import type { Driver, DriverAvailability, DriverStatus } from '../domain/driver';
 import { DriversRepository } from '../infrastructure/drivers.repository';
+import { required } from '../../../shared/required';
 
 /** Maximum tolerated device clock skew into the future for location timestamps. */
 const MAX_FUTURE_SKEW_MS = 5 * 60 * 1000;
@@ -49,7 +50,7 @@ export class DriverOperationsService {
             entityId: driver.userId,
           });
         }
-        return (await this.drivers.find(tx, driver.userId))!;
+        return required(await this.drivers.find(tx, driver.userId), 'record');
       }
 
       if (driver.status !== 'approved') {
@@ -83,7 +84,7 @@ export class DriverOperationsService {
           metadata: { vehicleId: vehicle.id },
         });
       }
-      return (await this.drivers.find(tx, driver.userId))!;
+      return required(await this.drivers.find(tx, driver.userId), 'record');
     });
   }
 

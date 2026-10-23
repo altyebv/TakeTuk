@@ -10,6 +10,7 @@ import type {
   DriverDocument,
   DriverStatus,
 } from '../domain/driver';
+import { required } from '../../../shared/required';
 
 interface DriverRow {
   user_id: string;
@@ -218,7 +219,7 @@ export class DriversRepository {
        returning received_at`,
       [input.driverId, input.lat, input.lng, input.accuracyMeters, input.recordedAt],
     );
-    return rows[0]!.received_at;
+    return required(rows[0], 'row').received_at;
   }
 
   // ---------------------------------------------------------------- documents
@@ -250,7 +251,7 @@ export class DriversRepository {
         input.path,
       ],
     );
-    return toDocument(rows[0]!);
+    return toDocument(required(rows[0], 'row'));
   }
 
   async findDocument(db: Queryable, documentId: string): Promise<DriverDocument | null> {
@@ -283,7 +284,7 @@ export class DriversRepository {
         where id = $1 returning ${DOCUMENT_COLUMNS}`,
       [document.id],
     );
-    return toDocument(rows[0]!);
+    return toDocument(required(rows[0], 'row'));
   }
 
   async listDocuments(db: Queryable, driverId: string): Promise<DriverDocument[]> {

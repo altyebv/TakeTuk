@@ -7,6 +7,7 @@ import type {
   PaymentStatus,
   RidePayment,
 } from '../domain/finance';
+import { required } from '../../../shared/required';
 
 interface CommissionPolicyRow {
   id: string;
@@ -115,7 +116,7 @@ export class FinanceRepository {
         input.createdBy,
       ],
     );
-    return (await this.findPolicy(tx, rows[0]!.id))!;
+    return required(await this.findPolicy(tx, required(rows[0], 'row').id), 'record');
   }
 
   async findPolicy(db: Queryable, id: string): Promise<CommissionPolicy | null> {
@@ -244,7 +245,7 @@ export class FinanceRepository {
         returning ${PAYMENT_COLUMNS}`,
       [paymentId, status, amountCollectedMinor],
     );
-    return toPayment(rows[0]!);
+    return toPayment(required(rows[0], 'row'));
   }
 
   // ----------------------------------------------------------------------- ledger

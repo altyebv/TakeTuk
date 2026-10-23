@@ -600,7 +600,9 @@ describe('ride booking (end to end)', () => {
       const list = await s.http().get('/v1/rides').set('Authorization', intruder.auth);
       expect(list.body.items).toEqual([]);
       const ownerList = await s.http().get('/v1/rides?limit=1').set('Authorization', owner.auth);
-      expect(ownerList.body.items.map((r: { id: string }) => r.id)).toEqual([ride.body.id]);
+      expect((ownerList.body.items as Array<{ id: string }>).map((r) => r.id)).toEqual([
+        ride.body.id,
+      ]);
       await s
         .http()
         .post(`/v1/rides/${ride.body.id}/cancel`)
