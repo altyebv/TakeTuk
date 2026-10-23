@@ -62,10 +62,11 @@ Status values: `open` (provisional behaviour implemented), `needs-input` (blocke
 
 | ID | Decision | Current provisional behaviour | Status |
 |---|---|---|---|
-| MAP-1 | Google Maps Platform coverage and quality for Wad Madani | Not evaluated. The Routes API adapter is implemented but not exercised against live Google. | needs-input |
-| MAP-2 | Retention of route distance and duration from Google | Stored as fare-calculation inputs (distance, duration, provider name, timestamp). Raw responses and polylines are not stored. **Legal/terms review required** before production. | needs-input |
-| MAP-3 | Travel mode for raksha | `DRIVE` is used as an approximation. Tuk-tuks may use roads that cars do not. | open |
+| MAP-1 | Road coverage and distance quality for Wad Madani (OpenStreetMap for OSRM, Google Maps Platform for Google) | Not evaluated for either. The OSRM adapter is verified against a real OSRM server on a synthetic network only; the Google adapter is not exercised live. Check before launch: compare quotes for known trips with distances measured on the ground, and tune `OSRM_SNAP_RADIUS_METERS` (default 500 m). | needs-input |
+| MAP-2 | Retention of route distance and duration, and data licensing | Stored as fare-calculation inputs (distance, duration, provider name, timestamp). Raw responses and polylines are not stored. Google: **terms review required** before production. OpenStreetMap (OSRM): ODbL. Internal use of derived distances is allowed; maps or data shown to users need "© OpenStreetMap contributors" attribution. | needs-input |
+| MAP-3 | Travel mode for raksha | Car routing is used as an approximation (Google `DRIVE`, OSRM car profile). Tuk-tuks may use roads that cars do not. With OSRM a custom raksha profile is possible. | open |
 | MAP-4 | Official Wad Madani service-area boundary | Only an approximate development bounding box in `seed.sql`. | needs-input |
+| MAP-5 | Production routing provider | Self-hosted OSRM (ADR-0017), because Google billing needs a payment card the team cannot use for now. Google stays configurable. Switching is a configuration change; quotes record which provider priced them. | open |
 
 ## API
 

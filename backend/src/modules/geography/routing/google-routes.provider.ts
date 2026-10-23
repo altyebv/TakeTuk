@@ -1,7 +1,7 @@
 import { Logger } from '@nestjs/common';
 import { z } from 'zod';
 import { AppError } from '../../../shared/errors/app-error';
-import type { RouteEstimate, RouteRequest, RoutingProvider } from './routing-provider';
+import type { FetchLike, RouteEstimate, RouteRequest, RoutingProvider } from './routing-provider';
 
 /**
  * Google Routes API adapter (ADR-0008). Implemented against the documented
@@ -25,8 +25,6 @@ const ResponseSchema = z.object({
     )
     .optional(),
 });
-
-export type FetchLike = (input: string, init: RequestInit) => Promise<Response>;
 
 export class GoogleRoutesProvider implements RoutingProvider {
   readonly name = 'google_routes';

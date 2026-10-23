@@ -27,7 +27,7 @@ One small interface isolates the only provider capability that affects business 
 
 ## Consequences
 
-- Adding OSRM or Valhalla later means adding one adapter and changing configuration. Pricing and mobility code stay as they are.
+- Adding OSRM or Valhalla later means adding one adapter and changing configuration. Pricing and mobility code stay as they are. This held for OSRM (ADR-0017): one adapter file, configuration, and no change to pricing or mobility.
 
 ## Risks
 

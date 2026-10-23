@@ -30,4 +30,7 @@ export interface RoutingProvider {
   estimateRoute(request: RouteRequest): Promise<RouteEstimate>;
 }
 
+/** Injectable transport so adapters can be tested without the network. */
+export type FetchLike = (input: string, init: RequestInit) => Promise<Response>;
+
 export const ROUTING_PROVIDER = Symbol('ROUTING_PROVIDER');

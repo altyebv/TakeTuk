@@ -68,8 +68,11 @@ Validated at startup by `backend/src/config/app-config.ts`. Invalid configuratio
 | `SUPABASE_SECRET_KEY` | — | required for `supabase` storage. Server-side only. |
 | `STORAGE_DRIVER_DOCUMENTS_BUCKET` | driver-documents | |
 | `STORAGE_VIEW_URL_TTL_SECONDS` | 300 | admin document view links |
-| `ROUTING_PROVIDER` | dev_fake | `google` in real environments (`dev_fake` refused in production) |
+| `ROUTING_PROVIDER` | dev_fake | `osrm` or `google` in real environments (`dev_fake` refused in production) |
 | `GOOGLE_MAPS_API_KEY` | — | required for `google`. Server key restricted to the Routes API. |
+| `OSRM_BASE_URL` | — | required for `osrm`: base URL of the self-hosted `osrm-routed` (`infra/osrm/README.md`). https in production unless `OSRM_ALLOW_HTTP=true` |
+| `OSRM_SNAP_RADIUS_METERS` | 500 | farthest a trip point may be moved to reach a mapped road; beyond it the quote fails with `NO_ROUTE_FOUND` (MAP-1) |
+| `OSRM_ALLOW_HTTP` | false | set only when OSRM is reachable solely over an encrypted private network |
 | `ROUTING_TIMEOUT_MS` | 5000 | |
 | `NOTIFICATION_PROVIDER` | log | `fcm` in real environments (`log` refused in production) |
 | `FCM_PROJECT_ID`, `FCM_SERVICE_ACCOUNT_FILE` | — | required for `fcm`. The file is mounted as a secret. |

@@ -32,3 +32,7 @@ The directive specifies Google, it has broad coverage, and it involves no infras
 - Cost growth with quote volume. Mitigation: rate limits, and caching only where the terms permit (not implemented).
 - Terms restricting storage of derived distance. Mitigation: legal review, and the provider abstraction allows switching.
 - The Google adapter is unit-tested against the documented request and response shapes but has **not** been verified against the live API.
+
+## Amendments
+
+- **2026-10-23:** Google Maps Platform billing needs a payment card that the team cannot use for now (prepaid cards are refused). ADR-0017 adds a self-hosted OSRM provider behind the same port. Google stays supported, and which provider runs in production is a configuration choice (OPEN_DECISIONS MAP-5). Map display in the clients (Google Maps SDK) has the same billing requirement; the client map provider is decided with the Flutter work.

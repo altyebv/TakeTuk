@@ -38,3 +38,4 @@ No record claims a measurement or benchmark that was not performed.
 | [0014](0014-validation-zod-openapi.md) | Runtime validation with Zod; OpenAPI from the same schemas | Accepted |
 | [0015](0015-database-security-posture.md) | Private schema, least-privilege backend role, RLS as defence in depth | Accepted |
 | [0016](0016-financial-records-ledger.md) | Cash-first payments and an append-only double-entry ledger | Accepted |
+| [0017](0017-self-hosted-osrm-routing.md) | Self-hosted OSRM as a routing provider | Accepted |
