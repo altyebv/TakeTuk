@@ -1,0 +1,16 @@
+<!--
+  TAKE-TUK sign-in code (SIGN_IN_METHOD=email, OPEN_DECISIONS IDN-6). The apps ask for the code;
+  they do not open links, so the email carries only {{ .Token }}. Used for both the
+  "Confirm signup" and "Magic Link" emails: a first sign-in can send either.
+  Hosted projects: paste this into Authentication > Emails for both templates.
+-->
+<div dir="rtl" lang="ar" style="font-family: sans-serif">
+  <p>رمز الدخول إلى تك تك:</p>
+  <p style="font-size: 28px; font-weight: bold; letter-spacing: 4px" dir="ltr">{{ .Token }}</p>
+  <p>أدخل هذا الرمز في التطبيق. إذا لم تطلبه فتجاهل هذه الرسالة.</p>
+</div>
+<hr />
+<div dir="ltr" lang="en" style="font-family: sans-serif">
+  <p>Your TAKE-TUK sign-in code is <strong>{{ .Token }}</strong>.</p>
+  <p>Enter it in the app. If you did not ask for it, ignore this email.</p>
+</div>

@@ -35,4 +35,10 @@ Local verification against JWKS is fast and standard, and it supports key rotati
 ## Risks
 
 - Misconfigured issuer or audience: mitigated by startup configuration validation and tests for wrong-issuer and wrong-audience tokens.
-- Verification against a live Supabase project has **not** been performed in this environment.
+- Verification against the live project: done for email sign-in (see the amendment). Phone sign-in is not verified, because no SMS provider works yet.
+
+## Amendment (2026-10-23): email codes in development builds
+
+SMS delivery is not available yet (IDN-1), so the apps can also sign in with a one-time code sent by email (`SIGN_IN_METHOD=email`, OPEN_DECISIONS IDN-6). This is a client setting only: the token, its verification and authorization are unchanged, and the backend already treated the phone claim as optional. Release builds refuse email sign-in, because email accounts have no verified phone number for drivers and passengers to call each other.
+
+Verified against the live Supabase project: a user signed in with an email code using only the publishable key, the project issued an ES256 token, and the backend verified it through the project's JWKS and rejected a tampered copy. The check is repeatable with `npm run test:live -- supabase`.

@@ -22,14 +22,23 @@ class TaketukAuthLocalizationsAr extends TaketukAuthLocalizations {
   String get phoneHelp => 'سنرسل إليك رمزًا برسالة نصية.';
 
   @override
+  String get emailLabel => 'البريد الإلكتروني';
+
+  @override
+  String get emailHint => 'name@example.com';
+
+  @override
+  String get emailHelp => 'سنرسل إليك رمزًا بالبريد الإلكتروني.';
+
+  @override
   String get sendCode => 'إرسال الرمز';
 
   @override
   String get codeTitle => 'أدخل الرمز';
 
   @override
-  String codeSentTo(String phone) {
-    return 'أدخل الرمز الذي أرسلناه إلى $phone.';
+  String codeSentTo(String address) {
+    return 'أدخل الرمز الذي أرسلناه إلى $address.';
   }
 
   @override
@@ -48,10 +57,21 @@ class TaketukAuthLocalizationsAr extends TaketukAuthLocalizations {
   String get changeNumber => 'تغيير الرقم';
 
   @override
+  String get changeEmail => 'تغيير البريد الإلكتروني';
+
+  @override
   String get signOut => 'تسجيل الخروج';
 
   @override
   String get errorInvalidPhone => 'أدخل رقم هاتف سوداني، مثل 0912345678.';
+
+  @override
+  String get errorInvalidEmail =>
+      'أدخل بريدًا إلكترونيًا صحيحًا، مثل name@example.com.';
+
+  @override
+  String get errorAddressNotAllowed =>
+      'لا يمكن إرسال رموز الدخول إلى هذا العنوان حاليًا.';
 
   @override
   String get errorInvalidCode => 'الرمز غير صحيح أو انتهت صلاحيته.';

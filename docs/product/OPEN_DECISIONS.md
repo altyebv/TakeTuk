@@ -59,6 +59,7 @@ Status values: `open` (provisional behaviour implemented), `needs-input` (blocke
 | IDN-3 | Can one person be both passenger and driver? | Yes (separate roles). A driver can never receive their own ride request. | open |
 | IDN-4 | Admin roles granularity | A single `admin` role mapped to fine-grained permissions in code, so it can be split later (support, finance, verification). | open |
 | IDN-5 | Where the apps keep the session | `supabase_flutter` persists the session (including the refresh token) in the app's private storage, which is not an encrypted keystore. A secure-storage adapter can replace it. | open |
+| IDN-6 | Email sign-in while SMS is unavailable | SMS delivery (Twilio) is not available yet, so development builds can sign in with an email code (`SIGN_IN_METHOD=email`). Release builds refuse it: email accounts have no verified phone number, so drivers and passengers cannot call each other (IDN-2). To decide: whether email stays as a fallback once SMS works, and how an email account later adds a verified phone. | open |
 
 ## Maps and data
 

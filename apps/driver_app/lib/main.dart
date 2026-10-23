@@ -37,6 +37,7 @@ Future<void> main() async {
       auth: auth,
       api: api,
       session: session,
+      signInMethod: config.signInMethod,
       serviceAreaCode: _serviceAreaCode,
       mapSettings: MapSettings(
         tileUrlTemplate: config.mapTileUrlTemplate,

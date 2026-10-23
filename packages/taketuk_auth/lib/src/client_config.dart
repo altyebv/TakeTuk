@@ -2,16 +2,26 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 
+/// How users receive sign-in codes (`SIGN_IN_METHOD`).
+enum SignInMethod {
+  /// By SMS to a Sudanese mobile number (ADR-0004). The default.
+  phone,
+
+  /// By email. Development builds only, while SMS delivery is unavailable (OPEN_DECISIONS IDN-6).
+  email,
+}
+
 /// Build-time configuration of a TAKE-TUK app, from `--dart-define` or `--dart-define-from-file`
 /// (see apps/README.md). Only public values belong here: the API URL, the Supabase project URL
-/// and its publishable key, and the map tile provider. Never a secret or service-role key
-/// (docs/security/SECURITY.md §4).
+/// and its publishable key, the sign-in method and the map tile provider. Never a secret or
+/// service-role key (docs/security/SECURITY.md §4).
 @immutable
 final class ClientConfig {
   const ClientConfig({
     required this.apiBaseUrl,
     required this.supabaseUrl,
     required this.supabasePublishableKey,
+    required this.signInMethod,
     required this.mapTileUrlTemplate,
     required this.mapAttribution,
     required this.problems,
@@ -23,6 +33,7 @@ final class ClientConfig {
     supabasePublishableKey: const String.fromEnvironment(
       'SUPABASE_PUBLISHABLE_KEY',
     ),
+    signInMethod: const String.fromEnvironment('SIGN_IN_METHOD'),
     mapTileUrl: const String.fromEnvironment('MAP_TILE_URL'),
     mapAttribution: const String.fromEnvironment('MAP_ATTRIBUTION'),
     release: kReleaseMode,
@@ -34,6 +45,7 @@ final class ClientConfig {
     required String supabaseUrl,
     required String supabasePublishableKey,
     required bool release,
+    String signInMethod = '',
     String mapTileUrl = '',
     String mapAttribution = '',
   }) {
@@ -63,6 +75,21 @@ final class ClientConfig {
       );
     }
 
+    final method = switch (signInMethod) {
+      '' || 'phone' => SignInMethod.phone,
+      'email' => SignInMethod.email,
+      _ => null,
+    };
+    if (method == null) {
+      problems.add('SIGN_IN_METHOD must be phone or email');
+    } else if (method == SignInMethod.email && release) {
+      // Users signed in by email have no verified phone number for drivers and passengers to
+      // call each other (IDN-2), so email stays out of releases until product decides IDN-6.
+      problems.add(
+        'SIGN_IN_METHOD=email is for development builds only; release builds sign in by phone',
+      );
+    }
+
     var tiles = mapTileUrl;
     if (tiles.isEmpty) {
       if (release) {
@@ -83,6 +110,7 @@ final class ClientConfig {
       apiBaseUrl: api ?? Uri(),
       supabaseUrl: supabase ?? Uri(),
       supabasePublishableKey: supabasePublishableKey,
+      signInMethod: method ?? SignInMethod.phone,
       mapTileUrlTemplate: tiles,
       mapAttribution: mapAttribution.isEmpty
           ? openStreetMapAttribution
@@ -100,6 +128,7 @@ final class ClientConfig {
   final Uri apiBaseUrl;
   final Uri supabaseUrl;
   final String supabasePublishableKey;
+  final SignInMethod signInMethod;
 
   /// Map tiles (`MAP_TILE_URL`), with `{z}`, `{x}` and `{y}` placeholders.
   final String mapTileUrlTemplate;

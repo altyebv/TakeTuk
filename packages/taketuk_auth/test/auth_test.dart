@@ -84,6 +84,37 @@ void main() {
     });
   });
 
+  test('normalizeEmail trims, lower-cases and rejects malformed addresses', () {
+    expect(
+      normalizeEmail('  Hiba.Osman@Example.COM '),
+      'hiba.osman@example.com',
+    );
+    expect(normalizeEmail('a+b@mail.example.sd'), 'a+b@mail.example.sd');
+    for (final input in [
+      '',
+      'hiba',
+      'hiba@',
+      '@example.com',
+      'hiba@example',
+      'hiba@@example.com',
+      'hiba osman@example.com',
+      'hiba@example..com',
+    ]) {
+      expect(normalizeEmail(input), isNull, reason: input);
+    }
+  });
+
+  test('sign-in addresses round-trip through navigation query parameters', () {
+    for (final address in const [
+      PhoneAddress('+249912345678'),
+      EmailAddress('hiba@example.com'),
+    ]) {
+      expect(SignInAddress.fromQuery(address.toQuery()), address);
+    }
+    expect(SignInAddress.fromQuery(const {}), isNull);
+    expect(SignInAddress.fromQuery(const {'phone': ''}), isNull);
+  });
+
   test('maps Supabase Auth errors to sign-in failures', () {
     expect(
       authFailureFrom(AuthRetryableFetchException(message: 'offline')).kind,
@@ -107,9 +138,26 @@ void main() {
     );
     expect(
       authFailureFrom(
-        const AuthException('bad phone', code: 'validation_failed'),
+        const AuthException('slow down', code: 'over_email_send_rate_limit'),
       ).kind,
-      AuthFailureKind.invalidPhone,
+      AuthFailureKind.rateLimited,
+    );
+    for (final code in ['validation_failed', 'email_address_invalid']) {
+      expect(
+        authFailureFrom(AuthException('bad address', code: code)).kind,
+        AuthFailureKind.invalidAddress,
+        reason: code,
+      );
+    }
+    expect(
+      authFailureFrom(
+        const AuthException(
+          'Email address not authorized',
+          code: 'email_address_not_authorized',
+          statusCode: '400',
+        ),
+      ).kind,
+      AuthFailureKind.addressNotAllowed,
     );
     expect(
       authFailureFrom(
@@ -140,7 +188,10 @@ void main() {
       await session.start();
       expect(session.status, SessionStatus.signedOut);
 
-      await auth.verifyCode(phoneE164: '+249911111111', code: '123456');
+      await auth.verifyCode(
+        address: const PhoneAddress('+249911111111'),
+        code: '123456',
+      );
       await pumpEventQueue();
       expect(session.status, SessionStatus.ready);
       expect(session.me!.displayName, 'Hiba');
@@ -211,9 +262,9 @@ void main() {
       tester,
     ) async {
       final auth = FakeAuthGateway();
-      String? sentTo;
+      SignInAddress? sentTo;
       await tester.pumpWidget(
-        _app(PhoneEntryScreen(auth: auth, onCodeSent: (p) => sentTo = p)),
+        _app(SignInScreen(auth: auth, onCodeSent: (a) => sentTo = a)),
       );
 
       await tester.enterText(find.byKey(const Key('phone')), '0812');
@@ -228,8 +279,51 @@ void main() {
       await tester.enterText(find.byKey(const Key('phone')), '091 234 5678');
       await tester.tap(find.text('Send code'));
       await tester.pumpAndSettle();
-      expect(auth.codesRequested, ['+249912345678']);
-      expect(sentTo, '+249912345678');
+      expect(auth.codesRequested, [const PhoneAddress('+249912345678')]);
+      expect(sentTo, const PhoneAddress('+249912345678'));
+    });
+
+    testWidgets('email entry validates and requests a code by email', (
+      tester,
+    ) async {
+      final auth = FakeAuthGateway();
+      SignInAddress? sentTo;
+      await tester.pumpWidget(
+        _app(
+          SignInScreen(
+            auth: auth,
+            method: SignInMethod.email,
+            onCodeSent: (a) => sentTo = a,
+          ),
+        ),
+      );
+      expect(find.byKey(const Key('phone')), findsNothing);
+
+      await tester.enterText(find.byKey(const Key('email')), 'hiba@example');
+      await tester.tap(find.text('Send code'));
+      await tester.pump();
+      expect(
+        find.textContaining('Enter a valid email address'),
+        findsOneWidget,
+      );
+      expect(auth.codesRequested, isEmpty);
+
+      auth.nextFailure = const AuthFailure(AuthFailureKind.addressNotAllowed);
+      await tester.enterText(
+        find.byKey(const Key('email')),
+        'Hiba@Example.com',
+      );
+      await tester.tap(find.text('Send code'));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Sign-in codes cannot be sent to this address yet.'),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.text('Send code'));
+      await tester.pumpAndSettle();
+      expect(auth.codesRequested, [const EmailAddress('hiba@example.com')]);
+      expect(sentTo, const EmailAddress('hiba@example.com'));
     });
 
     testWidgets('phone entry explains rate limits and network failures', (
@@ -238,7 +332,7 @@ void main() {
       final auth = FakeAuthGateway()
         ..nextFailure = const AuthFailure(AuthFailureKind.rateLimited);
       await tester.pumpWidget(
-        _app(PhoneEntryScreen(auth: auth, onCodeSent: (_) {})),
+        _app(SignInScreen(auth: auth, onCodeSent: (_) {})),
       );
       await tester.enterText(find.byKey(const Key('phone')), '0912345678');
       await tester.tap(find.text('Send code'));
@@ -254,8 +348,8 @@ void main() {
           _app(
             CodeEntryScreen(
               auth: auth,
-              phoneE164: '+249912345678',
-              onChangeNumber: () {},
+              address: const PhoneAddress('+249912345678'),
+              onChangeAddress: () {},
             ),
           ),
         );
@@ -273,6 +367,31 @@ void main() {
         expect(auth.currentUser?.phoneE164, '+249912345678');
       },
     );
+
+    testWidgets('code entry signs in by email and offers to change it', (
+      tester,
+    ) async {
+      final auth = FakeAuthGateway();
+      var changed = false;
+      await tester.pumpWidget(
+        _app(
+          CodeEntryScreen(
+            auth: auth,
+            address: const EmailAddress('hiba@example.com'),
+            onChangeAddress: () => changed = true,
+          ),
+        ),
+      );
+      expect(find.textContaining('hiba@example.com'), findsOneWidget);
+      await tester.tap(find.text('Change email'));
+      expect(changed, isTrue);
+
+      await tester.enterText(find.byKey(const Key('code')), '123456');
+      await tester.tap(find.text('Confirm'));
+      await tester.pumpAndSettle();
+      expect(auth.currentUser?.email, 'hiba@example.com');
+      expect(auth.currentUser?.phoneE164, isNull);
+    });
   });
 
   group('ClientConfig', () {
@@ -289,6 +408,31 @@ void main() {
       );
       expect(config.problems, isEmpty);
       expect(config.apiBaseUrl.host, 'api.example');
+      expect(config.signInMethod, SignInMethod.phone);
+    });
+
+    test('allows email sign-in only in development builds', () {
+      ClientConfig check(String method, {required bool release}) =>
+          ClientConfig.validate(
+            apiBaseUrl: 'https://api.example',
+            supabaseUrl: 'https://project.supabase.co',
+            supabasePublishableKey: 'sb_publishable_abc',
+            release: release,
+            signInMethod: method,
+            mapTileUrl: 'https://tiles.example/{z}/{x}/{y}.png',
+          );
+      final development = check('email', release: false);
+      expect(development.problems, isEmpty);
+      expect(development.signInMethod, SignInMethod.email);
+      expect(check('phone', release: true).problems, isEmpty);
+      expect(
+        check('email', release: true).problems.single,
+        contains('development builds only'),
+      );
+      expect(
+        check('whatsapp', release: false).problems.single,
+        contains('SIGN_IN_METHOD must be phone or email'),
+      );
     });
 
     test('allows http only in development builds', () {

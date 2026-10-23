@@ -76,6 +76,12 @@ Implemented and tested with widget tests over recorded backend responses (65 Dar
 
 Also in this increment: the backend accepts the FCM key from an environment variable (`FCM_SERVICE_ACCOUNT_JSON`).
 
+### Phase 8: live integration verification 🟡 started
+
+- ✅ **Supabase Auth.** Token verification works against the live project, using email sign-in. Email codes are a stopgap for development builds while SMS is unavailable (IDN-6). The check is repeatable with `npm run test:live -- supabase`.
+- 📋 **Pending:** the schema (`supabase db push` from a machine that can reach the database), the API login role, Storage uploads, FCM, and OSRM on real data.
+- 📋 **Phone sign-in** waits for an SMS provider (IDN-1).
+
 ---
 
 ## Next phases (planned)
@@ -92,6 +98,6 @@ Also in this increment: the backend accepts the FCM key from an environment vari
 ## Known gaps and risks
 
 Kept current in [IMPLEMENTATION_REPORT.md](IMPLEMENTATION_REPORT.md) §4, §6 and §7. The largest outstanding risks:
-- live integrations are unverified (Supabase, FCM, OSRM on real data; Google Routes has no key),
+- most live integrations are unverified: Supabase token verification works, but the schema, Storage, FCM and OSRM on real data are pending, and Google Routes has no key,
 - pricing, commission and dispatch values are placeholders awaiting product decisions,
-- the apps have sign-in and registration only; ride screens are next (phase 10).
+- the apps have not run on a device or against a running backend, and phone sign-in waits for an SMS provider (IDN-1, IDN-6).

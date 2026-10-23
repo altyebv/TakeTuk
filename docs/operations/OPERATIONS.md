@@ -44,6 +44,7 @@ supabase db reset           # applies supabase/migrations, then supabase/seed.sq
 - Create the API login role as in §4, with the local DB URL `postgres://postgres:postgres@127.0.0.1:54322/postgres`.
 - `SUPABASE_URL=http://127.0.0.1:54321`. Use `AUTH_JWT_MODE=jwks` if the local stack issues asymmetric tokens, otherwise `legacy_hs256` with the local JWT secret printed by `supabase status`.
 - `supabase/config.toml` enables phone sign-up with **test OTPs** for three fictitious numbers (`249900000001`–`003`, code `123456`). Never configure test OTPs in hosted projects.
+- Email sign-in (`SIGN_IN_METHOD=email` in the app build, IDN-6): codes appear in the local mail viewer at `http://127.0.0.1:54324`. The email template is `supabase/templates/sign_in_code.html`.
 - The `driver-documents` bucket is created by migration `…0900_storage_buckets.sql`.
 
 ## 3. Environment variables
@@ -112,7 +113,9 @@ On Supabase, connect through the **session** pooler (port 5432 on the pooler hos
 **Operator checklist after provisioning a Supabase project**
 1. *API settings → Exposed schemas*: only `public`, `graphql_public`. `taketuk` must not appear.
 2. Asymmetric JWT signing keys are enabled (then `AUTH_JWT_MODE=jwks`).
-3. Phone provider (SMS) configured; delivery to Sudanese numbers tested (IDN-1).
+3. Phone provider (SMS) configured; delivery to Sudanese numbers tested (IDN-1). Until then, for development builds signing in by email (IDN-6):
+   - *Authentication → Emails*: in both **Confirm signup** and **Magic Link**, the body must contain `{{ .Token }}`; paste `supabase/templates/sign_in_code.html`. The apps ask for the code and do not open links.
+   - Supabase's built-in email service only delivers to members of the project's organization, with a low hourly limit. Anyone else needs custom SMTP (*Authentication → SMTP Settings*).
 4. Bucket `driver-documents` exists and is private (migration).
 5. Point-in-time recovery enabled (plan-dependent).
 
@@ -140,9 +143,13 @@ npm run openapi          # regenerate docs/api/openapi.json after changing endpo
 
 Integration tests need `TEST_DATABASE_ADMIN_URL` (default `postgres://postgres:postgres@localhost:5432/postgres`), a role that can create databases and roles. Global setup migrates a template database from empty. Each suite clones it, and the API under test connects as a login role whose only rights come from `taketuk_api`.
 
-CI: `.github/workflows/backend.yml` runs the same checks against a `postgis/postgis:16-3.4` service container. **It has not run yet**, because the branch could not be pushed (see the implementation report).
+CI: `.github/workflows/backend.yml` runs the same checks against a `postgis/postgis:16-3.4` service container, on every pull request that touches the backend or the migrations.
 
-On demand, `OSRM_LIVE_URL=… npm run test:live` runs the OSRM adapter against a real `osrm-routed` serving the synthetic network (`infra/osrm/README.md`). The Flutter apps and packages have their own checks: see [apps/README.md](../../apps/README.md).
+Live checks, on demand only (`npm run test:live -- <name>`):
+- `osrm`: the OSRM adapter against a real `osrm-routed` serving the synthetic network. Needs `OSRM_LIVE_URL` (`infra/osrm/README.md`).
+- `supabase`: token verification against the Supabase project in `SUPABASE_URL`. A throwaway user signs in with an email code as the apps do (the admin API issues the code, so no email is sent), the backend verifier checks the token through the project's JWKS, and the user is deleted. Needs `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` and `SUPABASE_SECRET_KEY`.
+
+Behind an HTTPS proxy, Node's `fetch` needs `NODE_USE_ENV_PROXY=1`. The Flutter apps and packages have their own checks: see [apps/README.md](../../apps/README.md).
 
 ## 7. Deployment (planned; not performed)
 

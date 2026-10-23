@@ -19,6 +19,7 @@ class PassengerApp extends StatefulWidget {
     required this.session,
     required this.mapSettings,
     required this.location,
+    this.signInMethod = SignInMethod.phone,
     this.ridePollInterval = const Duration(seconds: 4),
     super.key,
   });
@@ -26,6 +27,9 @@ class PassengerApp extends StatefulWidget {
   final AuthGateway auth;
   final TaketukApi api;
   final SessionController session;
+
+  /// How sign-in codes are sent (`SIGN_IN_METHOD`).
+  final SignInMethod signInMethod;
   final MapSettings mapSettings;
   final DeviceLocation location;
   final Duration ridePollInterval;
@@ -47,23 +51,28 @@ class _PassengerAppState extends State<PassengerApp> {
       GoRoute(path: Routes.starting, builder: (_, _) => const StartingScreen()),
       GoRoute(
         path: Routes.signIn,
-        builder: (context, _) => PhoneEntryScreen(
+        builder: (context, _) => SignInScreen(
           auth: widget.auth,
+          method: widget.signInMethod,
           heading: PassengerLocalizations.of(context).appName,
-          onCodeSent: (phone) => context.go(
+          onCodeSent: (address) => context.go(
             Uri(
               path: Routes.signInCode,
-              queryParameters: {'phone': phone},
+              queryParameters: address.toQuery(),
             ).toString(),
           ),
         ),
         routes: [
           GoRoute(
             path: 'code',
+            redirect: (_, state) =>
+                SignInAddress.fromQuery(state.uri.queryParameters) == null
+                ? Routes.signIn
+                : null,
             builder: (context, state) => CodeEntryScreen(
               auth: widget.auth,
-              phoneE164: state.uri.queryParameters['phone'] ?? '',
-              onChangeNumber: () => context.go(Routes.signIn),
+              address: SignInAddress.fromQuery(state.uri.queryParameters)!,
+              onChangeAddress: () => context.go(Routes.signIn),
             ),
           ),
         ],

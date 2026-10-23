@@ -22,14 +22,23 @@ class TaketukAuthLocalizationsEn extends TaketukAuthLocalizations {
   String get phoneHelp => 'We will send you a code by SMS.';
 
   @override
+  String get emailLabel => 'Email';
+
+  @override
+  String get emailHint => 'name@example.com';
+
+  @override
+  String get emailHelp => 'We will send you a code by email.';
+
+  @override
   String get sendCode => 'Send code';
 
   @override
   String get codeTitle => 'Enter the code';
 
   @override
-  String codeSentTo(String phone) {
-    return 'Enter the code we sent to $phone.';
+  String codeSentTo(String address) {
+    return 'Enter the code we sent to $address.';
   }
 
   @override
@@ -48,11 +57,22 @@ class TaketukAuthLocalizationsEn extends TaketukAuthLocalizations {
   String get changeNumber => 'Change number';
 
   @override
+  String get changeEmail => 'Change email';
+
+  @override
   String get signOut => 'Sign out';
 
   @override
   String get errorInvalidPhone =>
       'Enter a Sudanese mobile number, for example 0912345678.';
+
+  @override
+  String get errorInvalidEmail =>
+      'Enter a valid email address, for example name@example.com.';
+
+  @override
+  String get errorAddressNotAllowed =>
+      'Sign-in codes cannot be sent to this address yet.';
 
   @override
   String get errorInvalidCode => 'The code is wrong or has expired.';

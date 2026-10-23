@@ -124,7 +124,7 @@ node dist/src/main.js                                        # smoke test (§2)
 
 | Integration | State | To complete |
 |---|---|---|
-| Supabase project (Auth JWKS, Storage, roles) | Code paths implemented. **Not verified live.** | Create staging project; enable asymmetric signing keys; `supabase db push`; create the API login role (OPERATIONS §4); run the smoke test with real tokens |
+| Supabase project (Auth JWKS, Storage, roles) | Token verification **verified live** (§11): email sign-in, ES256 through the project JWKS. **Schema not applied, API login role not created, Storage not exercised** | `supabase db push` from a machine that can reach the database (§11.3); create the API login role (OPERATIONS §4); exercise Storage uploads |
 | Supabase CLI local stack | Config and migrations ready. **`supabase start` not run** (Docker image pulls were rate-limited or blocked in this environment) | Run `supabase start && supabase db reset` |
 | Supabase Storage adapter | storage-js based. **Not verified live.** | Exercise upload URL, existence check and view URL against staging |
 | Google Routes API | Adapter matches the documented format. **Not verified live.** No key. | Server key restricted to Routes API; compare distances for Wad Madani routes (MAP-1); terms review (MAP-2) |
@@ -291,3 +291,60 @@ Analysis with `--fatal-infos`, formatting and generated-code freshness are clean
 2. **A device run** of both apps against a staging backend: the phase 10 completion criterion.
 3. **Phase 11:** an admin dashboard for driver approval, so the end-to-end flow needs no SQL.
 
+## 11. Email sign-in and the first live Supabase check
+
+### 11.1 What was implemented
+
+- **Email sign-in for development builds** (`SIGN_IN_METHOD=email`), because SMS delivery (Twilio) is not available yet (OPEN_DECISIONS IDN-6). Release builds refuse it: email accounts have no verified phone number, so drivers and passengers cannot call each other.
+- **`taketuk_auth`:**
+  - `SignInAddress` (a phone number or an email address) across the gateway, the screens and navigation;
+  - `SignInScreen` replaces `PhoneEntryScreen`;
+  - email normalisation;
+  - mapping of Supabase's email errors (rate limit, invalid address, address not allowed by the built-in email service);
+  - Arabic and English strings.
+- **Supabase:** the email template `supabase/templates/sign_in_code.html` (the code only, no link), used by the local stack's config.
+- **Backend:** no change was needed, because the phone claim was already optional. Added the live check `test/live/supabase-auth.live-spec.ts`.
+
+### 11.2 Verified against the live Supabase project
+
+These ran from this environment against the project in `SUPABASE_URL`:
+
+- **Auth settings** (public endpoint): email provider on, phone provider off, sign-ups open, email confirmation required.
+- **Sign-in by email code:**
+  - a throwaway user was created through the admin API, which issues the code without sending an email;
+  - the code was exchanged with the publishable key only, exactly as the apps do;
+  - the project issued an ES256 token with a `kid`, the expected issuer and audience, role `authenticated`, an empty phone claim and a 1-hour lifetime;
+  - this project's email codes are **8 digits**; the code field accepts up to 10.
+- **A wrong code** gets `403 otp_expired`, which the apps show as "wrong or expired".
+- **The backend**, running here against a local database through the least-privilege role and verifying with the live JWKS:
+  - `GET /v1/me` answered 200, unregistered;
+  - passenger registration answered 201, and the account then had the passenger role and no phone number;
+  - a copy of the token with a tampered signature got `401 INVALID_TOKEN`.
+- **Cleanup:** the user was deleted, and no test users remain in the project.
+- **Repeatable:** `npm run test:live -- supabase` (2 tests) ran and passed against the project.
+
+### 11.3 Not possible from this environment
+
+- **The database.** Only HTTPS leaves this environment, so a PostgreSQL URL cannot be used here. The schema must be applied from a machine that can reach the database (`supabase link`, then `supabase db push`).
+- **Storage uploads.** The private `driver-documents` bucket is created by the migrations, which are not applied yet. The project already has a **public** bucket, `TakeTukDocs`, which TAKE-TUK does not use. Driver documents must never be stored in a public bucket.
+
+### 11.4 Incident: database password partly exposed
+
+While checking the format of `SUPABASE_DB_URL` without printing it, two fragments of the database password were printed into the session output. The password contains `@` and `?` without URL escaping, so the URL parser split the password at those characters. The password should be reset, and the variable removed from the environment, since this environment cannot use it. An unescaped password would also have broken the backend's connection string.
+
+### 11.5 What was tested (all ran and passed here)
+
+| Suite | Tests |
+|---|---:|
+| `packages/taketuk_auth` | 19. New: email normalisation, address round-trip, email entry, email code, the `SIGN_IN_METHOD` setting |
+| `apps/passenger_app` | 15. New: email sign-in through to registration |
+| `apps/driver_app` | 12. New: email sign-in through to the applicant form |
+| Backend live `supabase` | 2, against the live project |
+
+The other suites are unchanged: backend `npm test` 196, `taketuk_api` 20, `taketuk_ui` 6. Analysis with `--fatal-infos` and formatting are clean.
+
+### 11.6 Recommended next phase
+
+1. **Reset the database password.** Then apply the schema from your machine and create the API login role (OPERATIONS §4).
+2. **Email templates** with `{{ .Token }}` (OPERATIONS §4). Then a device run with `SIGN_IN_METHOD=email` against a backend the phone can reach.
+3. **Phase 11:** the admin dashboard, so drivers can be approved without SQL.

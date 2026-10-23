@@ -4,10 +4,14 @@ import 'package:supabase_flutter/supabase_flutter.dart' hide AuthUser;
 
 import 'auth_gateway.dart';
 
-/// [AuthGateway] over Supabase Auth phone OTP. Only the publishable key is used: it is designed
-/// to be public and has no access to TAKE-TUK data (docs/security/SECURITY.md §4).
+/// [AuthGateway] over Supabase Auth one-time codes, by SMS or email. Only the publishable key is
+/// used: it is designed to be public and has no access to TAKE-TUK data
+/// (docs/security/SECURITY.md §4).
 ///
-/// Not verified against a live Supabase project yet (IMPLEMENTATION_REPORT §4).
+/// Email codes need the Supabase email templates to include `{{ .Token }}` (OPERATIONS §4).
+///
+/// The email-code exchange it makes was verified against the live project over HTTP
+/// (IMPLEMENTATION_REPORT §11); this class itself has not run against it yet (no device run).
 final class SupabaseAuthGateway implements AuthGateway {
   SupabaseAuthGateway(this._auth);
 
@@ -34,9 +38,18 @@ final class SupabaseAuthGateway implements AuthGateway {
       .distinct((a, b) => a?.id == b?.id);
 
   @override
-  Future<void> requestCode(String phoneE164) async {
+  Future<void> requestCode(SignInAddress address) async {
     try {
-      await _auth.signInWithOtp(phone: phoneE164, shouldCreateUser: true);
+      await switch (address) {
+        PhoneAddress(:final phoneE164) => _auth.signInWithOtp(
+          phone: phoneE164,
+          shouldCreateUser: true,
+        ),
+        EmailAddress(:final email) => _auth.signInWithOtp(
+          email: email,
+          shouldCreateUser: true,
+        ),
+      };
     } on AuthException catch (error) {
       throw authFailureFrom(error);
     }
@@ -44,11 +57,23 @@ final class SupabaseAuthGateway implements AuthGateway {
 
   @override
   Future<void> verifyCode({
-    required String phoneE164,
+    required SignInAddress address,
     required String code,
   }) async {
     try {
-      await _auth.verifyOTP(phone: phoneE164, token: code, type: OtpType.sms);
+      await switch (address) {
+        PhoneAddress(:final phoneE164) => _auth.verifyOTP(
+          phone: phoneE164,
+          token: code,
+          type: OtpType.sms,
+        ),
+        // `email` covers both a new user's sign-up code and a returning user's sign-in code.
+        EmailAddress(:final email) => _auth.verifyOTP(
+          email: email,
+          token: code,
+          type: OtpType.email,
+        ),
+      };
     } on AuthException catch (error) {
       throw authFailureFrom(error);
     }
@@ -83,6 +108,10 @@ final class SupabaseAuthGateway implements AuthGateway {
               phone.startsWith('+') ? phone : '+$phone',
             _ => null,
           },
+          email: switch (user.email) {
+            final email? when email.isNotEmpty => email,
+            _ => null,
+          },
         );
 }
 
@@ -93,11 +122,19 @@ AuthFailure authFailureFrom(AuthException error) {
     AuthException(code: 'otp_expired' || 'invalid_credentials') =>
       AuthFailureKind.invalidCode,
     AuthException(
-      code: 'over_sms_send_rate_limit' || 'over_request_rate_limit',
+      code: 'over_sms_send_rate_limit' ||
+          'over_email_send_rate_limit' ||
+          'over_request_rate_limit',
     ) ||
     AuthException(statusCode: '429') => AuthFailureKind.rateLimited,
-    AuthException(code: 'validation_failed' || 'phone_not_confirmed') ||
-    AuthException(statusCode: '422') => AuthFailureKind.invalidPhone,
+    AuthException(code: 'email_address_not_authorized') =>
+      AuthFailureKind.addressNotAllowed,
+    AuthException(
+      code: 'validation_failed' ||
+          'phone_not_confirmed' ||
+          'email_address_invalid',
+    ) ||
+    AuthException(statusCode: '422') => AuthFailureKind.invalidAddress,
     _ => AuthFailureKind.unavailable,
   };
   return AuthFailure(kind, error);

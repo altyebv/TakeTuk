@@ -45,8 +45,9 @@ http.Response _json(int status, Object? body) => http.Response(
 Future<SessionController> _pumpApp(
   WidgetTester tester,
   FakeAuthGateway auth,
-  Future<http.Response> Function(http.Request) respond,
-) async {
+  Future<http.Response> Function(http.Request) respond, {
+  SignInMethod signInMethod = SignInMethod.phone,
+}) async {
   tester.platformDispatcher.localesTestValue = const [Locale('en')];
   addTearDown(tester.platformDispatcher.clearLocalesTestValue);
   final api = TaketukApi(
@@ -64,6 +65,7 @@ Future<SessionController> _pumpApp(
       auth: auth,
       api: api,
       session: session,
+      signInMethod: signInMethod,
       serviceAreaCode: 'wad_madani',
       mapSettings: const MapSettings.withoutTiles(),
       location: FakeDeviceLocation(null),
@@ -96,6 +98,29 @@ void main() {
       );
     },
   );
+
+  testWidgets('signs in by email when the build uses email codes', (
+    tester,
+  ) async {
+    final auth = FakeAuthGateway();
+    await _pumpApp(
+      tester,
+      auth,
+      (request) async => _json(200, {..._me(roles: []), 'phoneE164': null}),
+      signInMethod: SignInMethod.email,
+    );
+
+    expect(find.byKey(const Key('phone')), findsNothing);
+    await tester.enterText(find.byKey(const Key('email')), 'musa@example.com');
+    await tester.tap(find.text('Send code'));
+    await tester.pumpAndSettle();
+    expect(auth.codesRequested, [const EmailAddress('musa@example.com')]);
+
+    await tester.enterText(find.byKey(const Key('code')), '123456');
+    await tester.tap(find.text('Confirm'));
+    await tester.pumpAndSettle();
+    expect(find.text('Drive with TAKE-TUK'), findsOneWidget);
+  });
 
   testWidgets('registers an applicant for the configured service area', (
     tester,

@@ -22,6 +22,7 @@ class DriverApp extends StatefulWidget {
     required this.location,
     required this.picker,
     required this.storage,
+    this.signInMethod = SignInMethod.phone,
     this.pollInterval = const Duration(seconds: 4),
     this.locationInterval = const Duration(seconds: 15),
     super.key,
@@ -30,6 +31,9 @@ class DriverApp extends StatefulWidget {
   final AuthGateway auth;
   final TaketukApi api;
   final SessionController session;
+
+  /// How sign-in codes are sent (`SIGN_IN_METHOD`).
+  final SignInMethod signInMethod;
 
   /// The service area new drivers apply for (`SERVICE_AREA_CODE`).
   final String serviceAreaCode;
@@ -59,23 +63,28 @@ class _DriverAppState extends State<DriverApp> {
       GoRoute(path: Routes.starting, builder: (_, _) => const StartingScreen()),
       GoRoute(
         path: Routes.signIn,
-        builder: (context, _) => PhoneEntryScreen(
+        builder: (context, _) => SignInScreen(
           auth: widget.auth,
+          method: widget.signInMethod,
           heading: DriverLocalizations.of(context).appName,
-          onCodeSent: (phone) => context.go(
+          onCodeSent: (address) => context.go(
             Uri(
               path: Routes.signInCode,
-              queryParameters: {'phone': phone},
+              queryParameters: address.toQuery(),
             ).toString(),
           ),
         ),
         routes: [
           GoRoute(
             path: 'code',
+            redirect: (_, state) =>
+                SignInAddress.fromQuery(state.uri.queryParameters) == null
+                ? Routes.signIn
+                : null,
             builder: (context, state) => CodeEntryScreen(
               auth: widget.auth,
-              phoneE164: state.uri.queryParameters['phone'] ?? '',
-              onChangeNumber: () => context.go(Routes.signIn),
+              address: SignInAddress.fromQuery(state.uri.queryParameters)!,
+              onChangeAddress: () => context.go(Routes.signIn),
             ),
           ),
         ],

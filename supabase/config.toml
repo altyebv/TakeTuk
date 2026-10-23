@@ -246,6 +246,17 @@ otp_expiry = 3600
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
 
+# TAKE-TUK: email sign-in codes for development builds (SIGN_IN_METHOD=email, OPEN_DECISIONS
+# IDN-6). The apps ask for the code and never open links. Both templates, because a first
+# sign-in can send either. Codes appear in the local mail viewer (port 54324).
+[auth.email.template.confirmation]
+subject = "TAKE-TUK sign-in code"
+content_path = "./supabase/templates/sign_in_code.html"
+
+[auth.email.template.magic_link]
+subject = "TAKE-TUK sign-in code"
+content_path = "./supabase/templates/sign_in_code.html"
+
 # Uncomment to customize email template
 # [auth.email.template.invite]
 # subject = "You have been invited"
