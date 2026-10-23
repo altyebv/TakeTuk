@@ -124,9 +124,9 @@ node dist/src/main.js                                        # smoke test (§2)
 
 | Integration | State | To complete |
 |---|---|---|
-| Supabase project (Auth JWKS, Storage, roles) | Token verification **verified live** (§11): email sign-in, ES256 through the project JWKS. **Schema not applied, API login role not created, Storage not exercised** | `supabase db push` from a machine that can reach the database (§11.3); create the API login role (OPERATIONS §4); exercise Storage uploads |
+| Supabase project (Auth JWKS, Storage, roles) | **Verified live** (§11): token verification (email sign-in, ES256 through the project JWKS); the schema applied with `supabase db push`, the private bucket and the Data API exposure. The API login role was created, but **the API has not yet connected to the database** | Run the API against the project (OPERATIONS §2c) |
 | Supabase CLI local stack | Config and migrations ready. **`supabase start` not run** (Docker image pulls were rate-limited or blocked in this environment) | Run `supabase start && supabase db reset` |
-| Supabase Storage adapter | storage-js based. **Not verified live.** | Exercise upload URL, existence check and view URL against staging |
+| Supabase Storage adapter | **Verified live** (§11.7): signed upload as the driver app sends it, existence check, signed view URL. The live run found a bug in the existence check, now fixed | — |
 | Google Routes API | Adapter matches the documented format. **Not verified live.** No key. | Server key restricted to Routes API; compare distances for Wad Madani routes (MAP-1); terms review (MAP-2) |
 | FCM / APNs | HTTP v1 adapter. **Not verified live.** No Firebase project. | Firebase project, service account, APNs key; device test |
 | SMS OTP delivery to Sudan | Not evaluated | Choose provider; test (IDN-1) |
@@ -348,3 +348,21 @@ The other suites are unchanged: backend `npm test` 196, `taketuk_api` 20, `taket
 1. **Reset the database password.** Then apply the schema from your machine and create the API login role (OPERATIONS §4).
 2. **Email templates** with `{{ .Token }}` (OPERATIONS §4). Then a device run with `SIGN_IN_METHOD=email` against a backend the phone can reach.
 3. **Phase 11:** the admin dashboard, so drivers can be approved without SQL.
+
+### 11.7 After the schema was applied
+
+`supabase db push` and the API login role were run by the project owner. `npm run test:live -- supabase-storage` then ran here and passed (5 tests):
+- `driver-documents` is private, limited to 10 MB and to JPEG, PNG and PDF;
+- the `taketuk` schema is not reachable through the Data API with the publishable key (`PGRST106`);
+- a document uploaded through a signed URL, exactly as the driver app sends it, is reported as present and is readable through a signed view URL;
+- neither the public path nor the publishable key can read the document;
+- a text file is refused;
+- a signed upload URL cannot be used twice.
+
+The test objects were removed, and the bucket is empty.
+
+**Bug found and fixed.** For a missing object, Storage answers the existence check (a `HEAD` request) with a bare 400. storage-js reports that as `data: false`, but `SupabaseDocumentStorage.objectExists` only recognized a "not found" message. So confirming a document that was never uploaded would have answered 503 `STORAGE_UNAVAILABLE` instead of saying the upload is missing. The adapter now relies on storage-js's own not-found result, and it also turns errors storage-js throws (network failures, 5xx) into `STORAGE_UNAVAILABLE`. Before, those escaped as raw errors. New unit tests cover all of these cases (backend `npm test`: 200).
+
+**Also fixed:** the npm scripts never read `backend/.env`, although OPERATIONS §2a told developers to create one. So `npm run start:dev` would have failed with `DATABASE_URL` missing. `start`, `start:dev`, `cli`, `db:migrate` and `db:seed:dev` now load it with `node --env-file-if-exists`. A check here showed that the file is read, and that a variable set in the environment takes precedence over it. The container image is unchanged.
+
+Not verified yet: the API connecting to the project's database through the session pooler with `sslmode=verify-full` (OPERATIONS §2c).

@@ -110,10 +110,10 @@ As of 2026-10-23 (third increment and the first live Supabase check). Details ar
 |---|---|---|
 | Documentation foundation, ADRs 0001–0016 | Written and reconciled with the implementation | `docs/` |
 | Backend scaffold, configuration, health, logging, CLI | Implemented and tested | `docs/operations/OPERATIONS.md` |
-| Database schema and migrations | Implemented. Tested from a clean database on PostgreSQL 16 + PostGIS 3.4. **Not yet applied through the Supabase CLI** | `docs/architecture/DATABASE_DESIGN.md` |
+| Database schema and migrations | Implemented. Tested from a clean database on PostgreSQL 16 + PostGIS 3.4, and applied to the Supabase project with `supabase db push`. **The API has not yet connected to it** | `docs/architecture/DATABASE_DESIGN.md` |
 | Identity and authorization | Implemented and tested. Token verification is **verified against the live Supabase project** (email sign-in). Phone sign-in is **not verified** (no SMS provider yet) | `docs/security/SECURITY.md` |
 | Ride-booking vertical slice (negotiation, dispatch, atomic assignment, trip, cash payment, commission ledger) | Implemented and tested end to end against PostgreSQL, including concurrency, idempotency and failure tests | `docs/domain/STATE_MACHINES.md` |
-| External integrations (Google Routes, FCM, Supabase Storage) | Adapters written and unit-tested against documented formats. **Not verified against live services** | `docs/IMPLEMENTATION_REPORT.md` |
+| External integrations (Google Routes, FCM, Supabase Storage) | Adapters written and unit-tested. Supabase Storage is **verified against the live project**. Google Routes and FCM are **not verified against live services** | `docs/IMPLEMENTATION_REPORT.md` |
 | Self-hosted routing (OSRM) | Implemented. Verified against a real OSRM server on a synthetic network. **Not yet run on Wad Madani map data** | ADR-0017, `infra/osrm/README.md` |
 | Flutter apps (passenger, driver) and shared packages | Implemented and tested with widget tests: sign-in by SMS code (or email code in development builds), registration, the passenger ride flow, driver onboarding, offers and trips, Arabic/RTL. Debug APKs build in CI. **Not yet run on a device** | `apps/README.md`, ADR-0018 |
 | CI workflow | Runs and passes on GitHub Actions (format, lint, type check, tests against PostGIS, build, audit) | `.github/workflows/backend.yml` |
