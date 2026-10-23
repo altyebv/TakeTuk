@@ -94,6 +94,24 @@ This prints a sign-in code and creates the account on first use. No email is sen
 
 With real addresses and Supabase's built-in email service, both addresses must belong to members of the project's organization.
 
+### 2d. Reaching the local API from anywhere (Cloudflare quick tunnel)
+
+Gives the API from §2c a public https address, so phones on mobile data can use it too. It is free and needs no Cloudflare account. **Not verified yet.**
+
+1. **Install `cloudflared`:**
+   - Windows: `winget install --id Cloudflare.cloudflared`;
+   - macOS: `brew install cloudflared`;
+   - Linux: Cloudflare's packages.
+2. **Start the API** (§2c), then run `cloudflared tunnel --url http://localhost:3000`. It prints an address like `https://<random-words>.trycloudflare.com`.
+3. **Point the apps at it.** Set `API_BASE_URL` in `config/local.json` to that address and rebuild. The address is compiled into the app.
+4. **Optionally, set `TRUST_PROXY=true`** in `backend/.env`. The API then reads client addresses from the tunnel's forwarding headers.
+
+Things to know:
+- A new address is issued every time the tunnel starts, so each restart means rebuilding the apps. A fixed address needs a named tunnel, which requires a free Cloudflare account and a domain on Cloudflare.
+- The API only runs while the laptop is on and awake, but unlike Render's free plan it never sleeps on its own.
+- While the tunnel runs, the API is on the public internet. Every business endpoint still requires a signed-in user. Only `/health` and, when `API_DOCS_ENABLED=true`, the Swagger UI are open. Stop the tunnel when testing ends.
+- Quick tunnels are meant for testing, and Cloudflare limits them. That suits a few testers. The apps poll and need nothing else from the tunnel.
+
 ## 3. Environment variables
 
 Validated at startup by `backend/src/config/app-config.ts`. Invalid configuration means the process exits with a list of issues. Placeholders are in `backend/.env.example`.
