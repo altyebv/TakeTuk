@@ -132,7 +132,7 @@ node dist/src/main.js                                        # smoke test (§2)
 | SMS OTP delivery to Sudan | Not evaluated | Choose provider; test (IDN-1) |
 | Container image | Dockerfile written. **Not built** (no registry access here). | Build in CI or locally |
 | OSRM routing (§9) | Adapter verified against a real `osrm-routed` v26.4.0 on a synthetic network. **Not run on real Wad Madani data**; the Docker dataset path has not been run | Build a dataset from a Sudan/Wad Madani extract (`infra/osrm`); compare quotes for known trips (MAP-1) |
-| Flutter apps (§9) | Analysed and tested with fakes. **No Android build here** (no Android SDK), **not run on a device**, **not signed in against Supabase** | Run the mobile CI workflow (debug APKs); device test against staging |
+| Flutter apps (§9) | Analysed and tested with fakes. Debug APKs of both apps **build in CI**. **Not run on a device**, **not signed in against Supabase** | Device test against staging |
 
 ## 5. Assumptions made
 
@@ -225,17 +225,16 @@ Mutation checks were run by hand and reverted:
 ### 9.3 Not verified
 
 - **OSRM:** real Wad Madani OpenStreetMap data, since no extract could be downloaded here (Geofabrik and other OSM mirrors were blocked), and the Docker dataset path.
-- **Android builds:** the Android SDK host was blocked here. The mobile CI workflow builds debug APKs but has not run yet.
+- **Android builds** could not run here (the Android SDK host was blocked). The `mobile` CI workflow built debug APKs of both apps on [altyebv/TakeTuk#3](https://github.com/altyebv/TakeTuk/pull/3). Release builds and iOS are not built.
 - **Devices and Supabase:** the apps have not run on a device, signed in against a Supabase project, or sent an SMS to a Sudanese number (IDN-1). iOS is not built (APP-2).
 - **Arabic copy:** needs review by a native speaker (APP-3).
 
 ### 9.4 Recommended next phase
 
-1. **Run the mobile CI workflow** by opening a pull request, so the debug APKs are built once.
-2. **Phase 8 (staging):**
+1. **Phase 8 (staging):**
    - a Supabase project: `db push`, the login role, JWKS with real OTP tokens, Storage, test SMS numbers, then real SMS to Sudan;
    - an OSRM dataset from a real extract, with quotes compared to known trips;
    - an FCM project.
-3. **Phase 10, passenger ride flow:** quote → proposed fare → searching → counteroffer → trip. Maps use `flutter_map` (MAP-6, resolved); the map-image provider and place search are still to choose.
-4. **Phase 10, driver onboarding:** vehicle, documents through signed upload URLs, submission, availability and offers.
+2. **Phase 10, passenger ride flow:** quote → proposed fare → searching → counteroffer → trip. Maps use `flutter_map` (MAP-6, resolved); the map-image provider and place search are still to choose.
+3. **Phase 10, driver onboarding:** vehicle, documents through signed upload URLs, submission, availability and offers.
 

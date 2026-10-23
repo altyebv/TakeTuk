@@ -71,7 +71,7 @@ The generated files are committed. CI fails when any of them is out of date.
 
 ## Verification status
 
-- **Verified (tests run here):**
+- **Verified:** debug APKs of both apps build in CI (`mobile` workflow). Tests run here:
   - analysis and formatting clean;
   - 47 tests covering:
     - the generated client against recorded backend responses;
@@ -81,7 +81,6 @@ The generated files are committed. CI fails when any of them is out of date.
     - session state;
     - the sign-in and registration flows of both apps, in Arabic and English.
 - **Not verified:**
-  - an Android build (no Android SDK in the build environment; CI builds debug APKs);
   - a run on a device;
   - sign-in against a live Supabase project;
   - SMS delivery to Sudanese numbers (OPEN_DECISIONS IDN-1);

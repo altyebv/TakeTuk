@@ -62,7 +62,7 @@ Implemented and tested (47 Dart tests):
 - `taketuk_ui`: theme, Arabic/RTL and error messages;
 - passenger and driver app shells with sign-in and registration.
 
-**Pending:** completion criteria "apps build in CI" (the mobile workflow builds debug APKs and has not run yet) and "sign-in against staging" (needs a Supabase project).
+Completion criterion "apps build in CI" is met: the `mobile` workflow builds debug APKs of both apps. **Pending:** "sign-in against staging", which needs Supabase reachable from the build environment and test credentials (phase 8).
 
 ---
 
