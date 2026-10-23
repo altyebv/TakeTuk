@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
+import 'package:http/http.dart' as http;
 import 'package:taketuk_api/taketuk_api.dart';
 import 'package:taketuk_auth/taketuk_auth.dart';
 import 'package:taketuk_ui/taketuk_ui.dart';
 
+import 'earnings_screen.dart';
 import 'l10n/driver_localizations.dart';
+import 'onboarding/documents.dart';
 import 'routing.dart';
 import 'screens.dart';
 
@@ -15,6 +18,12 @@ class DriverApp extends StatefulWidget {
     required this.api,
     required this.session,
     required this.serviceAreaCode,
+    required this.mapSettings,
+    required this.location,
+    required this.picker,
+    required this.storage,
+    this.pollInterval = const Duration(seconds: 4),
+    this.locationInterval = const Duration(seconds: 15),
     super.key,
   });
 
@@ -24,6 +33,14 @@ class DriverApp extends StatefulWidget {
 
   /// The service area new drivers apply for (`SERVICE_AREA_CODE`).
   final String serviceAreaCode;
+  final MapSettings mapSettings;
+  final DeviceLocation location;
+  final DocumentPicker picker;
+
+  /// HTTP client for document uploads to signed storage URLs.
+  final http.Client storage;
+  final Duration pollInterval;
+  final Duration locationInterval;
 
   @override
   State<DriverApp> createState() => _DriverAppState();
@@ -77,7 +94,21 @@ class _DriverAppState extends State<DriverApp> {
       ),
       GoRoute(
         path: Routes.home,
-        builder: (_, _) => HomeScreen(api: widget.api, session: widget.session),
+        builder: (context, _) => HomeScreen(
+          api: widget.api,
+          session: widget.session,
+          mapSettings: widget.mapSettings,
+          location: widget.location,
+          picker: widget.picker,
+          storage: widget.storage,
+          pollInterval: widget.pollInterval,
+          locationInterval: widget.locationInterval,
+          onEarnings: () => context.push(Routes.earnings),
+        ),
+      ),
+      GoRoute(
+        path: Routes.earnings,
+        builder: (_, _) => EarningsScreen(api: widget.api),
       ),
     ],
   );

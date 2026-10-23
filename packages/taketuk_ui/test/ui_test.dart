@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:taketuk_api/taketuk_api.dart';
 import 'package:taketuk_ui/taketuk_ui.dart';
 
@@ -139,4 +141,60 @@ void main() {
     expect(runs, 1);
     expect(find.text('Go'), findsOneWidget);
   });
+
+  testWidgets('theme buttons lay out inside rows (no infinite minimum width)', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: taketukTheme(),
+        home: Scaffold(
+          body: Row(
+            children: [
+              FilledButton(onPressed: () {}, child: const Text('Accept')),
+              const BusyButton(label: 'Busy', onPressed: null),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    expect(tester.getSize(find.byType(FilledButton).first).height, 52);
+  });
+
+  testWidgets(
+    'the map shows markers and attribution, and tiles only when set',
+    (tester) async {
+      Future<void> pumpMap(MapSettings settings) => tester.pumpWidget(
+        MaterialApp(
+          home: TaketukMap(
+            settings: settings,
+            markers: [
+              tripMarker(
+                wadMadaniCentre,
+                color: Colors.green,
+                label: 'Pickup',
+                key: const Key('pin'),
+              ),
+            ],
+          ),
+        ),
+      );
+      await pumpMap(const MapSettings.withoutTiles());
+      expect(find.byKey(const Key('pin')), findsOneWidget);
+      expect(find.byType(TileLayer), findsNothing);
+      expect(find.byType(RichAttributionWidget), findsOneWidget);
+
+      await pumpMap(
+        const MapSettings(
+          tileUrlTemplate: 'https://tiles.example/{z}/{x}/{y}.png',
+          attribution: '© OpenStreetMap contributors',
+          userAgentPackageName: 'app.taketuk.test',
+        ),
+      );
+      final tiles = tester.widget<TileLayer>(find.byType(TileLayer));
+      expect(tiles.urlTemplate, 'https://tiles.example/{z}/{x}/{y}.png');
+      expect(const LatLng(14.4012, 33.5199), wadMadaniCentre);
+    },
+  );
 }

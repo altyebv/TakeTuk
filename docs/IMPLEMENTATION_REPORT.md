@@ -235,6 +235,59 @@ Mutation checks were run by hand and reverted:
    - a Supabase project: `db push`, the login role, JWKS with real OTP tokens, Storage, test SMS numbers, then real SMS to Sudan;
    - an OSRM dataset from a real extract, with quotes compared to known trips;
    - an FCM project.
-2. **Phase 10, passenger ride flow:** quote → proposed fare → searching → counteroffer → trip. Maps use `flutter_map` (MAP-6, resolved); the map-image provider and place search are still to choose.
-3. **Phase 10, driver onboarding:** vehicle, documents through signed upload URLs, submission, availability and offers.
+2. **Phase 10** (ride screens): done in the third increment (§10).
+
+## 10. Third increment
+
+### 10.1 What was implemented
+
+- **Backend:** `FCM_SERVICE_ACCOUNT_JSON` accepts the service-account key as JSON or base64. Exactly one of it and `FCM_SERVICE_ACCOUNT_FILE` is required, and the key is validated at startup without being echoed.
+- **Passenger app** (phase 10):
+  - a trip planner on a `flutter_map` map: pickup and destination by tap or device position, optional place names;
+  - the quote's minimum fare and trip estimate, and an offer that can be raised but never below the minimum;
+  - the ride request with one idempotency key per intent;
+  - the ride screen, polling every 4 s: drivers notified, counteroffers to accept or decline, the assigned driver with a call button, trip status, the cash fare due, cancellation;
+  - ride history; an open ride is resumed on start.
+- **Driver app** (phase 10):
+  - onboarding: a checklist of required documents, photos picked with `image_picker` (downscaled), uploaded straight to the signed URL the API issues, then confirmed; vehicle registration; submission; the reviewer's note after a rejection;
+  - for approved drivers: going online with an approved vehicle, position reports every 15 s while online, offers polled every 4 s with accept, decline or a higher fare;
+  - the trip: arrive, start, complete, cancel with a required reason; reporting the cash collected, a different amount, or non-payment;
+  - earnings with commission owed.
+- **Shared packages:**
+  - `taketuk_ui`: `TaketukMap` (tiles only when configured; OpenStreetMap attribution always shown), `DeviceLocation` over `geolocator`;
+  - `ClientConfig`: `MAP_TILE_URL` and `MAP_ATTRIBUTION`, with a tile provider required in release builds.
+
+### 10.2 Bugs found by the new tests and fixed
+
+- The theme's `Size.fromHeight(52)` minimum gave buttons an infinite minimum width, so any button in a `Row` failed layout. A regression test now covers it.
+- A dialog's text controller was disposed while the dialog was still animating closed.
+- The driver home's reload passed `setState` a closure that returned a `Future`, which Flutter rejects. The phase-9 retry button had the same bug.
+
+### 10.3 What was tested (all ran and passed here)
+
+| Suite | Tests |
+|---|---:|
+| Backend `npm test` | 196 (20 suites): §9.2 plus 3 FCM key configuration tests |
+| `packages/taketuk_api` | 20 |
+| `packages/taketuk_ui` | 6: adds the button-in-a-row regression and the map |
+| `packages/taketuk_auth` | 14: adds the map tile configuration |
+| `apps/passenger_app` | 14: adds 8 ride-flow tests |
+| `apps/driver_app` | 11: adds 8 onboarding, shift, trip and earnings tests |
+
+Analysis with `--fatal-infos`, formatting and generated-code freshness are clean.
+
+### 10.4 Not verified
+
+- **Devices and services:** no run on a phone, no live Supabase sign-in or Storage upload, no real push. The upload path is tested against a fake signed URL only.
+- **Live API from the apps:** the apps have not talked to a running backend; their tests use recorded responses.
+- **Polling:** API-1 is still open.
+- **Driver positions:** only while the app is open (DRV-6).
+
+### 10.5 Recommended next phase
+
+1. **Phase 8 against your Supabase project.** It is reachable now, and its JWKS publishes an ES256 key.
+   - Apply the schema (`supabase db push`, or provide `SUPABASE_DB_URL`) and create the API login role.
+   - Add a test phone number in the dashboard, then verify real sign-in tokens and Storage uploads.
+2. **A device run** of both apps against a staging backend: the phase 10 completion criterion.
+3. **Phase 11:** an admin dashboard for driver approval, so the end-to-end flow needs no SQL.
 

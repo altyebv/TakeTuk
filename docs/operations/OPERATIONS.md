@@ -75,7 +75,8 @@ Validated at startup by `backend/src/config/app-config.ts`. Invalid configuratio
 | `OSRM_ALLOW_HTTP` | false | set only when OSRM is reachable solely over an encrypted private network |
 | `ROUTING_TIMEOUT_MS` | 5000 | |
 | `NOTIFICATION_PROVIDER` | log | `fcm` in real environments (`log` refused in production) |
-| `FCM_PROJECT_ID`, `FCM_SERVICE_ACCOUNT_FILE` | — | required for `fcm`. The file is mounted as a secret. |
+| `FCM_PROJECT_ID` | — | required for `fcm` |
+| `FCM_SERVICE_ACCOUNT_FILE` or `FCM_SERVICE_ACCOUNT_JSON` | — | exactly one, for `fcm`. Either a path to the service-account key file (mounted as a secret), or the key itself: the JSON, or the JSON base64-encoded (`base64 -w0 key.json`) for platforms whose secret editors cannot hold JSON. Validated at startup without echoing it |
 | `WORKERS_ENABLED` | true | dispatch, outbox, retention and cleanup workers in-process |
 | `DISPATCH_TICK_MS` / `OUTBOX_TICK_MS` / `MAINTENANCE_TICK_MS` | 2000 / 1000 / 300000 | |
 | `QUOTE_TTL_SECONDS` | 600 | development default (PRC-6) |

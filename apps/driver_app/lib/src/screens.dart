@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:taketuk_api/taketuk_api.dart';
 import 'package:taketuk_auth/taketuk_auth.dart';
 import 'package:taketuk_ui/taketuk_ui.dart';
 
 import 'l10n/driver_localizations.dart';
+import 'onboarding/documents.dart';
+import 'onboarding/onboarding_screen.dart';
+import 'work/work_screen.dart';
 
 /// Driver applicant registration (`POST /v1/driver/registration`, idempotent for identical
 /// details). Vehicles and documents follow in the onboarding flow (roadmap phase 10).
@@ -125,13 +129,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 }
 
-/// Home: the applicant's review status (`GET /v1/driver/profile`). Going online, offers and
-/// trips arrive with roadmap phase 10.
+/// Home: what the driver needs to do next, by review status (STATE_MACHINES §6). Applicants and
+/// rejected drivers complete their application; approved drivers work; others see their status.
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({required this.api, required this.session, super.key});
+  const HomeScreen({
+    required this.api,
+    required this.session,
+    required this.mapSettings,
+    required this.location,
+    required this.picker,
+    required this.storage,
+    required this.onEarnings,
+    this.pollInterval = const Duration(seconds: 4),
+    this.locationInterval = const Duration(seconds: 15),
+    super.key,
+  });
 
   final TaketukApi api;
   final SessionController session;
+  final MapSettings mapSettings;
+  final DeviceLocation location;
+  final DocumentPicker picker;
+  final http.Client storage;
+  final VoidCallback onEarnings;
+  final Duration pollInterval;
+  final Duration locationInterval;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -139,6 +161,13 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late Future<DriverProfile> _profile = widget.api.drivers.getProfile();
+
+  void _reload() {
+    // A block body: setState must not return the new Future.
+    setState(() {
+      _profile = widget.api.drivers.getProfile();
+    });
+  }
 
   String _statusText(DriverLocalizations l10n, DriverProfileStatus status) =>
       switch (status) {
@@ -153,68 +182,84 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = DriverLocalizations.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.appName),
-        actions: [
-          IconButton(
-            tooltip: l10n.signOut,
-            icon: const Icon(Icons.logout),
-            onPressed: widget.session.signOut,
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: FutureBuilder<DriverProfile>(
-          future: _profile,
-          builder: (context, snapshot) => ListView(
-            padding: const EdgeInsets.all(24),
-            children: [
-              Text(
-                l10n.homeGreeting(widget.session.me?.displayName ?? ''),
-                style: Theme.of(context).textTheme.headlineSmall,
+    return FutureBuilder<DriverProfile>(
+      future: _profile,
+      builder: (context, snapshot) {
+        final profile = snapshot.data;
+        final approved = profile?.status == DriverProfileStatus.approved;
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(l10n.appName),
+            actions: [
+              if (approved)
+                IconButton(
+                  tooltip: l10n.earnings,
+                  icon: const Icon(Icons.account_balance_wallet),
+                  onPressed: widget.onEarnings,
+                ),
+              IconButton(
+                tooltip: l10n.signOut,
+                icon: const Icon(Icons.logout),
+                onPressed: widget.session.signOut,
               ),
-              const SizedBox(height: 16),
-              switch (snapshot) {
-                AsyncSnapshot(hasError: true, :final error?) => Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    ErrorMessage(error),
-                    const SizedBox(height: 16),
-                    BusyButton(
-                      label: TaketukUiLocalizations.of(context).retry,
-                      onPressed: () async {
-                        setState(
-                          () => _profile = widget.api.drivers.getProfile(),
-                        );
-                        await _profile.then((_) {}, onError: (_) {});
-                      },
-                    ),
-                  ],
-                ),
-                AsyncSnapshot(hasData: true, :final data?) => Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          key: const Key('status'),
-                          _statusText(l10n, data.status),
-                        ),
-                        if (data.reviewNote case final note?
-                            when data.status == DriverProfileStatus.rejected)
-                          Text(l10n.reviewNote(note)),
-                      ],
-                    ),
-                  ),
-                ),
-                _ => const Center(child: CircularProgressIndicator()),
-              },
             ],
           ),
-        ),
-      ),
+          body: SafeArea(
+            child: switch (snapshot) {
+              AsyncSnapshot(hasError: true, :final error?) => ListView(
+                padding: const EdgeInsets.all(24),
+                children: [
+                  ErrorMessage(error),
+                  const SizedBox(height: 16),
+                  FilledButton(
+                    onPressed: _reload,
+                    child: Text(TaketukUiLocalizations.of(context).retry),
+                  ),
+                ],
+              ),
+              AsyncSnapshot(hasData: true, data: final profile?) =>
+                switch (profile.status) {
+                  DriverProfileStatus.applicant ||
+                  DriverProfileStatus.rejected => OnboardingScreen(
+                    api: widget.api,
+                    profile: profile,
+                    picker: widget.picker,
+                    storage: widget.storage,
+                    onSubmitted: (_) => _reload(),
+                  ),
+                  DriverProfileStatus.approved => WorkScreen(
+                    api: widget.api,
+                    profile: profile,
+                    location: widget.location,
+                    mapSettings: widget.mapSettings,
+                    pollInterval: widget.pollInterval,
+                    locationInterval: widget.locationInterval,
+                  ),
+                  _ => ListView(
+                    padding: const EdgeInsets.all(24),
+                    children: [
+                      Text(
+                        l10n.homeGreeting(widget.session.me?.displayName ?? ''),
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                      const SizedBox(height: 16),
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Text(
+                            _statusText(l10n, profile.status),
+                            key: const Key('status'),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                },
+              _ => const Center(child: CircularProgressIndicator()),
+            },
+          ),
+        );
+      },
     );
   }
 }

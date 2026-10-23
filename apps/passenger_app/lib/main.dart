@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:taketuk_api/taketuk_api.dart';
 import 'package:taketuk_auth/taketuk_auth.dart';
+import 'package:taketuk_ui/taketuk_ui.dart';
 
 import 'src/app.dart';
 
@@ -22,5 +23,17 @@ Future<void> main() async {
   );
   final session = SessionController(auth: auth, api: api);
   unawaited(session.start());
-  runApp(PassengerApp(auth: auth, api: api, session: session));
+  runApp(
+    PassengerApp(
+      auth: auth,
+      api: api,
+      session: session,
+      mapSettings: MapSettings(
+        tileUrlTemplate: config.mapTileUrlTemplate,
+        attribution: config.mapAttribution,
+        userAgentPackageName: 'app.taketuk.passenger',
+      ),
+      location: const GeolocatorDeviceLocation(),
+    ),
+  );
 }

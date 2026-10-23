@@ -161,7 +161,7 @@ abstract class DriverLocalizations {
   /// No description provided for @statusApplicant.
   ///
   /// In en, this message translates to:
-  /// **'Next: add your vehicle and documents. This arrives in the next version of the app.'**
+  /// **'Next: add your vehicle and upload your documents.'**
   String get statusApplicant;
 
   /// No description provided for @statusPendingReview.
@@ -173,7 +173,7 @@ abstract class DriverLocalizations {
   /// No description provided for @statusApproved.
   ///
   /// In en, this message translates to:
-  /// **'You are approved. Going online arrives in the next version of the app.'**
+  /// **'You are approved. Go online to receive ride offers.'**
   String get statusApproved;
 
   /// No description provided for @statusRejected.
@@ -205,6 +205,510 @@ abstract class DriverLocalizations {
   /// In en, this message translates to:
   /// **'Sign out'**
   String get signOut;
+
+  /// No description provided for @documentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your documents'**
+  String get documentsTitle;
+
+  /// No description provided for @vehicleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your vehicle'**
+  String get vehicleTitle;
+
+  /// No description provided for @docDriverPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Your photo'**
+  String get docDriverPhoto;
+
+  /// No description provided for @docDrivingLicense.
+  ///
+  /// In en, this message translates to:
+  /// **'Driving licence'**
+  String get docDrivingLicense;
+
+  /// No description provided for @docNationalId.
+  ///
+  /// In en, this message translates to:
+  /// **'National ID'**
+  String get docNationalId;
+
+  /// No description provided for @docVehicleRegistration.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle registration'**
+  String get docVehicleRegistration;
+
+  /// No description provided for @docVehiclePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle photo'**
+  String get docVehiclePhoto;
+
+  /// No description provided for @docUploaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploaded'**
+  String get docUploaded;
+
+  /// No description provided for @docMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Not uploaded yet'**
+  String get docMissing;
+
+  /// No description provided for @upload.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload'**
+  String get upload;
+
+  /// No description provided for @replace.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace'**
+  String get replace;
+
+  /// No description provided for @takePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a photo'**
+  String get takePhoto;
+
+  /// No description provided for @chooseFromGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from gallery'**
+  String get chooseFromGallery;
+
+  /// No description provided for @addVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your vehicle'**
+  String get addVehicle;
+
+  /// No description provided for @vehicleTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle type'**
+  String get vehicleTypeLabel;
+
+  /// No description provided for @plateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Plate number'**
+  String get plateLabel;
+
+  /// No description provided for @vehicleDescriptionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Description (optional), e.g. colour'**
+  String get vehicleDescriptionLabel;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @vehicleStatusPendingReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for review'**
+  String get vehicleStatusPendingReview;
+
+  /// No description provided for @vehicleStatusApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get vehicleStatusApproved;
+
+  /// No description provided for @vehicleStatusRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Not approved'**
+  String get vehicleStatusRejected;
+
+  /// No description provided for @vehicleStatusSuspended.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspended'**
+  String get vehicleStatusSuspended;
+
+  /// No description provided for @vehicleStatusUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown status'**
+  String get vehicleStatusUnknown;
+
+  /// No description provided for @submitForReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit for review'**
+  String get submitForReview;
+
+  /// No description provided for @submitHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload every document and add your vehicle, then submit. We review applications before you can take rides.'**
+  String get submitHelp;
+
+  /// No description provided for @resubmitHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix what the reviewer noted, then submit again.'**
+  String get resubmitHelp;
+
+  /// No description provided for @errorRequirementsNotMet.
+  ///
+  /// In en, this message translates to:
+  /// **'Some documents or the vehicle are still missing.'**
+  String get errorRequirementsNotMet;
+
+  /// No description provided for @errorVehicleAlreadyRegistered.
+  ///
+  /// In en, this message translates to:
+  /// **'This vehicle is already registered.'**
+  String get errorVehicleAlreadyRegistered;
+
+  /// No description provided for @errorVehicleNotEligible.
+  ///
+  /// In en, this message translates to:
+  /// **'This vehicle cannot be used for this service.'**
+  String get errorVehicleNotEligible;
+
+  /// No description provided for @online.
+  ///
+  /// In en, this message translates to:
+  /// **'Online'**
+  String get online;
+
+  /// No description provided for @offline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get offline;
+
+  /// No description provided for @goOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'Go online'**
+  String get goOnline;
+
+  /// No description provided for @goOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Go offline'**
+  String get goOffline;
+
+  /// No description provided for @onlineHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'You receive ride offers while you are online and the app is open.'**
+  String get onlineHelp;
+
+  /// No description provided for @chooseVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle for this shift'**
+  String get chooseVehicle;
+
+  /// No description provided for @noApprovedVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'You need an approved vehicle to go online.'**
+  String get noApprovedVehicle;
+
+  /// No description provided for @locationOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Your location is not available. Turn on location to receive offers.'**
+  String get locationOff;
+
+  /// No description provided for @waitingForOffers.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for ride offers…'**
+  String get waitingForOffers;
+
+  /// No description provided for @offerFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'{passenger} offers {amount}'**
+  String offerFrom(String passenger, String amount);
+
+  /// No description provided for @offerTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'{toPickup} to pickup · trip {trip}'**
+  String offerTrip(String toPickup, String trip);
+
+  /// No description provided for @offerMinimum.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum fare {amount}'**
+  String offerMinimum(String amount);
+
+  /// No description provided for @offerCountered.
+  ///
+  /// In en, this message translates to:
+  /// **'You proposed {amount}. Waiting for the passenger.'**
+  String offerCountered(String amount);
+
+  /// No description provided for @acceptOffer.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get acceptOffer;
+
+  /// No description provided for @declineOffer.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get declineOffer;
+
+  /// No description provided for @proposeFare.
+  ///
+  /// In en, this message translates to:
+  /// **'Propose a fare'**
+  String get proposeFare;
+
+  /// No description provided for @proposeFareTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your fare'**
+  String get proposeFareTitle;
+
+  /// No description provided for @proposeFareHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'It must be higher than the passenger\'s offer.'**
+  String get proposeFareHelp;
+
+  /// No description provided for @send.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get send;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @km.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} km'**
+  String km(String value);
+
+  /// No description provided for @tripToPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to the pickup'**
+  String get tripToPickup;
+
+  /// No description provided for @tripAtPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the passenger'**
+  String get tripAtPickup;
+
+  /// No description provided for @tripInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip in progress'**
+  String get tripInProgress;
+
+  /// No description provided for @tripCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip completed'**
+  String get tripCompleted;
+
+  /// No description provided for @tripCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'This ride was cancelled'**
+  String get tripCancelled;
+
+  /// No description provided for @arrived.
+  ///
+  /// In en, this message translates to:
+  /// **'I have arrived'**
+  String get arrived;
+
+  /// No description provided for @startTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Start trip'**
+  String get startTrip;
+
+  /// No description provided for @completeTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete trip'**
+  String get completeTrip;
+
+  /// No description provided for @cancelRide.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel ride'**
+  String get cancelRide;
+
+  /// No description provided for @cancelReasonRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason (required)'**
+  String get cancelReasonRequired;
+
+  /// No description provided for @errorReasonTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter at least 3 characters.'**
+  String get errorReasonTooShort;
+
+  /// No description provided for @keepRide.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep ride'**
+  String get keepRide;
+
+  /// No description provided for @callPassenger.
+  ///
+  /// In en, this message translates to:
+  /// **'Call passenger'**
+  String get callPassenger;
+
+  /// No description provided for @pickupPoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup'**
+  String get pickupPoint;
+
+  /// No description provided for @destinationPoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Destination'**
+  String get destinationPoint;
+
+  /// No description provided for @fareToCollect.
+  ///
+  /// In en, this message translates to:
+  /// **'Collect {amount} in cash'**
+  String fareToCollect(String amount);
+
+  /// No description provided for @collectedFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected {amount}'**
+  String collectedFull(String amount);
+
+  /// No description provided for @collectedOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected a different amount'**
+  String get collectedOther;
+
+  /// No description provided for @notCollected.
+  ///
+  /// In en, this message translates to:
+  /// **'The passenger did not pay'**
+  String get notCollected;
+
+  /// No description provided for @amountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount ({currency})'**
+  String amountLabel(String currency);
+
+  /// No description provided for @paymentRecorded.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment recorded.'**
+  String get paymentRecorded;
+
+  /// No description provided for @done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get done;
+
+  /// No description provided for @earnings.
+  ///
+  /// In en, this message translates to:
+  /// **'Earnings'**
+  String get earnings;
+
+  /// No description provided for @commissionOwed.
+  ///
+  /// In en, this message translates to:
+  /// **'Commission owed: {amount}'**
+  String commissionOwed(String amount);
+
+  /// No description provided for @noCommissionOwed.
+  ///
+  /// In en, this message translates to:
+  /// **'No commission owed.'**
+  String get noCommissionOwed;
+
+  /// No description provided for @noEarnings.
+  ///
+  /// In en, this message translates to:
+  /// **'No completed rides yet.'**
+  String get noEarnings;
+
+  /// No description provided for @earningLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Fare {fare} · commission {commission}'**
+  String earningLine(String fare, String commission);
+
+  /// No description provided for @loadMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Show more'**
+  String get loadMore;
+
+  /// No description provided for @errorOfferGone.
+  ///
+  /// In en, this message translates to:
+  /// **'This offer is no longer available.'**
+  String get errorOfferGone;
+
+  /// No description provided for @errorBelowMinimum.
+  ///
+  /// In en, this message translates to:
+  /// **'Your fare must be at least the minimum fare.'**
+  String get errorBelowMinimum;
+
+  /// No description provided for @errorNotAboveProposal.
+  ///
+  /// In en, this message translates to:
+  /// **'Your fare must be higher than the passenger\'s offer.'**
+  String get errorNotAboveProposal;
+
+  /// No description provided for @errorBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'You already have an active ride.'**
+  String get errorBusy;
+
+  /// No description provided for @errorNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Go online to accept offers.'**
+  String get errorNotAvailable;
+
+  /// No description provided for @errorPaymentReported.
+  ///
+  /// In en, this message translates to:
+  /// **'This payment was already reported.'**
+  String get errorPaymentReported;
 }
 
 class _DriverLocalizationsDelegate

@@ -6,6 +6,9 @@ import 'package:taketuk_auth/taketuk_auth.dart';
 import 'package:taketuk_ui/taketuk_ui.dart';
 
 import 'l10n/passenger_localizations.dart';
+import 'ride/history_screen.dart';
+import 'ride/ride_screen.dart';
+import 'ride/trip_planner_screen.dart';
 import 'routing.dart';
 import 'screens.dart';
 
@@ -14,12 +17,18 @@ class PassengerApp extends StatefulWidget {
     required this.auth,
     required this.api,
     required this.session,
+    required this.mapSettings,
+    required this.location,
+    this.ridePollInterval = const Duration(seconds: 4),
     super.key,
   });
 
   final AuthGateway auth;
   final TaketukApi api;
   final SessionController session;
+  final MapSettings mapSettings;
+  final DeviceLocation location;
+  final Duration ridePollInterval;
 
   @override
   State<PassengerApp> createState() => _PassengerAppState();
@@ -70,7 +79,34 @@ class _PassengerAppState extends State<PassengerApp> {
       ),
       GoRoute(
         path: Routes.home,
-        builder: (_, _) => HomeScreen(session: widget.session),
+        builder: (context, _) => TripPlannerScreen(
+          api: widget.api,
+          mapSettings: widget.mapSettings,
+          location: widget.location,
+          onRide: (id) => context.go(Routes.ride(id)),
+          onHistory: () => context.push(Routes.rides),
+          onSignOut: widget.session.signOut,
+        ),
+      ),
+      GoRoute(
+        path: Routes.rides,
+        builder: (context, _) => HistoryScreen(
+          api: widget.api,
+          onOpen: (id) => context.push(Routes.ride(id)),
+        ),
+        routes: [
+          GoRoute(
+            path: ':id',
+            builder: (context, state) => RideScreen(
+              key: ValueKey(state.pathParameters['id']),
+              api: widget.api,
+              rideId: state.pathParameters['id']!,
+              mapSettings: widget.mapSettings,
+              pollInterval: widget.ridePollInterval,
+              onNewRide: () => context.go(Routes.home),
+            ),
+          ),
+        ],
       ),
     ],
   );

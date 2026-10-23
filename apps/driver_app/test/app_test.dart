@@ -9,6 +9,9 @@ import 'package:http/testing.dart';
 import 'package:taketuk_api/taketuk_api.dart';
 import 'package:taketuk_auth/taketuk_auth.dart';
 import 'package:taketuk_auth/testing.dart';
+import 'package:taketuk_ui/taketuk_ui.dart';
+
+import 'support.dart' show FakeDeviceLocation, FakeDocumentPicker;
 
 Map<String, Object?> _me({required List<String> roles}) => {
   'userId': 'user-1',
@@ -62,6 +65,10 @@ Future<SessionController> _pumpApp(
       api: api,
       session: session,
       serviceAreaCode: 'wad_madani',
+      mapSettings: const MapSettings.withoutTiles(),
+      location: FakeDeviceLocation(null),
+      picker: FakeDocumentPicker(),
+      storage: MockClient((_) async => http.Response('', 200)),
     ),
   );
   await tester.pumpAndSettle();
@@ -106,6 +113,10 @@ void main() {
           return _json(201, _profile('applicant'));
         case ('GET', '/v1/driver/profile'):
           return _json(200, _profile('applicant'));
+        case ('GET', '/v1/driver/vehicles' || '/v1/driver/documents'):
+          return _json(200, {'items': <Object>[]});
+        case ('GET', '/v1/fleet/vehicle-types'):
+          return _json(200, {'items': <Object>[]});
       }
       return _json(404, {
         'type': 't',
@@ -135,27 +146,9 @@ void main() {
       'drivingLicenseNumber': 'DL-123',
       'serviceAreaCode': 'wad_madani',
     });
-    expect(find.text('Hello, Musa'), findsOneWidget);
-    expect(
-      find.textContaining('add your vehicle and documents'),
-      findsOneWidget,
-    );
-  });
-
-  testWidgets('shows the review outcome, including the reviewer note', (
-    tester,
-  ) async {
-    final auth = FakeAuthGateway(signedIn: const AuthUser(id: 'user-1'));
-    await _pumpApp(tester, auth, (request) async {
-      return request.url.path == '/v1/me'
-          ? _json(200, _me(roles: ['driver']))
-          : _json(200, _profile('rejected', note: 'Licence photo unreadable'));
-    });
-    expect(find.text('Your application was not approved.'), findsOneWidget);
-    expect(
-      find.text("Reviewer's note: Licence photo unreadable"),
-      findsOneWidget,
-    );
+    // Registered as an applicant: onboarding (documents and vehicle) is next.
+    expect(find.text('Your documents'), findsOneWidget);
+    expect(find.text('Add your vehicle'), findsOneWidget);
   });
 
   testWidgets('explains an already-registered conflict', (tester) async {

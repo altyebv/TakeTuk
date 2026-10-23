@@ -13,16 +13,20 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
+  flutter_map: ^8.3.2
   go_router: ^18.1.1
+  http: ^1.6.0
+  image_picker: ^1.2.4
   intl: any
+  latlong2: ^0.10.1
   taketuk_api: any
   taketuk_auth: any
   taketuk_ui: any
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  http: ^1.6.0
 
 flutter:
   uses-material-design: true

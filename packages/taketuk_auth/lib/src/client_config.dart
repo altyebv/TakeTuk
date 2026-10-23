@@ -4,13 +4,16 @@ import 'package:flutter/foundation.dart';
 
 /// Build-time configuration of a TAKE-TUK app, from `--dart-define` or `--dart-define-from-file`
 /// (see apps/README.md). Only public values belong here: the API URL, the Supabase project URL
-/// and its publishable key. Never a secret or service-role key (docs/security/SECURITY.md §4).
+/// and its publishable key, and the map tile provider. Never a secret or service-role key
+/// (docs/security/SECURITY.md §4).
 @immutable
 final class ClientConfig {
   const ClientConfig({
     required this.apiBaseUrl,
     required this.supabaseUrl,
     required this.supabasePublishableKey,
+    required this.mapTileUrlTemplate,
+    required this.mapAttribution,
     required this.problems,
   });
 
@@ -20,6 +23,8 @@ final class ClientConfig {
     supabasePublishableKey: const String.fromEnvironment(
       'SUPABASE_PUBLISHABLE_KEY',
     ),
+    mapTileUrl: const String.fromEnvironment('MAP_TILE_URL'),
+    mapAttribution: const String.fromEnvironment('MAP_ATTRIBUTION'),
     release: kReleaseMode,
   );
 
@@ -29,6 +34,8 @@ final class ClientConfig {
     required String supabaseUrl,
     required String supabasePublishableKey,
     required bool release,
+    String mapTileUrl = '',
+    String mapAttribution = '',
   }) {
     final problems = <String>[];
     Uri? url(String name, String value) {
@@ -55,17 +62,50 @@ final class ClientConfig {
         'publishable (anon) key',
       );
     }
+
+    var tiles = mapTileUrl;
+    if (tiles.isEmpty) {
+      if (release) {
+        problems.add(
+          'MAP_TILE_URL is required in release builds (a map tile provider)',
+        );
+      } else {
+        tiles = developmentTileUrl;
+      }
+    } else if (!tiles.startsWith('https://') ||
+        !['{z}', '{x}', '{y}'].every(tiles.contains)) {
+      problems.add(
+        'MAP_TILE_URL must be an https URL template with {z}, {x} and {y}',
+      );
+    }
+
     return ClientConfig(
       apiBaseUrl: api ?? Uri(),
       supabaseUrl: supabase ?? Uri(),
       supabasePublishableKey: supabasePublishableKey,
+      mapTileUrlTemplate: tiles,
+      mapAttribution: mapAttribution.isEmpty
+          ? openStreetMapAttribution
+          : mapAttribution,
       problems: problems,
     );
   }
 
+  /// The public OpenStreetMap tile server. Its usage policy suits development, not an app at
+  /// scale, so release builds must name their own provider (OPEN_DECISIONS MAP-6).
+  static const developmentTileUrl =
+      'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+  static const openStreetMapAttribution = '© OpenStreetMap contributors';
+
   final Uri apiBaseUrl;
   final Uri supabaseUrl;
   final String supabasePublishableKey;
+
+  /// Map tiles (`MAP_TILE_URL`), with `{z}`, `{x}` and `{y}` placeholders.
+  final String mapTileUrlTemplate;
+
+  /// Shown on every map (`MAP_ATTRIBUTION`, default OpenStreetMap's).
+  final String mapAttribution;
   final List<String> problems;
 }
 

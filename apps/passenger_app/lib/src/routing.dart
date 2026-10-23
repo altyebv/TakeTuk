@@ -8,6 +8,8 @@ abstract final class Routes {
   static const register = '/register';
   static const accountError = '/account-error';
   static const home = '/';
+  static const rides = '/rides';
+  static String ride(String id) => '/rides/${Uri.encodeComponent(id)}';
 }
 
 bool isPassenger(Me? me) =>

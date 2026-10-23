@@ -49,6 +49,7 @@ const environmentSchema = z
     NOTIFICATION_PROVIDER: z.enum(['fcm', 'log']).default('log'),
     FCM_PROJECT_ID: z.string().min(1).optional(),
     FCM_SERVICE_ACCOUNT_FILE: z.string().min(1).optional(),
+    FCM_SERVICE_ACCOUNT_JSON: z.string().min(1).optional(),
 
     WORKERS_ENABLED: booleanString.default(true),
     DISPATCH_TICK_MS: integer(2000, 200, 60_000),
@@ -91,13 +92,22 @@ const environmentSchema = z
     if (env.ROUTING_PROVIDER === 'osrm' && !env.OSRM_BASE_URL) {
       issue('OSRM_BASE_URL', 'required when ROUTING_PROVIDER=osrm');
     }
-    if (
-      env.NOTIFICATION_PROVIDER === 'fcm' &&
-      (!env.FCM_PROJECT_ID || !env.FCM_SERVICE_ACCOUNT_FILE)
-    ) {
+    if (env.NOTIFICATION_PROVIDER === 'fcm') {
+      if (!env.FCM_PROJECT_ID) {
+        issue('FCM_PROJECT_ID', 'required when NOTIFICATION_PROVIDER=fcm');
+      }
+      if (!env.FCM_SERVICE_ACCOUNT_FILE === !env.FCM_SERVICE_ACCOUNT_JSON) {
+        issue(
+          'FCM_SERVICE_ACCOUNT_JSON',
+          'set exactly one of FCM_SERVICE_ACCOUNT_FILE and FCM_SERVICE_ACCOUNT_JSON when NOTIFICATION_PROVIDER=fcm',
+        );
+      }
+    }
+    if (env.FCM_SERVICE_ACCOUNT_JSON && !parseServiceAccount(env.FCM_SERVICE_ACCOUNT_JSON)) {
+      // The value is a credential: never echo it.
       issue(
-        'FCM_PROJECT_ID',
-        'FCM_PROJECT_ID and FCM_SERVICE_ACCOUNT_FILE are required when NOTIFICATION_PROVIDER=fcm',
+        'FCM_SERVICE_ACCOUNT_JSON',
+        'must be a Google service-account key (JSON, or that JSON base64-encoded)',
       );
     }
 
@@ -172,6 +182,8 @@ export interface AppConfig {
     readonly provider: 'fcm' | 'log';
     readonly fcmProjectId: string | undefined;
     readonly fcmServiceAccountFile: string | undefined;
+    /** Parsed from FCM_SERVICE_ACCOUNT_JSON. A credential: never log it. */
+    readonly fcmServiceAccount: ServiceAccountKey | undefined;
   };
   readonly workers: {
     readonly enabled: boolean;
@@ -255,6 +267,9 @@ export function loadConfig(source: Record<string, string | undefined>): AppConfi
       provider: env.NOTIFICATION_PROVIDER,
       fcmProjectId: env.FCM_PROJECT_ID,
       fcmServiceAccountFile: env.FCM_SERVICE_ACCOUNT_FILE,
+      fcmServiceAccount: env.FCM_SERVICE_ACCOUNT_JSON
+        ? parseServiceAccount(env.FCM_SERVICE_ACCOUNT_JSON)
+        : undefined,
     },
     workers: {
       enabled: env.WORKERS_ENABLED,
@@ -278,6 +293,35 @@ export function loadConfig(source: Record<string, string | undefined>): AppConfi
     outbox: { maxAttempts: env.OUTBOX_MAX_ATTEMPTS, batchSize: env.OUTBOX_BATCH_SIZE },
     idempotency: { ttlHours: env.IDEMPOTENCY_TTL_HOURS },
   };
+}
+
+/** The fields of a Google service-account key that FCM authentication needs. */
+export interface ServiceAccountKey {
+  readonly client_email: string;
+  readonly private_key: string;
+}
+
+const ServiceAccountSchema = z.looseObject({
+  type: z.literal('service_account'),
+  client_email: z.string().min(3),
+  private_key: z.string().startsWith('-----BEGIN PRIVATE KEY-----'),
+});
+
+/**
+ * Accepts the key file's JSON or its base64 encoding, which survives environment-variable
+ * editors that cannot hold multi-line or quoted values (`base64 -w0 key.json`).
+ */
+export function parseServiceAccount(value: string): ServiceAccountKey | undefined {
+  const trimmed = value.trim();
+  const json = trimmed.startsWith('{') ? trimmed : Buffer.from(trimmed, 'base64').toString('utf8');
+  try {
+    const parsed = ServiceAccountSchema.safeParse(JSON.parse(json));
+    return parsed.success
+      ? { client_email: parsed.data.client_email, private_key: parsed.data.private_key }
+      : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 export const APP_CONFIG = Symbol('APP_CONFIG');

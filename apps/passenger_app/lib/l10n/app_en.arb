@@ -6,8 +6,144 @@
   "nameLabel": "Your name",
   "errorNameRequired": "Enter your name.",
   "continueButton": "Continue",
-  "homeGreeting": "Hello, {name}",
-  "@homeGreeting": { "placeholders": { "name": { "type": "String" } } },
-  "homeNextPhase": "Requesting rides arrives in the next version of the app.",
-  "signOut": "Sign out"
+  "signOut": "Sign out",
+  "myRides": "My rides",
+  "noRides": "No rides yet.",
+  "setPickup": "Pickup",
+  "setDestination": "Destination",
+  "tapForPickup": "Tap the map to set your pickup point.",
+  "tapForDestination": "Tap the map to set your destination.",
+  "useMyLocation": "Use my location",
+  "locationUnavailable": "Your location is not available. Place the pickup on the map.",
+  "pickupNameLabel": "Pickup place name (optional)",
+  "destinationNameLabel": "Destination place name (optional)",
+  "seePrice": "See price",
+  "minimumFare": "Minimum fare: {amount}",
+  "@minimumFare": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "tripSummary": "{distance} km · about {minutes} min",
+  "@tripSummary": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "yourOffer": "Your offer: {amount}",
+  "@yourOffer": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "offerHelp": "Drivers can accept your offer or propose a higher fare.",
+  "lowerOffer": "Lower offer",
+  "raiseOffer": "Raise offer",
+  "requestRide": "Request ride",
+  "changeTrip": "Change trip",
+  "searchingTitle": "Looking for a driver",
+  "driversNotified": "{count, plural, =0{No drivers notified yet} =1{1 driver notified} other{{count} drivers notified}}",
+  "@driversNotified": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "counteroffersTitle": "Drivers' offers",
+  "counteroffer": "{driver} offers {amount}",
+  "@counteroffer": {
+    "placeholders": {
+      "driver": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "acceptOffer": "Accept",
+  "rejectOffer": "Decline",
+  "cancelRide": "Cancel ride",
+  "cancelRideQuestion": "Cancel this ride?",
+  "cancelReasonLabel": "Reason (optional)",
+  "keepRide": "Keep ride",
+  "statusAssigned": "{driver} is on the way",
+  "@statusAssigned": {
+    "placeholders": {
+      "driver": {
+        "type": "String"
+      }
+    }
+  },
+  "statusArrived": "Your driver has arrived",
+  "statusInProgress": "On the way to your destination",
+  "statusCompleted": "You have arrived",
+  "payCash": "Pay {amount} in cash",
+  "@payCash": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "statusCancelled": "This ride was cancelled",
+  "statusExpired": "No driver accepted in time",
+  "statusUnknown": "This ride's status cannot be shown in this version. Please update the app.",
+  "agreedFare": "Fare: {amount}",
+  "@agreedFare": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "vehicle": "{type} · {plate}",
+  "@vehicle": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "plate": {
+        "type": "String"
+      }
+    }
+  },
+  "vehicleRaksha": "Raksha",
+  "callDriver": "Call driver",
+  "newRide": "Request a new ride",
+  "errorOutsideArea": "TAKE-TUK is not available there yet. Choose points inside the service area.",
+  "errorSamePoint": "Pickup and destination are the same place.",
+  "errorNoRoute": "We could not find a road route there. Move the points closer to a road.",
+  "errorRidesUnavailable": "Rides are not available right now.",
+  "errorFareBelowMinimum": "Your offer must be at least the minimum fare.",
+  "errorQuoteExpired": "The price has expired. Check the price again.",
+  "errorRideAlreadyOpen": "You already have a ride in progress.",
+  "errorOfferGone": "This offer is no longer available.",
+  "tripDistance": "{distance} km",
+  "@tripDistance": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "loadMore": "Show more",
+  "rideStatusSearching": "Searching",
+  "rideStatusAssigned": "Driver on the way",
+  "rideStatusArrived": "Driver arrived",
+  "rideStatusInProgress": "In progress",
+  "rideStatusCompleted": "Completed",
+  "rideStatusCancelled": "Cancelled",
+  "rideStatusExpired": "Expired",
+  "rideStatusUnknown": "Unknown"
 }

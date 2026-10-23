@@ -64,6 +64,18 @@ Implemented and tested (47 Dart tests):
 
 Completion criterion "apps build in CI" is met: the `mobile` workflow builds debug APKs of both apps. **Pending:** "sign-in against staging", which needs Supabase reachable from the build environment and test credentials (phase 8).
 
+## Third increment
+
+### Phase 10: ride UX 🟡
+
+Implemented and tested with widget tests over recorded backend responses (65 Dart tests in total):
+- **Passenger:** trip planner on a map (`flutter_map`), quote, offer, retry-safe ride request, searching with counteroffers, the trip, the cash fare, cancellation and history.
+- **Driver:** onboarding (document photos to signed URLs, vehicle, submission), going online, position reports, offers and counteroffers, the trip, cash reporting and earnings.
+
+**Pending:** completion criterion "pilot-ready ride flow on devices", which needs a device test against staging. Known limits: polling instead of push (API-1), and foreground-only driver positions (DRV-6).
+
+Also in this increment: the backend accepts the FCM key from an environment variable (`FCM_SERVICE_ACCOUNT_JSON`).
+
 ---
 
 ## Next phases (planned)
@@ -71,7 +83,6 @@ Completion criterion "apps build in CI" is met: the `mobile` workflow builds deb
 | Phase | Scope | Depends on | Completion criteria |
 |---|---|---|---|
 | 8. Live integration verification | Supabase project (Auth JWKS, Storage bucket, role creation, `supabase db push`), FCM project, an OSRM dataset built from a real extract (Google Routes once billing is possible). Run the existing adapters against them | Accounts and credentials | Each adapter exercised in staging; findings fed back into ADRs |
-| 10. Passenger and driver ride UX | Quote → request → negotiation → trip screens; driver onboarding, availability, offers | Phase 9 | Pilot-ready ride flow on devices |
 | 11. Admin web (React) | Driver verification queue, document viewer, policy management, ride lookup, audit | Phase 8 | Operators can approve drivers and configure policies without SQL |
 | 12. Operations hardening | Global rate limiting, alerting on failed outbox and dispatch, account deletion, document retention, restore drill, admin MFA (`aal2`) | — | Runbooks exercised |
 | 13. Marketplace and orders | Merchants, branches, catalogue, merchant dashboard, orders | Phase 11 | Order state machine implemented and tested |
