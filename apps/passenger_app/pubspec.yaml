@@ -15,9 +15,12 @@ dependencies:
     sdk: flutter
   go_router: ^18.1.1
   intl: any
+  flutter_map: ^8.3.2
+  latlong2: ^0.10.1
   taketuk_api: any
   taketuk_auth: any
   taketuk_ui: any
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_test:

@@ -9,6 +9,9 @@ import 'package:passenger_app/src/routing.dart';
 import 'package:taketuk_api/taketuk_api.dart';
 import 'package:taketuk_auth/taketuk_auth.dart';
 import 'package:taketuk_auth/testing.dart';
+import 'package:taketuk_ui/taketuk_ui.dart';
+
+import 'support.dart' show FakeDeviceLocation;
 
 Me _me({required bool registered, String? name}) => Me.fromJson({
   'userId': 'user-1',
@@ -117,6 +120,10 @@ void main() {
               registered = true;
               return _json(201, _me(registered: true, name: 'Hiba').toJson());
             }(),
+            ('GET', '/v1/rides') => _json(200, {
+              'items': <Object>[],
+              'nextCursor': null,
+            }),
             _ => _json(404, {
               'type': 't',
               'title': 'Not found',
@@ -134,7 +141,13 @@ void main() {
     final session = SessionController(auth: auth, api: api);
     await session.start();
     await tester.pumpWidget(
-      PassengerApp(auth: auth, api: api, session: session),
+      PassengerApp(
+        auth: auth,
+        api: api,
+        session: session,
+        mapSettings: const MapSettings.withoutTiles(),
+        location: FakeDeviceLocation(null),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -157,7 +170,8 @@ void main() {
     await tester.tap(find.text('متابعة'));
     await tester.pumpAndSettle();
 
-    expect(find.text('مرحبًا، Hiba'), findsOneWidget);
+    // Registered: the trip planner.
+    expect(find.text('اضغط على الخريطة لتحديد نقطة الانطلاق.'), findsOneWidget);
     final registration = requests.singleWhere(
       (r) => r.url.path == '/v1/passenger/registration',
     );
@@ -191,7 +205,13 @@ void main() {
     final session = SessionController(auth: auth, api: api);
     await session.start();
     await tester.pumpWidget(
-      PassengerApp(auth: auth, api: api, session: session),
+      PassengerApp(
+        auth: auth,
+        api: api,
+        session: session,
+        mapSettings: const MapSettings.withoutTiles(),
+        location: FakeDeviceLocation(null),
+      ),
     );
     await tester.pumpAndSettle();
     await tester.enterText(find.byKey(const Key('name')), 'Hiba');

@@ -285,6 +285,7 @@ void main() {
         supabaseUrl: 'https://project.supabase.co',
         supabasePublishableKey: 'sb_publishable_abc',
         release: true,
+        mapTileUrl: 'https://tiles.example/{z}/{x}/{y}.png',
       );
       expect(config.problems, isEmpty);
       expect(config.apiBaseUrl.host, 'api.example');
@@ -296,9 +297,43 @@ void main() {
         supabaseUrl: 'http://10.0.2.2:54321',
         supabasePublishableKey: jwt({'role': 'anon'}),
         release: release,
+        mapTileUrl: 'https://tiles.example/{z}/{x}/{y}.png',
       );
       expect(check(release: false).problems, isEmpty);
       expect(check(release: true).problems, hasLength(2));
+    });
+
+    test('uses the public OpenStreetMap tiles only in development builds', () {
+      ClientConfig check({required bool release, String tiles = ''}) =>
+          ClientConfig.validate(
+            apiBaseUrl: 'https://api.example',
+            supabaseUrl: 'https://project.supabase.co',
+            supabasePublishableKey: 'sb_publishable_abc',
+            release: release,
+            mapTileUrl: tiles,
+          );
+      final development = check(release: false);
+      expect(development.problems, isEmpty);
+      expect(development.mapTileUrlTemplate, ClientConfig.developmentTileUrl);
+      expect(development.mapAttribution, '© OpenStreetMap contributors');
+      expect(
+        check(release: true).problems.single,
+        contains('MAP_TILE_URL is required'),
+      );
+      expect(
+        check(
+          release: true,
+          tiles: 'https://tiles.example/{z}/{x}/{y}.png',
+        ).problems,
+        isEmpty,
+      );
+      expect(
+        check(
+          release: false,
+          tiles: 'http://tiles.example/{z}/{x}/{y}.png',
+        ).problems,
+        hasLength(1),
+      );
     });
 
     test('refuses missing values and privileged keys', () {

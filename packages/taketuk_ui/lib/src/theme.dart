@@ -18,7 +18,9 @@ ThemeData taketukTheme({Brightness brightness = Brightness.light}) {
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
-        minimumSize: const Size.fromHeight(52),
+        // Tall for outdoor use. Width comes from the layout: a minimum width of infinity
+        // (Size.fromHeight) would break buttons placed in a Row.
+        minimumSize: const Size(64, 52),
         textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
       ),
     ),
